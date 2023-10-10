@@ -1,0 +1,60 @@
+# For more information about using CMake with Android Studio, read the
+# documentation: https://d.android.com/studio/projects/add-native-code.html
+# Sets the minimum version of CMake required to build the native library.
+
+cmake_minimum_required(VERSION 3.10.2)
+
+# Declares and names the project.
+project("tr369")
+
+# Creates and names a library, sets it as either STATIC
+# or SHARED, and provides the relative paths to its source code.
+# You can define multiple libraries, and CMake builds them for you.
+# Gradle automatically packages shared libraries with your APK.
+
+aux_source_directory(openTr369/core SRC_TR369_CORE)
+aux_source_directory(openTr369/protobuf-c SRC_TR369_PROTOBUF)
+aux_source_directory(openTr369/vendor SRC_TR369_VENDOR)
+aux_source_directory(skSource SRC_SKCMD)
+
+add_library(
+        # Sets the name of the library.
+        sk_tr369_jni
+        # Sets the library as a shared library.
+        SHARED
+        # Provides a relative path to your source file(s).
+        skSource/sk_tr369_jni.cpp ${SRC_SKCMD} ${SRC_TR369_CORE} ${SRC_TR369_PROTOBUF} ${SRC_TR369_VENDOR}
+)
+
+include_directories(
+        openTr369/core
+        openTr369/include
+        openTr369/protobuf-c
+        openTr369/vendor
+        openTr369
+        skSource
+        libs/armeabi-v7a/include
+        libs/armeabi-v7a/include/mosquitto
+#        libs/armeabi-v7a/include/libevent
+#        libs/armeabi-v7a/include/libzlib
+#        libs/armeabi-v7a/include/openssl
+)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DENABLE_MQTT -DDISABLE_STOMP")
+
+# Specifies libraries CMake should link to your target library. You
+# can link multiple libraries, such as libraries you define in this
+# build script, prebuilt third-party libraries, or system libraries.
+
+target_link_libraries(
+        # Specifies the target library.
+        sk_tr369_jni
+        log
+        android
+#        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libeventopenssl.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libssl.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libcrypto.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libz.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libcurl.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libmosquitto.so
+)

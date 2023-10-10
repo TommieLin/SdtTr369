@@ -1,0 +1,82 @@
+# Each line of this file contains either a comment (denoted by '#' at the start of the line)
+# or a USP data model parameter and its factory reset value.
+# The parameter and value are separated by whitespace.
+# The value may optionally be enclosed in speech marks "" (this is the only way to specify an empty string)
+#
+##########################################################################################################
+#
+# Adding MQTT parameters to test the datamodel interface
+#
+
+#Device.LocalAgent.EndpointID "os::309176-OUTIS202310071812"
+
+## Adding boot params
+Device.LocalAgent.Controller.1.BootParameter.1.Enable "true"
+Device.LocalAgent.Controller.1.BootParameter.1.ParameterName "Device.LocalAgent.EndpointID"
+Device.LocalAgent.Subscription.1.Alias "sdtcpe-1"
+Device.LocalAgent.Subscription.1.Enable "true"
+Device.LocalAgent.Subscription.1.ID "default-boot-event-ACS"
+Device.LocalAgent.Subscription.1.Recipient "Device.LocalAgent.Controller.1"
+Device.LocalAgent.Subscription.1.NotifType "Event"
+Device.LocalAgent.Subscription.1.ReferenceList "Device.Boot!"
+Device.LocalAgent.Subscription.1.Persistent "true"
+
+# MTP & MQTT configuration.
+Device.LocalAgent.MTP.1.Alias "cpe-1"
+Device.LocalAgent.MTP.1.Enable "true"
+Device.LocalAgent.MTP.1.Protocol "MQTT"
+Device.LocalAgent.MTP.1.MQTT.Reference "Device.MQTT.Client.1"
+Device.LocalAgent.MTP.1.MQTT.PublishQoS "2"
+#Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured "sdtcpe/agent/resptopic/os::309176-OUTIS202310071812"
+Device.MQTT.Client.1.BrokerAddress "172.28.11.231"
+Device.MQTT.Client.1.ProtocolVersion "5.0"
+Device.MQTT.Client.1.BrokerPort "8883"
+Device.MQTT.Client.1.TransportProtocol "TLS"
+Device.MQTT.Client.1.Username ""
+Device.MQTT.Client.1.Password ""
+Device.MQTT.Client.1.Alias "cpe-1"
+Device.MQTT.Client.1.Enable "true"
+#Device.MQTT.Client.1.ClientID "os::309176-OUTIS202310071812"
+Device.MQTT.Client.1.KeepAliveTime "60"
+Device.MQTT.Client.1.ConnectRetryTime "5"
+Device.MQTT.Client.1.ConnectRetryIntervalMultiplier "2000"
+Device.MQTT.Client.1.ConnectRetryMaxInterval "600"
+
+# LocalAgent.Controller configuration.
+Device.LocalAgent.Controller.1.Alias "cpe-1"
+Device.LocalAgent.Controller.1.Enable "true"
+Device.LocalAgent.Controller.1.PeriodicNotifInterval "3600"
+Device.LocalAgent.Controller.1.PeriodicNotifTime "0001-01-01T00:00:00Z"
+Device.LocalAgent.Controller.1.ControllerCode ""
+Device.LocalAgent.Controller.1.AssignedRole "Device.LocalAgent.ControllerTrust.Role.1"
+Device.LocalAgent.Controller.1.EndpointID "self::sdtacs-ABC369"
+Device.LocalAgent.Controller.1.MTP.1.Alias "cpe-1"
+Device.LocalAgent.Controller.1.MTP.1.Enable "true"
+Device.LocalAgent.Controller.1.MTP.1.Protocol "MQTT"
+Device.LocalAgent.Controller.1.MTP.1.MQTT.Reference "Device.MQTT.Client.1"
+Device.LocalAgent.Controller.1.MTP.1.MQTT.Topic "sdtacs/tr369/mqttv5/report"
+
+Device.MQTT.Client.1.Subscription.1.Alias "mqtt-sub-1"
+Device.MQTT.Client.1.Subscription.1.Enable "true"
+Device.MQTT.Client.1.Subscription.1.Topic "/tr069/mqtt/kick/platform/OUTIS202310071812"
+Device.MQTT.Client.1.Subscription.1.QoS "2"
+
+# LocalAgent.ControllerTrust.Role configuration.
+Device.LocalAgent.ControllerTrust.Role.1.Alias "cpe-role-1"
+Device.LocalAgent.ControllerTrust.Role.1.Enable "true"
+Device.LocalAgent.ControllerTrust.Role.1.Name "Trust-Role-1"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Alias "cpe-permission-1"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Enable "true"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.CommandEvent "rwxn"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.InstantiatedObj "rwxn"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Obj "rwxn"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Param "rwxn"
+Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Targets  "Device."
+
+Internal.Reboot.Cause "LocalFactoryReset"
+
+Device.DeviceInfo.ManufacturerOUI "309176"
+Device.DeviceInfo.SerialNumber "OUTIS202310071812"
+
+# Add by Skyworth
+#Device.X_Skyworth.MqttServer.Url "tcp://172.28.11.231:1883"

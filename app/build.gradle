@@ -2,7 +2,7 @@ plugins {
     id 'com.android.application'
 }
 
-//def gitShortVersion = 'git rev-parse --short HEAD'
+def gitShortVersion = 'git rev-parse --short HEAD'
 
 static def releaseTime() {
     return new Date().format("yyyyMMddHHmmss", TimeZone.getTimeZone("GMT+08:00"))
@@ -106,7 +106,7 @@ android {
             if (outputFile != null && outputFileName.endsWith('.apk')) {
                 outputFileName = apkName + "_" +
                         variant.versionName + "_" +
-//                        gitShortVersion.execute().text.trim() + "_" +
+                        gitShortVersion.execute().text.trim() + "_" +
                         releaseTime() + "_" +
                         variant.buildType.name + ".apk"
             }
@@ -120,6 +120,8 @@ android {
 }
 
 dependencies {
+    compileOnly files('libs/framework.jar')
 
+    implementation project(':tr369')
     implementation 'androidx.leanback:leanback:1.0.0'
 }
