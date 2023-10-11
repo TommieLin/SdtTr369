@@ -60,7 +60,7 @@
 #include "os_utils.h"
 #include "bdc_exec.h"
 
-
+#include "sk_jni_callback.h"
 
 //------------------------------------------------------------------------------
 // Cached version of the endpoint_id, which is populated at boot up by DEVICE_LOCAL_AGENT_SetDefaults()
@@ -722,57 +722,39 @@ int GetDefaultOUI(char *buf, int len)
 **************************************************************************/
 int GetDefaultSerialNumber(char *buf, int len)
 {
-    int err;
-    dm_vendor_get_agent_serial_number_cb_t   get_agent_serial_number_cb;
-    unsigned char mac_addr[MAC_ADDR_LEN];
-    char *p;
-    int i;
-    int val;
-
-    // Exit if serial number is determined by a vendor hook
-    get_agent_serial_number_cb = vendor_hook_callbacks.get_agent_serial_number_cb;
-    if (get_agent_serial_number_cb != NULL)
-    {
-        err = get_agent_serial_number_cb(buf, len);
-        if (err != USP_ERR_OK)
-        {
-            USP_ERR_SetMessage("%s: get_agent_endpoint_id_cb() failed", __FUNCTION__);
-            return USP_ERR_INTERNAL_ERROR;
-        }
-
-        return USP_ERR_OK;
-    }
-
-    // Exit if serial number set by environment variable
-    p = getenv("USP_BOARD_SERIAL");
-    if ((p != NULL) && (*p != '\0'))
-    {
-        USP_STRNCPY(buf, p, len);
-        return USP_ERR_OK;
-    }
-
-    // Otherwise use serial number set by MAC address (default)
-    err = nu_macaddr_wan_macaddr(mac_addr);
-    if (err != USP_ERR_OK)
-    {
-        // If unable to get the WAN interface's MAC address, then set serial number to 'undefined'
-        USP_LOG_Warning("%s: WARNING: Unable to determine a serial number for this device", __FUNCTION__);
-        USP_STRNCPY(buf, "undefined", len);
-        return USP_ERR_OK;
-    }
-
-    // Convert MAC address into ASCII string form
-    USP_ASSERT(len > 2*MAC_ADDR_LEN+1);
-    p = buf;
-    for (i=0; i<MAC_ADDR_LEN; i++)
-    {
-        val = mac_addr[i];
-        *p++ = TEXT_UTILS_ValueToHexDigit( (val & 0xF0) >> 4, USE_UPPERCASE_HEX_DIGITS );
-        *p++ = TEXT_UTILS_ValueToHexDigit( val & 0x0F, USE_UPPERCASE_HEX_DIGITS );
-    }
-    *p = '\0';
+    USP_LOG_Info(" ######### Outis ### GetDefaultSerialNumber start");
+    SK_TR369_API_GetParams(serial_number_path, buf, len);
+    USP_LOG_Info(" ######### Outis ### GetDefaultSerialNumber serial_number: %s, len: %d", buf, len);
 
     return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** ConvertSerialNumberToHex
+**
+** Function to convert a string to a fixed 12-character hexadecimal string
+**
+** \param   input - pointer to the buffer containing the string to be converted to hexadecimal.
+** \param   output - pointer to output that is used to return the converted hexadecimal result.
+** \param   outputSize = length of output buffer
+**
+** \return  None
+**
+**************************************************************************/
+void ConvertSerialNumberToHex(const char *input, char *output, size_t outputSize)
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256((const unsigned char *)input, strlen(input), hash);
+
+    char hexHash[SHA256_DIGEST_LENGTH * 2 + 1];
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    {
+        snprintf(&hexHash[i * 2], 3, "%02X", hash[i]);
+    }
+
+    // Copy the first 12 characters to the output
+    snprintf(output, outputSize, "%.12s", hexHash);
 }
 
 
@@ -816,9 +798,16 @@ int GetDefaultEndpointID(char *buf, int len, char *oui, char *serial_number)
     #define SAFE_CHARS "-._"
     TEXT_UTILS_PercentEncodeString(oui, oui_encoded, sizeof(oui_encoded), SAFE_CHARS, USE_UPPERCASE_HEX_DIGITS);
     TEXT_UTILS_PercentEncodeString(serial_number, serial_number_encoded, sizeof(serial_number_encoded), SAFE_CHARS, USE_UPPERCASE_HEX_DIGITS);
+    USP_LOG_Info(" ######### Outis ### GetDefaultEndpointID oui: %s, oui_encoded: %s", oui, oui_encoded);
+    USP_LOG_Info(" ######### Outis ### GetDefaultEndpointID serial_number: %s, serial_number_encoded: %s", serial_number, serial_number_encoded);
+
+    // Convert the input string to a 12-character hexadecimal string
+    char serial_number_hex[13]; // 12 characters + null-terminator
+    ConvertSerialNumberToHex(serial_number, serial_number_hex, sizeof(serial_number_hex));
+    USP_LOG_Info(" ######### Outis ### GetDefaultEndpointID serial_number_hex: %s", serial_number_hex);
 
     // Form the final endpoint_id
-    USP_SNPRINTF(buf, len, "os::%s-%s", oui_encoded, serial_number_encoded);
+    USP_SNPRINTF(buf, len, "os::%s-%s", oui_encoded, serial_number_hex);
 
     return USP_ERR_OK;
 }

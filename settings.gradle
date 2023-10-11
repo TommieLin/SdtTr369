@@ -15,3 +15,5 @@ dependencyResolutionManagement {
 rootProject.name = "SdtTr369"
 include ':app'
 include ':tr369'
+include ':accessor'
+include ':annotation'

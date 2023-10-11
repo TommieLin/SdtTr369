@@ -76,7 +76,7 @@ Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Targets  "Device."
 Internal.Reboot.Cause "LocalFactoryReset"
 
 Device.DeviceInfo.ManufacturerOUI "309176"
-Device.DeviceInfo.SerialNumber "OUTIS202310071812"
+#Device.DeviceInfo.SerialNumber "OUTIS202310071812"
 
 # Add by Skyworth
-#Device.X_Skyworth.MqttServer.Url "tcp://172.28.11.231:1883"
+Device.X_Skyworth.MqttServer.Url "tcp://172.28.11.231:1883"

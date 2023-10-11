@@ -43,6 +43,12 @@
 
 #include "vendor_defs.h"
 #include "usp_api.h"
+#include "sk_tr369_jni.h"
+
+//---------------------------------------------------------------------
+// Vendor Global Parameters
+extern SK_TR369_Setter sk_tr369_jni_setter;
+extern SK_TR369_Getter sk_tr369_jni_getter;
 
 //---------------------------------------------------------------------
 // Vendor API

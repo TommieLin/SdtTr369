@@ -15,7 +15,6 @@ project("tr369")
 aux_source_directory(openTr369/core SRC_TR369_CORE)
 aux_source_directory(openTr369/protobuf-c SRC_TR369_PROTOBUF)
 aux_source_directory(openTr369/vendor SRC_TR369_VENDOR)
-aux_source_directory(skSource SRC_SKCMD)
 
 add_library(
         # Sets the name of the library.
@@ -23,7 +22,9 @@ add_library(
         # Sets the library as a shared library.
         SHARED
         # Provides a relative path to your source file(s).
-        skSource/sk_tr369_jni.cpp ${SRC_SKCMD} ${SRC_TR369_CORE} ${SRC_TR369_PROTOBUF} ${SRC_TR369_VENDOR}
+        skSource/sk_tr369_jni.cpp
+        skSource/sk_jni_callback.cpp
+        ${SRC_TR369_CORE} ${SRC_TR369_PROTOBUF} ${SRC_TR369_VENDOR}
 )
 
 include_directories(

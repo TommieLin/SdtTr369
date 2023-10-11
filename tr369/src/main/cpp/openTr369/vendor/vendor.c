@@ -47,6 +47,8 @@
 #include "vendor_defs.h"
 #include "vendor_api.h"
 #include "usp_api.h"
+#include "usp_log.h"
+#include "sk_tr369_jni.h"
 
 /*********************************************************************//**
 **
@@ -61,6 +63,14 @@
 **************************************************************************/
 int VENDOR_Init(void)
 {
+    int err = USP_ERR_OK;
+
+    USP_LOG_Info(" ######### Outis ~~~ VENDOR_Init Start");
+    err |= USP_REGISTER_DBParam_ReadOnly("Device.X_Skyworth.MqttServer.Url", "OutisTest", DM_STRING);
+    if (err != USP_ERR_OK)
+    {
+        return USP_ERR_INTERNAL_ERROR;
+    }
 
     return USP_ERR_OK;
 }
@@ -103,3 +113,23 @@ int VENDOR_Stop(void)
     return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_Register_Setter_Getter
+**
+**
+**
+**
+** \param
+**
+** \return  None
+**
+**************************************************************************/
+SK_TR369_Setter sk_tr369_jni_setter = NULL;
+SK_TR369_Getter sk_tr369_jni_getter = NULL;
+void SK_TR369_Register_Setter_Getter(SK_TR369_Setter setter, SK_TR369_Getter getter)
+{
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Register_Setter_Getter Start");
+    sk_tr369_jni_setter = setter;
+    sk_tr369_jni_getter = getter;
+}

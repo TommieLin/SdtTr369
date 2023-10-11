@@ -345,34 +345,34 @@ exit:
 }
 #endif
 
-static char *m_db_file_path = NULL;
+static char *datebase_file_path = NULL;
 
-int sk_set_db_file_path(const char *const db_path)
+int SK_TR369_SetDBFilePath(const char *const db_path)
 {
-    if (m_db_file_path != NULL)
+    if (datebase_file_path != NULL)
     {
-        free(m_db_file_path);
+        free(datebase_file_path);
     }
 
     unsigned int len = strlen(db_path);
-    m_db_file_path = (char *) malloc(len + 1);
-    if (m_db_file_path == NULL)
+    datebase_file_path = (char *) malloc(len + 1);
+    if (datebase_file_path == NULL)
     {
         return USP_ERR_SK_MALLOC_FAILURE;
     }
 
-    strncpy(m_db_file_path, db_path, len);
-    m_db_file_path[len] = '\0';
+    strncpy(datebase_file_path, db_path, len);
+    datebase_file_path[len] = '\0';
 
     return USP_ERR_OK;
 }
 
-char *sk_get_db_file_path()
+char *SK_TR369_GetDBFilePath()
 {
-    return m_db_file_path;
+    return datebase_file_path;
 }
 
-int sk_tr369_start(const char *const model_path)
+int SK_TR369_Start(const char *const model_path)
 {
     int err;
     bool enable_mem_info = false;
@@ -423,7 +423,7 @@ int sk_tr369_start(const char *const model_path)
     USP_LOG_Info("USP Agent starting...");
 
     // Exit if unable to start USP Agent
-    err = MAIN_Start(m_db_file_path, enable_mem_info);
+    err = MAIN_Start(datebase_file_path, enable_mem_info);
     if (err != USP_ERR_OK)
     {
         goto exit;

@@ -21,7 +21,6 @@ import com.sdt.android.tr369.Utils.FileUtil;
 import com.sdt.opentr369.OpenTR369Native;
 
 import java.io.File;
-import java.io.IOException;
 
 public class SdtTr369Service extends Service {
     private static final String TAG = "SdtTr369Service";
