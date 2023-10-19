@@ -94,7 +94,7 @@ static bool schedule_factory_reset_init = false;
 
 //--------------------------------------------------------------------
 // String, set by '-r' command line option to specify a text file containing the factory reset database parameters
-char *factory_reset_text_file = NULL;
+char *sk_tr369_model_default = NULL;
 
 //--------------------------------------------------------------------
 typedef struct
@@ -141,7 +141,7 @@ int DATABASE_Init(char *db_file)
 {
     int err;
     FILE *fp;
-    char *factory_reset_file = FACTORY_RESET_FILE;
+    char *factory_reset_file = "";
 
     // Keep a copy of the database filename, this will be needed when performing a controller initiated factory reset
     USP_STRNCPY(database_filename, db_file, sizeof(database_filename));
@@ -219,9 +219,9 @@ int DATABASE_Start(void)
 #endif
 
         // Initialise using the factory reset text file
-        if (factory_reset_text_file != NULL)
+        if (sk_tr369_model_default != NULL)
         {
-            err = ResetFactoryParametersFromFile(factory_reset_text_file);
+            err = ResetFactoryParametersFromFile(sk_tr369_model_default);
             if (err != USP_ERR_OK)
             {
                 return err;
@@ -326,9 +326,9 @@ void DATABASE_PerformFactoryReset_ControllerInitiated(void)
 #endif
 
     // Exit if unable to setup the parameters specified in the factory reset text file
-    if (factory_reset_text_file != NULL)
+    if (sk_tr369_model_default != NULL)
     {
-        err = ResetFactoryParametersFromFile(factory_reset_text_file);
+        err = ResetFactoryParametersFromFile(sk_tr369_model_default);
         if (err != USP_ERR_OK)
         {
             return;

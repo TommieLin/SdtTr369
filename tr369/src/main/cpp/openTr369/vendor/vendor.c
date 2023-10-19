@@ -43,12 +43,221 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+
 #include "usp_err_codes.h"
 #include "vendor_defs.h"
 #include "vendor_api.h"
 #include "usp_api.h"
 #include "usp_log.h"
 #include "sk_tr369_jni.h"
+#include "sk_jni_callback.h"
+
+
+/*********************************************************************//**
+**
+** SK_TR369_Register_Setter_Getter
+**
+**
+**
+**
+** \param
+**
+** \return  None
+**
+**************************************************************************/
+//SK_TR369_Setter sk_tr369_jni_setter = NULL;
+//SK_TR369_Getter sk_tr369_jni_getter = NULL;
+//void SK_TR369_Register_Setter_Getter(SK_TR369_Setter setter, SK_TR369_Getter getter)
+//{
+//    sk_tr369_jni_setter = setter;
+//    sk_tr369_jni_getter = getter;
+//}
+
+// Skyworth Customized Content
+typedef struct
+{
+    char name[MAX_PATH_SEGMENTS]; // name="InternetGatewayDevice" 属性的名字
+    char path[MAX_DM_PATH];
+    unsigned type; // object or multipleObject or something else
+    int inform;
+    int app_inform;
+    char write;
+    dm_get_value_cb_t getter;
+    dm_set_value_cb_t setter;
+    dm_notify_set_cb_t notification;
+    char value[MAX_DM_VALUE_LEN];  //默认的值 对应default
+} sk_schema_node_t;
+
+char *sk_tr369_model_xml = NULL;
+
+
+int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
+{
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetVendorParam start");
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetVendorParam req->path: %s, req->schema_path: %s", req->path, req->schema_path);
+    SK_TR369_API_GetParams(req->path, buf, len);
+    return USP_ERR_OK;
+}
+
+
+int SK_TR369_SetVendorParam(dm_req_t *req, char *buf)
+{
+    int err = USP_ERR_OK;
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetVendorParam start");
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetVendorParam req->path: %s, req->schema_path: %s", req->path, req->schema_path);
+    err = SK_TR369_API_SetParams(req->path, buf);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_API_SetParams return: %d", err);
+    return err;
+}
+
+
+void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
+{
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetNodeFullName start");
+    xmlNodePtr current = node;
+    if (node == NULL || name == NULL)
+    {
+        USP_LOG_Error("%s: Parameter error.", __FUNCTION__);
+        return;
+    }
+    while (current != NULL)
+    {
+        xmlChar *nodeName = xmlGetProp(current, (const xmlChar *)"name");
+        USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName nodeName: %s", nodeName);
+        if (nodeName == NULL)
+        {
+            USP_LOG_Info(" ######### Outis ~~~ nodeName == NULL");
+            break;
+        }
+
+        xmlChar fullName[MAX_DM_PATH] = {0};
+        if (name[0] != '\0')
+        {
+            sprintf((char *)fullName, "%s.%s", nodeName, name);
+            USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName fullName: %s", fullName);
+        }
+        else
+        {
+            sprintf((char *)fullName, "%s", nodeName);
+        }
+
+        sprintf(name, "%s", fullName);
+        USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName Name: %s", name);
+
+        xmlFree(nodeName);
+        current = current->parent;
+    }
+}
+
+
+int SK_TR369_AddNodeToUspDataModel(sk_schema_node_t *schema_node)
+{
+    int err = USP_ERR_OK;
+
+    if (schema_node->setter != NULL)
+    {
+        if (schema_node->getter != NULL)
+        {
+            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter != NULL, setter != NULL", schema_node->path);
+        }
+        else
+        {
+            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter == NULL, setter != NULL", schema_node->path);
+        }
+        err |= USP_REGISTER_VendorParam_ReadWrite(schema_node->path, schema_node->getter, schema_node->setter, NULL, DM_STRING);
+    }
+    else
+    {
+        if (schema_node->getter != NULL)
+        {
+            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter != NULL, setter == NULL", schema_node->path);
+        }
+        else
+        {
+            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter == NULL, setter == NULL", schema_node->path);
+        }
+        err |= USP_REGISTER_VendorParam_ReadOnly(schema_node->path, schema_node->getter, DM_STRING);
+    }
+
+    return err;
+}
+
+
+void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
+{
+    SK_TR369_GetNodeFullName(xml_node, schema_node->path);
+    xmlChar *name = xmlGetProp(xml_node, (const xmlChar *)"name");
+    xmlChar *getter = xmlGetProp(xml_node, (const xmlChar *)"getter");
+    xmlChar *setter = xmlGetProp(xml_node, (const xmlChar *)"setter");
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Getter: %s, Setter: %s", schema_node->path, name, getter, setter);
+
+    if (name != NULL) sprintf(schema_node->name, "%s", name);
+    schema_node->getter = SK_TR369_GetVendorParam;
+    schema_node->setter = (setter != NULL && (xmlStrcmp(setter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_SetVendorParam : NULL;
+
+    xmlFree(name);
+    xmlFree(getter);
+    xmlFree(setter);
+}
+
+
+void SK_TR369_ParseSchema(xmlNodePtr node)
+{
+    xmlNodePtr current = node;
+    while (current != NULL)
+    {
+        if (xmlStrcmp(current->name, (const xmlChar *)"schema") == 0)
+        {
+            xmlChar *type = xmlGetProp(current, (const xmlChar *)"type");
+
+            if (xmlStrcmp(type, (const xmlChar *)"object") &&
+                xmlStrcmp(type, (const xmlChar *)"multipleObject") &&
+                xmlStrcmp(type, (const xmlChar *)"unknown"))
+            {
+                sk_schema_node_t schema_node = {0};
+                SK_TR369_ParseNode(current, &schema_node);
+                SK_TR369_AddNodeToUspDataModel(&schema_node);
+            }
+
+            xmlFree(type);
+        }
+        SK_TR369_ParseSchema(current->children);
+        current = current->next;
+    }
+}
+
+
+int SK_TR369_ParseModelFile(void)
+{
+    if (sk_tr369_model_xml == NULL)
+    {
+        USP_LOG_Error("%s: Model file path not initialized.", __FUNCTION__);
+        return USP_ERR_SK_INIT_FAILURE;
+    }
+
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseModelFile sk_tr369_model_xml: %s", sk_tr369_model_xml);
+
+    xmlDocPtr doc = xmlReadFile(sk_tr369_model_xml, "UTF-8", XML_PARSE_RECOVER);
+    if (doc == NULL)
+    {
+        USP_LOG_Error("%s: Failed to read tr369 model file (%s)", __FUNCTION__, sk_tr369_model_xml);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Info(" ######### Outis ~~~~~~~~~ 1 ~~~~~~~~~~~ ");
+
+    xmlNodePtr root = xmlDocGetRootElement(doc);
+    USP_LOG_Info(" ######### Outis ~~~~~~~~~ 2 ~~~~~~~~~~~ ");
+
+    SK_TR369_ParseSchema(root);
+    USP_LOG_Info(" ######### Outis ~~~~~~~~~ 3 ~~~~~~~~~~~ ");
+
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+
+    return USP_ERR_OK;
+}
 
 /*********************************************************************//**
 **
@@ -71,6 +280,9 @@ int VENDOR_Init(void)
     {
         return USP_ERR_INTERNAL_ERROR;
     }
+
+    SK_TR369_ParseModelFile();
+    USP_LOG_Info(" ######### Outis ~~~ VENDOR_Init return");
 
     return USP_ERR_OK;
 }
@@ -111,25 +323,4 @@ int VENDOR_Stop(void)
 {
 
     return USP_ERR_OK;
-}
-
-/*********************************************************************//**
-**
-** SK_TR369_Register_Setter_Getter
-**
-**
-**
-**
-** \param
-**
-** \return  None
-**
-**************************************************************************/
-SK_TR369_Setter sk_tr369_jni_setter = NULL;
-SK_TR369_Getter sk_tr369_jni_getter = NULL;
-void SK_TR369_Register_Setter_Getter(SK_TR369_Setter setter, SK_TR369_Getter getter)
-{
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Register_Setter_Getter Start");
-    sk_tr369_jni_setter = setter;
-    sk_tr369_jni_getter = getter;
 }

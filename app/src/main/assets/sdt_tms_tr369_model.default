@@ -80,3 +80,5 @@ Device.DeviceInfo.ManufacturerOUI "309176"
 
 # Add by Skyworth
 Device.X_Skyworth.MqttServer.Url "tcp://172.28.11.231:1883"
+Device.X_Skyworth.OperatorName "Platform"
+Device.X_Skyworth.Background.Enable "1"

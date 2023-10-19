@@ -598,6 +598,8 @@ void DM_EXEC_PostUspRecord(unsigned char *pbuf, int pbuf_len, ctrust_role_t role
     process_usp_record_msg_t *pur;
     int bytes_sent;
 
+    USP_LOG_Info(" ######### Outis $$$ DM_EXEC_PostUspRecord start");
+
     // Exit if message queue is not setup yet
     if (mq_tx_socket == -1)
     {
@@ -631,6 +633,7 @@ void DM_EXEC_PostUspRecord(unsigned char *pbuf, int pbuf_len, ctrust_role_t role
 
     // Send the message - does not block if the queue is full, discards the message instead
     bytes_sent = send(mq_tx_socket, &msg, sizeof(msg), MSG_DONTWAIT);
+    USP_LOG_Info(" ######### Outis $$$ DM_EXEC_PostUspRecord send mq_tx_socket");
     if (bytes_sent != sizeof(msg))
     {
         char buf[USP_ERR_MAXLEN];
@@ -1125,6 +1128,8 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
     bdc_transfer_result_msg_t *btr;
     mtp_reply_to_t *mrt;
 
+    USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity start");
+
     // Exit if there is no activity on the message queue socket
     if (SOCKET_SET_IsReadyToRead(mq_rx_socket, set) == 0)
     {
@@ -1133,6 +1138,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
 
     // Exit if unable to read the full message received
     bytes_read = recv(mq_rx_socket, &msg, sizeof(msg), 0);
+    USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity recv msg");
     if (bytes_read != sizeof(msg))
     {
         USP_LOG_Error("%s: recv() did not return a full message", __FUNCTION__);
@@ -1142,6 +1148,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
     switch(msg.type)
     {
         case kDmExecMsg_ProcessUspRecord:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_ProcessUspRecord");
             pur = &msg.params.usp_record;
             mrt = &pur->mtp_reply_to;
             MSG_HANDLER_HandleBinaryRecord(pur->pbuf, pur->pbuf_len, pur->role, mrt); // NOTE: Intentionally ignoring the error. Errors are handled in the function
@@ -1174,6 +1181,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
 #ifdef ENABLE_MQTT
         case kDmExecMsg_MqttHandshakeComplete:
         {
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_MqttHandshakeComplete");
             mqtt_complete_msg_t *mcm;
             mcm = &msg.params.mqtt_complete;
             DEVICE_CONTROLLER_QueueMqttConnectRecord(mcm->mqtt_instance, mcm->version, mcm->agent_topic);
@@ -1186,6 +1194,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
             break;
 #endif
         case kDmExecMsg_OperComplete:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_OperComplete");
             ocm = &msg.params.oper_complete;
             DEVICE_REQUEST_OperationComplete(ocm->instance, ocm->err_code, ocm->err_msg, ocm->output_args);
 
@@ -1200,6 +1209,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
             break;
 
         case kDmExecMsg_EventComplete:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_EventComplete");
             ecm = &msg.params.event_complete;
             DEVICE_SUBSCRIPTION_ProcessAllEventCompleteSubscriptions(ecm->event_name, ecm->output_args);
 
@@ -1214,6 +1224,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
             break;
 
         case kDmExecMsg_OperStatus:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_OperStatus");
             osm = &msg.params.oper_status;
             USP_ASSERT(osm->status != NULL);
             DEVICE_REQUEST_UpdateOperationStatus(osm->instance, osm->status);
@@ -1224,6 +1235,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
 
 
         case kDmExecMsg_ObjAdded:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_ObjAdded");
             oam = &msg.params.obj_added;
             err = DATA_MODEL_NotifyInstanceAdded(oam->path);
             if (err == USP_ERR_OK)
@@ -1237,6 +1249,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
             break;
 
         case kDmExecMsg_ObjDeleted:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_ObjDeleted");
             odm = &msg.params.obj_deleted;
             err = DATA_MODEL_NotifyInstanceDeleted(odm->path);
             if (err == USP_ERR_OK)
@@ -1250,6 +1263,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
             break;
 
         case kDmExecMsg_MtpThreadExited:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_MtpThreadExited");
             tem = &msg.params.mtp_thread_exited;
             cumulative_mtp_threads_exited |= tem->flags;
 
@@ -1280,6 +1294,7 @@ void ProcessMessageQueueSocketActivity(socket_set_t *set)
             break;
 
         case kDmExecMsg_BdcTransferResult:
+            USP_LOG_Info(" ######### Outis $$$ ProcessMessageQueueSocketActivity kDmExecMsg_BdcTransferResult");
             btr = &msg.params.bdc_transfer_result;
             DEVICE_BULKDATA_NotifyTransferResult(btr->profile_id, btr->transfer_result);
             break;

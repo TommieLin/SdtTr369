@@ -47,8 +47,9 @@
 
 //---------------------------------------------------------------------
 // Vendor Global Parameters
-extern SK_TR369_Setter sk_tr369_jni_setter;
-extern SK_TR369_Getter sk_tr369_jni_getter;
+//extern SK_TR369_Setter sk_tr369_jni_setter;
+//extern SK_TR369_Getter sk_tr369_jni_getter;
+extern char *sk_tr369_model_xml;
 
 //---------------------------------------------------------------------
 // Vendor API

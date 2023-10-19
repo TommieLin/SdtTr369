@@ -34,7 +34,7 @@ public class Tr369PathInvoke {
         this.mapRunSet = createMap(TYPE_TR369_SET, mapBuildSet);
     }
 
-    private void filterParams(ArrayMap<String, MethodProperty> arrayMap){
+    private void filterParams(ArrayMap<String, MethodProperty> arrayMap) {
         Set<Map.Entry<String, MethodProperty>> entries = arrayMap.entrySet();
         for (Map.Entry<String, MethodProperty> next : entries) {
             String key = next.getKey();

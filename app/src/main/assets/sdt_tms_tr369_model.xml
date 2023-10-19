@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<model>
+    <schema name="Device" type="object">
+        <schema name="X_Skyworth" type="object">
+            <schema name="AndroidVersion" type="string" getter="diagnose"/>
+            <schema name="AndroidTVOS" type="string" inform="true" getter="diagnose" />
+            <schema name="DeviceName" type="string" getter="diagnose"/>
+            <schema name="OperatorName" type="string" getter="diagnose"/>
+
+            <schema name="Mute" type="boolean" write="W" setter="diagnose"/>
+            <schema name="Volume" type="int" write="W" getter="diagnose" setter="diagnose"/>
+
+            <schema name="Background" type="object">
+                <schema name="Enable" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+            </schema>
+        </schema>
+    </schema>
+</model>

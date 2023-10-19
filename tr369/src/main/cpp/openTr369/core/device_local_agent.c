@@ -340,6 +340,16 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     err = DATA_MODEL_GetParameterValue("Device.DeviceInfo.UpTime", device_uptime, sizeof(device_uptime), 0);
     USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue device_uptime: %s, err: %d", device_uptime, err);
 
+    // Outis test
+    char operator_name[MAX_DM_SHORT_VALUE_LEN];
+    err = DATA_MODEL_GetParameterValue("Device.X_Skyworth.OperatorName", operator_name, sizeof(operator_name), 0);
+    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue operator_name: %s, err: %d", operator_name, err);
+
+    // Outis test
+//    char enable[MAX_DM_SHORT_VALUE_LEN] = "OutisTest";
+//    err = DATA_MODEL_SetParameterValue("Device.X_Skyworth.Background.Enable", enable, sizeof(enable));
+//    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue Background.Enable: %s, err: %d", enable, err);
+
     return USP_ERR_OK;
 }
 

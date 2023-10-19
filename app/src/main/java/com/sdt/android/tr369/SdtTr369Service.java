@@ -120,17 +120,16 @@ public class SdtTr369Service extends Service {
         String dbFilePath = getApplicationContext().getDataDir().getPath() + "/sdt_tms_usp.db"; // "/databases/sk_usp.db";
         Log.e(TAG, " ############ Outis ### startTR369 dbFilePath: " + dbFilePath);
 
-        int ret = OpenTR369Native.SetDBFilePath(dbFilePath);
-        Log.e(TAG, " ############ Outis ### startTR369 SetDBFilePath ret: " + ret);
-        String newFilePath = OpenTR369Native.GetDBFilePath();
-        Log.e(TAG, " ############ Outis ### startTR369 GetDBFilePath new: " + newFilePath);
+        FileUtil.copyTr369AssetsToFile(getApplicationContext());
+        String defaultFilePath = getApplicationContext().getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_DEFAULT;
+        Log.e(TAG, " ############ Outis ### startTR369 defaultFilePath: " + defaultFilePath);
 
-        FileUtil.copyTr369ModelToFile(getApplicationContext());
-        File modelFile = FileUtil.getTr369ModelFile(getApplicationContext(), FileUtil.PLATFORM_TMS_TR369_MODEL);
-        if (modelFile != null) {
-            ret = OpenTR369Native.OpenTR369Init(modelFile.getPath().trim());
-            Log.e(TAG, " ############ Outis ### startTR369 ret: " + ret);
-        }
+        int ret = OpenTR369Native.SetInitFilePath(dbFilePath, defaultFilePath);
+        Log.e(TAG, " ############ Outis ### startTR369 SetInitFilePath ret: " + ret);
+
+        String modelFile = getApplicationContext().getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_XML;
+        ret = OpenTR369Native.OpenTR369Init(modelFile);
+        Log.e(TAG, " ############ Outis ### startTR369 ret: " + ret);
 
         String test_str = OpenTR369Native.stringFromJNI();
         Log.e(TAG, " ############ Outis ### startTR369 test_str: " + test_str);

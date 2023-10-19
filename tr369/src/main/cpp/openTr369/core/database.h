@@ -48,7 +48,7 @@
 
 //------------------------------------------------------------------------------
 // String, set by '-r' command line option to specify a text file containing the factory reset database parameters
-extern char *factory_reset_text_file;
+extern char *sk_tr369_model_default;
 
 //------------------------------------------------------------------------------
 // API

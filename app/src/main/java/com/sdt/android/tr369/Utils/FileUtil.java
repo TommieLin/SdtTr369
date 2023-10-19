@@ -18,28 +18,28 @@ import java.util.Set;
 public class FileUtil {
 
     private static final String TAG = "FileUtil";
-    public static final String PLATFORM_TMS_TR369_MODEL = "sdt_tms_tr369_model.txt";
-    public static final String SYS_PROP_TR369_MODE_ISUPDATED = "persist.sys.tr369.mode.isupdated";
+    public static final String PLATFORM_TMS_TR369_MODEL_DEFAULT = "sdt_tms_tr369_model.default";
+    public static final String PLATFORM_TMS_TR369_MODEL_XML = "sdt_tms_tr369_model.xml";
+    public static final String SYS_PROP_TR369_MODE_ISUPDATED = "persist.sys.tr369.mode.isUpdated";
 
-    public static void copyTr369ModelToFile(Context context) {
-        String modelFileName = PLATFORM_TMS_TR369_MODEL;
-        File modelFile = getTr369ModelFile(context, modelFileName);
-        if (modelFile != null && !modelFile.exists()) {
-            copyAssetFile(context, modelFileName, modelFile);
-        } else if (modelFile != null && modelFile.exists()) {
-            /* 判断model是否已经更新过了 */
-            boolean isUpdated = SystemProperties.getBoolean(SYS_PROP_TR369_MODE_ISUPDATED, false);
-            if (!isUpdated || "eng".equalsIgnoreCase(Build.TYPE)) {
-                SystemProperties.set(SYS_PROP_TR369_MODE_ISUPDATED, Boolean.TRUE.toString());
-                modelFile.delete();
-                copyAssetFile(context, modelFileName, modelFile);
-            }
-        }
-    }
+    public static void copyTr369AssetsToFile(Context context) {
+        File modelFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_XML);
+        File defaultFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_DEFAULT);
 
-    public static File getTr369ModelFile(Context context, String filePath) {
-        if (context == null) return null;
-        return new File(context.getDataDir(), filePath);
+//        if (!modelFile.exists() || !defaultFile.exists()) {
+            copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
+            copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
+//        } else {
+//            /* 判断model是否已经更新过了 */
+//            boolean isUpdated = SystemProperties.getBoolean(SYS_PROP_TR369_MODE_ISUPDATED, false);
+//            if (!isUpdated || "eng".equalsIgnoreCase(Build.TYPE)) {
+//                SystemProperties.set(SYS_PROP_TR369_MODE_ISUPDATED, Boolean.TRUE.toString());
+//                modelFile.delete();
+//                defaultFile.delete();
+//                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
+//                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
+//            }
+//        }
     }
 
     private static void copyAssetFile(Context context, String inFileName, File outFile) {

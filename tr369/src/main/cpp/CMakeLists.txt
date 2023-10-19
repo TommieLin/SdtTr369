@@ -52,10 +52,11 @@ target_link_libraries(
         sk_tr369_jni
         log
         android
-#        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libeventopenssl.so
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libssl.so
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libcrypto.so
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libz.so
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libcurl.so
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libmosquitto.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_ssl.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_crypto.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_zlib.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_curl.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_mosquitto.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_iconv.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_xml2.so
 )

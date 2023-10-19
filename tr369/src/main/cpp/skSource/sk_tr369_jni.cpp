@@ -198,7 +198,7 @@ Java_com_sdt_opentr369_OpenTR369Native_OpenTR369Init(JNIEnv *env, jclass clazz, 
             .SK_TR369_Callback_Set = SK_TR369_Callback_Set};
     skSetJniCallback(&jniCallFuncion);
 
-    SK_TR369_Register_Setter_Getter(SK_TR369_Callback_SetAttr, SK_TR369_Callback_GetAttr);
+//    SK_TR369_Register_Setter_Getter(SK_TR369_Callback_SetAttr, SK_TR369_Callback_GetAttr);
 
     const char *const filePath = env->GetStringUTFChars(path, nullptr);
     int ret = SK_TR369_Start(filePath);
@@ -207,16 +207,27 @@ Java_com_sdt_opentr369_OpenTR369Native_OpenTR369Init(JNIEnv *env, jclass clazz, 
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_sdt_opentr369_OpenTR369Native_SetDBFilePath(JNIEnv *env, jclass clazz, const jstring path) {
-    const char *const filePath = env->GetStringUTFChars(path, nullptr);
-    int ret = SK_TR369_SetDBFilePath(filePath);
-    env->ReleaseStringUTFChars(path, filePath);
+Java_com_sdt_opentr369_OpenTR369Native_SetInitFilePath(JNIEnv *env, jclass clazz, const jstring db_path, const jstring default_path) {
+    const char *const dbFilePath = env->GetStringUTFChars(db_path, nullptr);
+    const char *const defaultFilePath = env->GetStringUTFChars(default_path, nullptr);
+    int ret = SK_TR369_SetInitFilePath(dbFilePath, defaultFilePath);
+    env->ReleaseStringUTFChars(db_path, dbFilePath);
+    env->ReleaseStringUTFChars(default_path, defaultFilePath);
     return ret;
 }
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_sdt_opentr369_OpenTR369Native_GetDBFilePath(JNIEnv *env, jclass clazz) {
     char *filePath = SK_TR369_GetDBFilePath();
+    if (filePath != nullptr) {
+        return env->NewStringUTF(filePath);
+    }
+    return env->NewStringUTF("");
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetDefaultFilePath(JNIEnv *env, jclass clazz) {
+    char *filePath = SK_TR369_GetDefaultFilePath();
     if (filePath != nullptr) {
         return env->NewStringUTF(filePath);
     }

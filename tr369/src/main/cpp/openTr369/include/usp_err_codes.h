@@ -95,5 +95,6 @@
 // These use codes 7800-7999. Currently USP Agent core does not define any codes in this range.
 #define USP_ERR_SK_SET_FAILURE            7107       // Special failure to set a parameter
 #define USP_ERR_SK_MALLOC_FAILURE         7108       // Failed to allocate memory using malloc.
+#define USP_ERR_SK_INIT_FAILURE           7109       // Failed to initialize parameters.
 
 #endif

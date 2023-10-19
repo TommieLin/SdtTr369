@@ -49,7 +49,7 @@
 // You are unlikely to need to change these
 #define MAX_DM_INSTANCE_ORDER 6   // Maximum number of instance numbers in a data model schema path (ie number of '{i}' in the schema path)
 #define MAX_DM_PATH (256)           // Maximum number of characters in a data model path
-#define MAX_DM_VALUE_LEN (4096)     // Maximum number of characters in a data model parameter value
+#define MAX_DM_VALUE_LEN (512)     // Maximum number of characters in a data model parameter value
 #define MAX_DM_SHORT_VALUE_LEN (MAX_DM_PATH) // Maximum number of characters in an (expected to be) short data model parameter value
 #define MAX_PATH_SEGMENTS (32)      // Maximum number of segments (eg "Device, "LocalAgent") in a path. Does not include instance numbers.
 #define MAX_COMPOUND_KEY_PARAMS 4   // Maximum number of parameters in a compound unique key
@@ -83,11 +83,11 @@
 
 // Location of the database file to use, if none is specified on the command line when invoking this executable
 // NOTE: As the database needs to be stored persistently, this should be changed to a directory which is not cleared on boot up
-#define OBUSPA_LOCAL_STATE_DIR              "/data/user/0/com.sdt.android.tr369"
-#define DEFAULT_DATABASE_FILE               OBUSPA_LOCAL_STATE_DIR "/usp.db"
+#define OBUSPA_LOCAL_STATE_DIR              "/data/user/0/com.sdt.android.tr369/"
+#define DEFAULT_DATABASE_FILE               OBUSPA_LOCAL_STATE_DIR "sdt_tms_usp.db"
 
 // Location of unix domain stream file used for CLI communication between client and server
-#define CLI_UNIX_DOMAIN_FILE                "/tmp/usp_cli"
+#define CLI_UNIX_DOMAIN_FILE                OBUSPA_LOCAL_STATE_DIR "sdt_tms_usp_cli"
 
 // Location of file or directory containing certificates to report in Device.Security.Certificate
 // NOTE: These certificates are not added to the agent's trust store

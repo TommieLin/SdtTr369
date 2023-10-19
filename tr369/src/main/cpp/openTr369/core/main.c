@@ -68,6 +68,7 @@
 #include "retry_wait.h"
 #include "nu_macaddr.h"
 
+#include "vendor_api.h"
 
 #ifdef ENABLE_WEBSOCKETS
 #include "wsclient.h"
@@ -211,7 +212,7 @@ int source_main(int argc, char *argv[])
 
             case 'r':
                 // Set the location of the text file containing the factory reset parameters
-                factory_reset_text_file = optarg;
+                sk_tr369_model_default = optarg;
                 break;
 
             case 'i':
@@ -347,11 +348,13 @@ exit:
 
 static char *datebase_file_path = NULL;
 
-int SK_TR369_SetDBFilePath(const char *const db_path)
+int SK_TR369_SetInitFilePath(const char *const db_path, const char *const default_path)
 {
+    // 初始化DB文件路径
     if (datebase_file_path != NULL)
     {
         free(datebase_file_path);
+        datebase_file_path = NULL;
     }
 
     unsigned int len = strlen(db_path);
@@ -364,12 +367,34 @@ int SK_TR369_SetDBFilePath(const char *const db_path)
     strncpy(datebase_file_path, db_path, len);
     datebase_file_path[len] = '\0';
 
+    // 初始化Model默认值文件路径
+    if (sk_tr369_model_default != NULL)
+    {
+        free(sk_tr369_model_default);
+        sk_tr369_model_default = NULL;
+    }
+
+    len = strlen(default_path);
+    sk_tr369_model_default = (char *) malloc(len + 1);
+    if (sk_tr369_model_default == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(sk_tr369_model_default, default_path, len);
+    sk_tr369_model_default[len] = '\0';
+
     return USP_ERR_OK;
 }
 
 char *SK_TR369_GetDBFilePath()
 {
     return datebase_file_path;
+}
+
+char *SK_TR369_GetDefaultFilePath()
+{
+    return sk_tr369_model_default;
 }
 
 int SK_TR369_Start(const char *const model_path)
@@ -401,23 +426,24 @@ int SK_TR369_Start(const char *const model_path)
     // Enable logging of protocol trace
     enable_protocol_trace = true;
 
-    // Set the location of the text file containing the factory reset parameters
-    if (factory_reset_text_file != NULL)
+    // 初始化Model文件路径
+    if (sk_tr369_model_xml != NULL)
     {
-        free(factory_reset_text_file);
+        free(sk_tr369_model_xml);
+        sk_tr369_model_xml = NULL;
     }
 
     unsigned int len = strlen(model_path);
-    factory_reset_text_file = (char *) malloc(len + 1);
-    if (factory_reset_text_file == NULL)
+    sk_tr369_model_xml = (char *) malloc(len + 1);
+    if (sk_tr369_model_xml == NULL)
     {
         err = USP_ERR_SK_MALLOC_FAILURE;
         goto exit;
     }
 
-    strncpy(factory_reset_text_file, model_path, len);
-    factory_reset_text_file[len] = '\0';
-    USP_LOG_Debug("model_path: %s, factory_reset_text_file: %s\n", model_path, factory_reset_text_file);
+    strncpy(sk_tr369_model_xml, model_path, len);
+    sk_tr369_model_xml[len] = '\0';
+    USP_LOG_Debug("sk_tr369_model_default: %s, sk_tr369_model_xml: %s\n", sk_tr369_model_default, sk_tr369_model_xml);
 
     // Following debug is only logged when running as a daemon (not when running as CLI client).
     USP_LOG_Info("USP Agent starting...");

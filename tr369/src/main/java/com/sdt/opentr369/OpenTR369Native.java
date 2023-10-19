@@ -77,7 +77,8 @@ public class OpenTR369Native {
 
     public static native String stringFromJNI();
     public static native int OpenTR369Init(String path);
-    public static native int SetDBFilePath(String path);
+    public static native int SetInitFilePath(String db_path, String default_path);
     public static native String GetDBFilePath();
+    public static native String GetDefaultFilePath();
 
 }
