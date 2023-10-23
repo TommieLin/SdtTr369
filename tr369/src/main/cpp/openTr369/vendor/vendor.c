@@ -274,13 +274,6 @@ int VENDOR_Init(void)
 {
     int err = USP_ERR_OK;
 
-    USP_LOG_Info(" ######### Outis ~~~ VENDOR_Init Start");
-    err |= USP_REGISTER_DBParam_ReadOnly("Device.X_Skyworth.MqttServer.Url", "OutisTest", DM_STRING);
-    if (err != USP_ERR_OK)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
-
     SK_TR369_ParseModelFile();
     USP_LOG_Info(" ######### Outis ~~~ VENDOR_Init return");
 

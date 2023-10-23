@@ -36,9 +36,6 @@ include_directories(
         skSource
         libs/armeabi-v7a/include
         libs/armeabi-v7a/include/mosquitto
-#        libs/armeabi-v7a/include/libevent
-#        libs/armeabi-v7a/include/libzlib
-#        libs/armeabi-v7a/include/openssl
 )
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DENABLE_MQTT -DDISABLE_STOMP")
@@ -52,11 +49,11 @@ target_link_libraries(
         sk_tr369_jni
         log
         android
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_ssl.so
         ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_crypto.so
-        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_zlib.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_ssl.so
         ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_curl.so
         ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_mosquitto.so
+        ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_zlib.so
         ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_iconv.so
         ${CMAKE_SOURCE_DIR}/libs/${ANDROID_ABI}/libtms_xml2.so
 )
