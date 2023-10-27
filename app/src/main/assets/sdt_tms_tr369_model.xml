@@ -2,18 +2,243 @@
 
 <model>
     <schema name="Device" type="object">
+
+<!--        <schema name="DeviceInfo" type="object">-->
+<!--            <schema name="Manufacturer" type="string" constraint="64" default="SkyworthDigital" getter="diagnose"/>-->
+<!--            <schema name="ManufacturerOUI" type="string" constraint="6" default="990104" getter="diagnose"/>-->
+<!--            <schema name="ModelName" type="string" inform="true" constraint="64" getter="diagnose"/>-->
+<!--            <schema name="ModelID" type="string" constraint="64" getter="diagnose"/>-->
+<!--            <schema name="Description" type="string" constraint="256" default="SKYWORTH IPTV"/>-->
+<!--            <schema name="AlarmCode" type="string" default="300103"/>-->
+<!--            <schema name="ProductClass" type="string" constraint="64" getter="diagnose"/>-->
+<!--            <schema name="SerialNumber" type="string" constraint="64" getter="diagnose" />-->
+
+<!--            <schema name="HardwareVersion" type="string" inform="true" constraint="64" getter="diagnose" />-->
+<!--            <schema name="SoftwareVersion" type="string" inform="true" constraint="64" notification="active" getter="diagnose"/>-->
+
+<!--            <schema name="SafeVersion" type="string" constraint="64" default="v0"/>-->
+<!--            <schema name="ConfigFileVersion" type="string" constraint="64" default="v1.0"/>-->
+<!--            <schema name="LogoVersion" type="string" constraint="64" default="V301"/>-->
+
+<!--            <schema name="EnabledOptions" type="string" constraint="1024" default="0" />-->
+<!--            <schema name="ProvisioningCode" type="string" constraint="64" notification="active" default="990104" inform="true"/>-->
+
+<!--            <schema name="DeviceStatus" type="string" constraint="64" default="Up"/>-->
+<!--            <schema name="UpTime" type="unsignedInt" inform="true" getter="sk_tr069_get_up_time"/>-->
+<!--            <schema name="FirstUseDate" type="dateTime" getter="sk_tr069_get_first_use_date"/>-->
+<!--            <schema name="DeviceLog" type="string" constraint="32768" default="this is run log!"/>-->
+<!--            <schema name="MemoryStatus" type="object">-->
+<!--                <schema name="Total"  inform="true" type="unsignedInt" getter="diagnose"/>-->
+<!--                <schema name="Free"  inform="true" type="unsignedInt" getter="diagnose"/>-->
+<!--            </schema>-->
+<!--            <schema name="ProcessStatus" type="object">-->
+<!--                <schema name="CPUUsage"  inform="true" type="unsignedInt" getter="diagnose" />-->
+<!--                <schema name="ProcessNumberOfEntries"  type="unsignedInt" getter="diagnose" />-->
+<!--                <schema name="Process" type="multipleObject">-->
+<!--                    <schema name="PID" type="unsignedInt" getter="diagnose" default="0"/>-->
+<!--                    <schema name="Command" type="string" constraint="256" getter="diagnose" />-->
+<!--                    <schema name="Size" type="unsignedInt" getter="diagnose" default="0"/>-->
+<!--                    <schema name="Priority" type="unsignedInt" getter="diagnose" default="1"/>-->
+<!--                    <schema name="CPUTime" type="unsignedInt" getter="diagnose" default="0"/>-->
+<!--                    <schema name="State" type="string" constraint="32" getter="diagnose" default="Uninterruptible"/>-->
+<!--                </schema>-->
+<!--            </schema>-->
+
+<!--        </schema>-->
+
         <schema name="X_Skyworth" type="object">
-            <schema name="AndroidVersion" type="string" getter="diagnose"/>
-            <schema name="AndroidTVOS" type="string" inform="true" getter="diagnose" />
+
+            <schema name="DreamInfo" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="CurrentDreamInfo" type="string" getter="diagnose"/>
+            <schema name="DreamTime" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="TotalRAMUsageCapacity" type="int" getter="diagnose"/>
+            <schema name="CpuTemperature" type="int" inform="true" getter="diagnose"/>
+            <schema name="MaxAllowableCPUTemperature" type="int" default="120"/>
+            <schema name="Reboot" type="object">
+                <schema name="Numbers" type="int" inform="true" getter="diagnose"/>
+            </schema>
+            <schema name="FTI" type="object">
+                <schema name="ResidenceDuration" type="int" inform="true" getter="diagnose"/>
+            </schema>
+
+            <schema name="ScreenInUse" type="int" inform="true" getter="diagnose"/>
+            <schema name="InternalDataStorageFree" type="int" inform="true" getter="diagnose" />
+            <schema name="InternalDataStorageTotal" type="int" inform="true" getter="diagnose" />
+
+            <schema name="InternalDataStorageUtilisation" type="string" getter="diagnose" />
+            <schema name="MemoryUtilisation" type="string" getter="diagnose" />
+            <schema name="ActiveNetworkConnection" type="string" inform="true" getter="diagnose" />
+
+            <schema name="DownlinkRate" type="int" inform="true" getter="diagnose" />
+            <schema name="UplinkRate" type="int" inform="true" getter="diagnose" />
+
+            <schema name="Lock" type="object">
+                <schema name="Background" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="Dialog" type="object">
+                    <schema name="Title" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="Message" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="NegativeButtonText" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="PositiveButtonText" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                </schema>
+                <schema name="Enable" type="boolean" inform="true" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="CountDown" type="object">
+                    <schema name="Enable" type="boolean" inform="true" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="FirstLongTerm" type="int" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="SecondLongTerm" type="int" write="W" getter="diagnose" setter="diagnose"/>
+                </schema>
+            </schema>
+            <schema name="MqttServer" type="object">
+                <schema name="Url" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="Enable" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+            </schema>
+            <schema name="TotalBytes" type="object">
+                <schema name="Today" type="string" inform="true" getter="diagnose"/>
+                <schema name="TxTotal" type="string" inform="true" getter="diagnose"/>
+                <schema name="RxTotal" type="string" inform="true" getter="diagnose"/>
+            </schema>
+            <schema name="Mute" type="boolean"  write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="Volume" type="int"  write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="ChangeProgram" type="string" write="W" setter="diagnose"/>
+            <schema name="SearchProgram" type="int" write="W" setter="diagnose"/>
+            <schema name="ScreenSaver" type="int" getter="diagnose"/>
+            <schema name="Build" type="string"  getter="diagnose"/>
+            <schema name="background" type="string"  getter="diagnose"/>
+            <schema name="PatchLevel" type="string"  getter="diagnose"/>
+            <schema name="AndroidVersion" type="string"  getter="diagnose"/>
+            <schema name="AndroidTVOS" type="string" constraint="64" inform="true" getter="diagnose" />
+            <schema name="BluetoothMac" type="string" getter="diagnose"/>
             <schema name="DeviceName" type="string" getter="diagnose"/>
             <schema name="OperatorName" type="string" getter="diagnose"/>
 
-            <schema name="Mute" type="boolean" write="W" setter="diagnose"/>
-            <schema name="Volume" type="int" write="W" getter="diagnose" setter="diagnose"/>
-
-            <schema name="Background" type="object">
+            <schema name="LogStream" type="object">
                 <schema name="Enable" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="UploadUrl" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="Level" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="Keyword" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="Period" type="unsignedInt" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="TransactionId" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
             </schema>
+
+            <schema name="Logcat" type="object">
+                <schema name="FileList" type="string" getter="diagnose"/>
+                <schema name="DeleteFiles" type="string" write="W" setter="diagnose"/>
+                <schema name="AutoUpload" type="object">
+                    <schema name="Enable" type="boolean" inform="true" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="Interval" type="unsignedInt" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="Url" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                </schema>
+                <schema name="Background" type="object">
+                    <schema name="Enable" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+                </schema>
+            </schema>
+
+            <schema name="UninstallApp" type="string" write="W" setter="diagnose"/>
+            <schema name="UninstallApps" type="string" write="W" setter="diagnose"/>
+            <schema name="AppNumberOfEntries" app_inform="true" type="unsignedInt" getter="diagnose" />
+            <schema name="Array" type="string" inform="true" getter="diagnose"/>
+            <schema name="ArrayRecordInterval" type="unsignedInt" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="AppInfoPeriodicInformInterval" type="unsignedInt" getter="diagnose" setter="diagnose" write="W" />
+            <schema name="App" type="multipleObject">
+                <schema app_inform="true" name="Type" type="string" getter="diagnose" />
+                <schema app_inform="true" name="PackageName" type="string" constraint="512" getter="diagnose" />
+                <schema app_inform="true" name="Name" type="string" constraint="64" getter="diagnose" />
+                <schema app_inform="true" name="Version" type="string" constraint="64" getter="diagnose" />
+                <schema app_inform="true" name="BlockStatus" type="boolean" getter="diagnose" setter="diagnose" write="W"/>
+                <schema app_inform="true" name="BlockEnable" type="boolean" getter="diagnose" />
+                <schema app_inform="true" name="StopEnable" type="boolean" getter="diagnose" />
+                <schema app_inform="true" name="Size" type="int" getter="diagnose" />
+                <schema app_inform="true" name="Running" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+                <schema app_inform="true" name="LastUpdatedTime" type="string" getter="diagnose" />
+                <schema app_inform="true" name="MemoryUsage" type="string"  getter="diagnose"/>
+                <schema app_inform="true" name="StorageUsage" type="string" getter="diagnose"/>
+                <schema app_inform="true" name="Uptime" type="string" getter="diagnose"/>
+                <schema app_inform="true" name="TotalUptime" type="string" getter="diagnose"/>
+                <schema app_inform="true" name="RunningTimes" type="string" getter="diagnose"/>
+                <schema app_inform="true" name="LastStartTime" type="string" getter="diagnose"/>
+                <schema app_inform="true" name="CpuUsage" type="string" getter="diagnose"/>
+                <schema name="ClearData" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="PermissionsNumberOfEntries" type="unsignedInt" getter="diagnose"/>
+                <schema name="Permissions" type="multipleObject">
+                    <schema name="Name" type="string" getter="diagnose"/>
+                    <schema name="Label" type="string" getter="diagnose"/>
+                    <schema name="Granted" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                    <schema name="CanModify" type="boolean" getter="diagnose"/>
+                </schema>
+            </schema>
+
+            <schema name="AppBatchBlock" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="AppBatchUnBlock" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="AppBlackList" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="AppWhiteList" type="string" write="W" getter="diagnose" setter="diagnose"/>
+
+            <schema name="SyncParamInterval" type="unsignedInt" write="W" getter="diagnose" setter="diagnose"/>
+
+            <schema name="Storage" type="object">
+                <schema name="Info" type="string" write="W" getter="diagnose"/>
+                <schema name="AppsInfo" type="string" write="W" getter="diagnose"/>
+                <schema name="Clear" type="boolean" write="W" setter="diagnose"/>
+                <schema name="ClearAppsData" type="string" write="W" setter="diagnose"/>
+                <schema name="ClearAppsCache" type="string" write="W" setter="diagnose"/>
+            </schema>
+
+            <schema name="System" type="object">
+                <schema name="Setting" type="object">
+                    <schema name="Use24HourFormat" type="boolean" write="W" getter="diagnose" setter="diagnose"/>
+                </schema>
+            </schema>
+
+            <schema name="BluetoothDeviceNumberOfEntries" type="unsignedInt" getter="diagnose" />
+            <schema name="BluetoothDevice" type="multipleObject">
+                <schema name="Type" type="string" getter="diagnose" />
+                <schema name="Mac" type="string" constraint="64" getter="diagnose" />
+                <schema name="Name" type="string" constraint="128" getter="diagnose" />
+                <schema name="ConnectionStatus" type="string" getter="diagnose" setter="diagnose" />
+                <schema name="Power" type="string" getter="diagnose" />
+            </schema>
+
+            <schema name="RemoteControl" type="object">
+                <schema name="Enable" type="boolean" write="W" setter="diagnose" getter="diagnose"/>
+                <schema name="UploadUrl" type="string" write="W" setter="diagnose" getter="diagnose"/>
+                <schema name="FrameRate" type="unsignedInt" write="W" setter="diagnose" getter="diagnose"/>
+                <schema name="IceServers" type="string" write="W" setter="diagnose" getter="diagnose"/>
+                <schema name="DPI" type="object">
+                    <schema name="Width" type="unsignedInt" write="W" setter="diagnose" getter="diagnose"/>
+                    <schema name="Height" type="unsignedInt" write="W" setter="diagnose" getter="diagnose"/>
+                </schema>
+            </schema>
+            <schema name="SpeedTest" type="object">
+                <schema name="Enable" type="boolean" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="Url" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="TransactionId" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            </schema>
+            <schema name="Tcpdump" type="object">
+                <schema name="Enable" type="boolean" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="Ip" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="Port" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="NetType" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="Duration" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="FileSize" type="int" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="FileType" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="Url" type="string" write="W" getter="diagnose" setter="diagnose" />
+            </schema>
+
+            <schema name="RemoteSSH" type="object">
+                <schema name="Enable" type="string" write="W" getter="diagnose" setter="diagnose" />
+                <schema name="IpPort" type="string" write="W" getter="diagnose" setter="diagnose" />
+            </schema>
+            <schema name="LowFrequencyInterval" type="string" write="W" getter="diagnose" setter="diagnose" />
+            <schema name="LowFrequencyNode" type="string" write="W" getter="diagnose" setter="diagnose" />
+
+            <schema name="MaxScreenRecordFileSize" type="unsignedInt" write="W" getter="diagnose" setter="diagnose" />
+            <schema name="StandbyMode" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="Standby" type="object">
+                <schema name="Url" type="string" write="W" getter="diagnose" setter="diagnose"/>
+                <schema name="Enable" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            </schema>
+            <schema name="SleepTime" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="IsSleep" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="SoundSwitch" type="string" write="W" getter="diagnose" setter="diagnose"/>
+            <schema name="Sound" type="string" write="W" getter="diagnose" setter="diagnose"/>
         </schema>
     </schema>
 </model>

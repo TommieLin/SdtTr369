@@ -11,8 +11,8 @@
 #Device.LocalAgent.EndpointID "os::309176-OUTIS202310071812"
 
 ## Adding boot params
-Device.LocalAgent.Controller.1.BootParameter.1.Enable "true"
-Device.LocalAgent.Controller.1.BootParameter.1.ParameterName "Device.LocalAgent.EndpointID"
+# Device.LocalAgent.Controller.1.BootParameter.1.Enable "true"
+# Device.LocalAgent.Controller.1.BootParameter.1.ParameterName "Device.LocalAgent.EndpointID"
 Device.LocalAgent.Subscription.1.Alias "sdtcpe-1"
 Device.LocalAgent.Subscription.1.Enable "true"
 Device.LocalAgent.Subscription.1.ID "default-boot-event-ACS"
@@ -27,7 +27,7 @@ Device.LocalAgent.MTP.1.Enable "true"
 Device.LocalAgent.MTP.1.Protocol "MQTT"
 Device.LocalAgent.MTP.1.MQTT.Reference "Device.MQTT.Client.1"
 Device.LocalAgent.MTP.1.MQTT.PublishQoS "2"
-#Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured "sdtcpe/agent/resptopic/os::309176-OUTIS202310071812"
+# Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured "sdtcpe/agent/resptopic/os::309176-OUTIS202310071812"
 Device.MQTT.Client.1.BrokerAddress "172.28.11.231"
 Device.MQTT.Client.1.ProtocolVersion "5.0"
 Device.MQTT.Client.1.BrokerPort "8883"
@@ -36,7 +36,7 @@ Device.MQTT.Client.1.Username ""
 Device.MQTT.Client.1.Password ""
 Device.MQTT.Client.1.Alias "cpe-1"
 Device.MQTT.Client.1.Enable "true"
-#Device.MQTT.Client.1.ClientID "os::309176-OUTIS202310071812"
+# Device.MQTT.Client.1.ClientID "os::309176-OUTIS202310071812"
 Device.MQTT.Client.1.KeepAliveTime "60"
 Device.MQTT.Client.1.ConnectRetryTime "5"
 Device.MQTT.Client.1.ConnectRetryIntervalMultiplier "2000"
@@ -56,11 +56,6 @@ Device.LocalAgent.Controller.1.MTP.1.Protocol "MQTT"
 Device.LocalAgent.Controller.1.MTP.1.MQTT.Reference "Device.MQTT.Client.1"
 Device.LocalAgent.Controller.1.MTP.1.MQTT.Topic "sdtacs/tr369/mqttv5/report"
 
-Device.MQTT.Client.1.Subscription.1.Alias "mqtt-sub-1"
-Device.MQTT.Client.1.Subscription.1.Enable "true"
-Device.MQTT.Client.1.Subscription.1.Topic "/tr069/mqtt/kick/platform/OUTIS202310071812"
-Device.MQTT.Client.1.Subscription.1.QoS "2"
-
 # LocalAgent.ControllerTrust.Role configuration.
 Device.LocalAgent.ControllerTrust.Role.1.Alias "cpe-role-1"
 Device.LocalAgent.ControllerTrust.Role.1.Enable "true"
@@ -76,9 +71,6 @@ Device.LocalAgent.ControllerTrust.Role.1.Permission.1.Targets  "Device."
 Internal.Reboot.Cause "LocalFactoryReset"
 
 Device.DeviceInfo.ManufacturerOUI "309176"
-#Device.DeviceInfo.SerialNumber "OUTIS202310071812"
 
 # Add by Skyworth
-Device.X_Skyworth.MqttServer.Url "tcp://172.28.11.231:1883"
-Device.X_Skyworth.OperatorName "Platform"
-Device.X_Skyworth.Background.Enable "1"
+

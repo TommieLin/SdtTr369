@@ -346,27 +346,9 @@ exit:
 }
 #endif
 
-static char *datebase_file_path = NULL;
 
-int SK_TR369_SetInitFilePath(const char *const db_path, const char *const default_path)
+int SK_TR369_SetInitFilePath(const char *const default_path)
 {
-    // 初始化DB文件路径
-    if (datebase_file_path != NULL)
-    {
-        free(datebase_file_path);
-        datebase_file_path = NULL;
-    }
-
-    unsigned int len = strlen(db_path);
-    datebase_file_path = (char *) malloc(len + 1);
-    if (datebase_file_path == NULL)
-    {
-        return USP_ERR_SK_MALLOC_FAILURE;
-    }
-
-    strncpy(datebase_file_path, db_path, len);
-    datebase_file_path[len] = '\0';
-
     // 初始化Model默认值文件路径
     if (sk_tr369_model_default != NULL)
     {
@@ -374,7 +356,7 @@ int SK_TR369_SetInitFilePath(const char *const db_path, const char *const defaul
         sk_tr369_model_default = NULL;
     }
 
-    len = strlen(default_path);
+    unsigned int len = strlen(default_path);
     sk_tr369_model_default = (char *) malloc(len + 1);
     if (sk_tr369_model_default == NULL)
     {
@@ -385,11 +367,6 @@ int SK_TR369_SetInitFilePath(const char *const db_path, const char *const defaul
     sk_tr369_model_default[len] = '\0';
 
     return USP_ERR_OK;
-}
-
-char *SK_TR369_GetDBFilePath()
-{
-    return datebase_file_path;
 }
 
 char *SK_TR369_GetDefaultFilePath()
@@ -449,7 +426,7 @@ int SK_TR369_Start(const char *const model_path)
     USP_LOG_Info("USP Agent starting...");
 
     // Exit if unable to start USP Agent
-    err = MAIN_Start(datebase_file_path, enable_mem_info);
+    err = MAIN_Start(DEFAULT_DATABASE_FILE, enable_mem_info);
     if (err != USP_ERR_OK)
     {
         goto exit;

@@ -163,6 +163,7 @@ int DATABASE_Init(char *db_file)
         }
 
         // Signal that factory reset initialisation should be performed later (when the data model has been fully registered)
+        USP_LOG_Info("%s: $$$ Outis $$$ schedule_factory_reset_init = true", __FUNCTION__);
         schedule_factory_reset_init = true;
     }
     else
@@ -199,6 +200,8 @@ int DATABASE_Start(void)
     int err;
     path_migrate_t *pm;
 
+    USP_LOG_Info(" ######### Outis ^^^ DATABASE_Start call");
+
     // Calculate the DB hash of each parameter that is to be migrated
     err = CalcPathMigrationHashes();
     if (err != USP_ERR_OK)
@@ -217,7 +220,7 @@ int DATABASE_Start(void)
             return err;
         }
 #endif
-
+        USP_LOG_Info(" ######### Outis ^^^ schedule_factory_reset_init == true");
         // Initialise using the factory reset text file
         if (sk_tr369_model_default != NULL)
         {
@@ -405,10 +408,10 @@ int DATABASE_GetParameterValue(char *path, dm_hash_t hash, char *instances, char
     int result = USP_ERR_INTERNAL_ERROR;        // Assume an error
 
     // Exit if this function is not being called from the data model thread
-    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
+//    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
+//    {
+//        return USP_ERR_INTERNAL_ERROR;
+//    }
 
     // Decide which prepared statement to use
     stmt = prepared_stmts[kSqlStmt_Get];
@@ -518,10 +521,10 @@ int DATABASE_SetParameterValue(char *path, dm_hash_t hash, char *instances, char
     int len;
 
     // Exit if this function is not being called from the data model thread
-    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
+//    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
+//    {
+//        return USP_ERR_INTERNAL_ERROR;
+//    }
 
     // Decide whether to obfuscate the value
     len = strlen(new_value);
@@ -606,10 +609,10 @@ int DATABASE_DeleteParameter(char *path, dm_hash_t hash, char *instances)
     int result = USP_ERR_INTERNAL_ERROR;        // Assume an error
 
     // Exit if this function is not being called from the data model thread
-    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
+//    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
+//    {
+//        return USP_ERR_INTERNAL_ERROR;
+//    }
 
     stmt = prepared_stmts[kSqlStmt_Del];
 
@@ -1130,6 +1133,7 @@ int ResetFactoryParametersFromFile(char *file)
     char *value;
     int line_number = 1;
 
+    USP_LOG_Info(" ######### Outis ^^^ ResetFactoryParametersFromFile start");
     USP_LOG_Info("%s: Setting factory reset parameters", __FUNCTION__);
 
     // Exit if unable to open the file containing factory reset parameters

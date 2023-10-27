@@ -262,7 +262,6 @@ int DEVICE_MQTT_Init(void)
 int DEVICE_MQTT_SetDefaults(void)
 {
     int err;
-    char default_value[MAX_DM_SHORT_VALUE_LEN];
     char endpoint_id[MAX_DM_SHORT_VALUE_LEN];
     char response_topic[MAX_DM_SHORT_VALUE_LEN];
 

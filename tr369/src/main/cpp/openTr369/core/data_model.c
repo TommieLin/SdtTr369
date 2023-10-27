@@ -603,7 +603,9 @@ int DATA_MODEL_SetParameterValue(char *path, char *new_value, unsigned flags)
     bool exists;
     unsigned db_flags = 0;          // Default to database not unobfuscating values. NOTE Only secure nodes are obfuscated
 
-    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
+    USP_LOG_Info(" ######### Outis *** DATA_MODEL_SetParameterValue Path: %s, new_value: %s, flags: %d", path, new_value, flags);
+
+//    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
 
     // Exit if unable to get node associated with parameter
     // This could occur if the parameter is not present in the schema

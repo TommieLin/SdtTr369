@@ -18,9 +18,12 @@ extern "C" {
 //void SK_TR369_Register_Setter_Getter(SK_TR369_Setter setter, SK_TR369_Getter getter);
 
 int SK_TR369_Start(const char *const);
-int SK_TR369_SetInitFilePath(const char *const, const char *const);
-char *SK_TR369_GetDBFilePath();
+int SK_TR369_SetInitFilePath(const char *const);
 char *SK_TR369_GetDefaultFilePath();
+
+int SK_TR369_GetDBParam(const char *, char *);
+int SK_TR369_SetDBParam(const char *, const char *);
+int SK_TR369_ShowData(const char *);
 
 #ifdef __cplusplus
 }

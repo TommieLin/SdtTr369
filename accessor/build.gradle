@@ -42,6 +42,7 @@ dependencies {
 
     annotationProcessor project(':annotation')
     implementation project(path: ':annotation')
+    implementation project(path: ':tr369')
 
 //    implementation 'com.squareup.okhttp3:logging-interceptor:3.5.0'
 //    implementation 'com.squareup.okhttp3:okhttp:4.9.1'

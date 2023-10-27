@@ -4,6 +4,8 @@
 #include "sk_tr369_jni.h"
 #include "sk_tr369_log.h"
 #include "sk_jni_callback.h"
+#include "vendor_defs.h"
+#include "usp_err_codes.h"
 
 #define JNI_REG_CLASS "com/sdt/opentr369/OpenTR369Native"
 
@@ -207,22 +209,11 @@ Java_com_sdt_opentr369_OpenTR369Native_OpenTR369Init(JNIEnv *env, jclass clazz, 
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_sdt_opentr369_OpenTR369Native_SetInitFilePath(JNIEnv *env, jclass clazz, const jstring db_path, const jstring default_path) {
-    const char *const dbFilePath = env->GetStringUTFChars(db_path, nullptr);
+Java_com_sdt_opentr369_OpenTR369Native_SetInitFilePath(JNIEnv *env, jclass clazz, const jstring default_path) {
     const char *const defaultFilePath = env->GetStringUTFChars(default_path, nullptr);
-    int ret = SK_TR369_SetInitFilePath(dbFilePath, defaultFilePath);
-    env->ReleaseStringUTFChars(db_path, dbFilePath);
+    int ret = SK_TR369_SetInitFilePath(defaultFilePath);
     env->ReleaseStringUTFChars(default_path, defaultFilePath);
     return ret;
-}
-
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_sdt_opentr369_OpenTR369Native_GetDBFilePath(JNIEnv *env, jclass clazz) {
-    char *filePath = SK_TR369_GetDBFilePath();
-    if (filePath != nullptr) {
-        return env->NewStringUTF(filePath);
-    }
-    return env->NewStringUTF("");
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -232,4 +223,36 @@ Java_com_sdt_opentr369_OpenTR369Native_GetDefaultFilePath(JNIEnv *env, jclass cl
         return env->NewStringUTF(filePath);
     }
     return env->NewStringUTF("");
+}
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetDBParam(JNIEnv *env, jclass clazz, const jstring path) {
+    const char *param = env->GetStringUTFChars(path, nullptr);
+    char value[MAX_DM_VALUE_LEN];
+    int ret = SK_TR369_GetDBParam(param, value);
+    env->ReleaseStringUTFChars(path, param);
+
+    if (ret == USP_ERR_OK) {
+        return env->NewStringUTF(value);
+    }
+    return env->NewStringUTF("");
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetDBParam(JNIEnv *env, jclass clazz, const jstring path, const jstring value) {
+    const char *param = env->GetStringUTFChars(path, nullptr);
+    const char *paramValue = env->GetStringUTFChars(value, nullptr);
+
+    int ret = SK_TR369_SetDBParam(param, paramValue);
+    env->ReleaseStringUTFChars(path, param);
+    env->ReleaseStringUTFChars(value, paramValue);
+    return ret;
+}
+
+extern "C" JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_ShowData(JNIEnv *env, jclass clazz, const jstring cmd) {
+    const char *command = env->GetStringUTFChars(cmd, nullptr);
+    int ret = SK_TR369_ShowData(command);
+    env->ReleaseStringUTFChars(cmd, command);
+    return ret;
 }

@@ -53,6 +53,8 @@
 #include "usp_log.h"
 #include "sk_tr369_jni.h"
 #include "sk_jni_callback.h"
+#include "data_model.h"
+#include "database.h"
 
 
 /*********************************************************************//**
@@ -124,9 +126,9 @@ void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
     }
     while (current != NULL)
     {
-        xmlChar *nodeName = xmlGetProp(current, (const xmlChar *)"name");
-        USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName nodeName: %s", nodeName);
-        if (nodeName == NULL)
+        xmlChar *node_name = xmlGetProp(current, (const xmlChar *)"name");
+        USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName nodeName: %s", node_name);
+        if (node_name == NULL)
         {
             USP_LOG_Info(" ######### Outis ~~~ nodeName == NULL");
             break;
@@ -135,20 +137,47 @@ void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
         xmlChar fullName[MAX_DM_PATH] = {0};
         if (name[0] != '\0')
         {
-            sprintf((char *)fullName, "%s.%s", nodeName, name);
+            sprintf((char *)fullName, "%s.%s", node_name, name);
             USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName fullName: %s", fullName);
         }
         else
         {
-            sprintf((char *)fullName, "%s", nodeName);
+            sprintf((char *)fullName, "%s", node_name);
         }
 
         sprintf(name, "%s", fullName);
         USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName Name: %s", name);
 
-        xmlFree(nodeName);
+        xmlFree(node_name);
         current = current->parent;
     }
+}
+
+
+void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
+{
+    SK_TR369_GetNodeFullName(xml_node, schema_node->path);
+    xmlChar *name = xmlGetProp(xml_node, (const xmlChar *)"name");
+    xmlChar *getter = xmlGetProp(xml_node, (const xmlChar *)"getter");
+    xmlChar *setter = xmlGetProp(xml_node, (const xmlChar *)"setter");
+    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Getter: %s, Setter: %s", schema_node->path, name, getter, setter);
+
+    if (name != NULL) sprintf(schema_node->name, "%s", name);
+    if (inform != NULL) {
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform != NULL");
+        if (xmlStrcmp(inform, (const xmlChar *)"true") == 0) {
+            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform == true");
+            schema_node->inform = 1;
+        }
+    }
+    schema_node->getter = SK_TR369_GetVendorParam;
+    schema_node->setter = (setter != NULL && (xmlStrcmp(setter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_SetVendorParam : NULL;
+
+    xmlFree(name);
+    xmlFree(getter);
+    xmlFree(setter);
+    xmlFree(inform);
 }
 
 
@@ -185,23 +214,24 @@ int SK_TR369_AddNodeToUspDataModel(sk_schema_node_t *schema_node)
 }
 
 
-void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
+int SK_TR369_AddNodeToBootParameter(sk_schema_node_t *schema_node, int num)
 {
-    SK_TR369_GetNodeFullName(xml_node, schema_node->path);
-    xmlChar *name = xmlGetProp(xml_node, (const xmlChar *)"name");
-    xmlChar *getter = xmlGetProp(xml_node, (const xmlChar *)"getter");
-    xmlChar *setter = xmlGetProp(xml_node, (const xmlChar *)"setter");
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Getter: %s, Setter: %s", schema_node->path, name, getter, setter);
+    int err = USP_ERR_OK;
+    char enable_path[MAX_DM_PATH], param_path[MAX_DM_PATH];
 
-    if (name != NULL) sprintf(schema_node->name, "%s", name);
-    schema_node->getter = SK_TR369_GetVendorParam;
-    schema_node->setter = (setter != NULL && (xmlStrcmp(setter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_SetVendorParam : NULL;
+    USP_SNPRINTF(enable_path, sizeof(enable_path), "Device.LocalAgent.Controller.1.BootParameter.%d.Enable", num);
+    USP_SNPRINTF(param_path, sizeof(param_path), "Device.LocalAgent.Controller.1.BootParameter.%d.ParameterName", num);
 
-    xmlFree(name);
-    xmlFree(getter);
-    xmlFree(setter);
+    USP_LOG_Info(" ######### Outis *** enable_path: %s", enable_path);
+    err |= DATA_MODEL_SetParameterInDatabase(enable_path, "true");
+    USP_LOG_Info(" ######### Outis *** param_path: %s, schema_node->path: %s", param_path, schema_node->path);
+    err |= DATA_MODEL_SetParameterInDatabase(param_path, schema_node->path);
+
+    USP_LOG_Info(" ######### Outis *** SK_TR369_AddNodeToBootParameter return: %d", err);
+    return err;
 }
 
+static int boot_param_number = 0;
 
 void SK_TR369_ParseSchema(xmlNodePtr node)
 {
@@ -219,6 +249,12 @@ void SK_TR369_ParseSchema(xmlNodePtr node)
                 sk_schema_node_t schema_node = {0};
                 SK_TR369_ParseNode(current, &schema_node);
                 SK_TR369_AddNodeToUspDataModel(&schema_node);
+
+                // 判断该节点是否需要放到启动参数里上报
+                if (schema_node.inform == 1) {
+                    boot_param_number++;
+                    SK_TR369_AddNodeToBootParameter(&schema_node, boot_param_number);
+                }
             }
 
             xmlFree(type);
@@ -296,7 +332,6 @@ int VENDOR_Init(void)
 **************************************************************************/
 int VENDOR_Start(void)
 {
-
     return USP_ERR_OK;
 }
 
@@ -316,4 +351,85 @@ int VENDOR_Stop(void)
 {
 
     return USP_ERR_OK;
+}
+
+int SK_TR369_GetDBParam(const char *param, char *value)
+{
+    int err;
+    dm_hash_t hash;
+    char instances[MAX_DM_PATH];
+    unsigned path_flags;
+
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetDBParam param: %s", param);
+
+    // Exit if parameter path is incorrect
+    err = DM_PRIV_FormDB_FromPath(param, &hash, instances, sizeof(instances));
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+
+    // Exit, not printing any value, if this parameter is obfuscated (eg containing a password)
+    value[0] = '\0';
+    path_flags = DATA_MODEL_GetPathProperties(param, INTERNAL_ROLE, NULL, NULL, NULL);
+    if (path_flags & PP_IS_SECURE_PARAM)
+    {
+        goto exit;
+    }
+
+    // Exit if unable to get value of parameter from DB
+    USP_ERR_ClearMessage();
+    err = DATABASE_GetParameterValue(param, hash, instances, value, MAX_DM_VALUE_LEN, 0);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("Parameter %s exists in the schema, but does not exist in the database", param);
+        return err;
+    }
+
+exit:
+    // Since successful, send back the value of the parameter
+    USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
+
+    return USP_ERR_OK;
+}
+
+int SK_TR369_SetDBParam(const char *param, const char *value)
+{
+    int err;
+
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDBParam param: %s, value: %s", param, value);
+
+    // Exit if unable to directly set the parameter in the database
+    err = DATA_MODEL_SetParameterInDatabase(param, value);
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+
+    // Since successful, send back the value of the parameter
+    USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
+
+    return USP_ERR_OK;
+}
+
+int SK_TR369_ShowData(const char *cmd)
+{
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ShowData cmd: %s", cmd);
+    // Show the data model schema if required
+    if (strcmp(cmd, "datamodel") == 0)
+    {
+        USP_DUMP("WARNING: This is the data model of this CLI command, rather than the daemon instance of this executable");
+        USP_DUMP("If the data model does not contain 'Device.Test', then you are not running this CLI command with the '-T' option");
+        DATA_MODEL_DumpSchema();
+        return USP_ERR_OK;
+    }
+
+    // Show the contents of the database if required
+    if (strcmp(cmd, "database") == 0)
+    {
+        DATABASE_Dump();
+        return USP_ERR_OK;
+    }
+
+    return USP_ERR_INVALID_ARGUMENTS;
 }

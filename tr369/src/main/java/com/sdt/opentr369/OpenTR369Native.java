@@ -1,8 +1,9 @@
 package com.sdt.opentr369;
 
+import androidx.annotation.NonNull;
+
 import android.util.Log;
 
-import com.sdt.diagnose.Tr369PathInvoke;
 
 public class OpenTR369Native {
     static {
@@ -10,9 +11,19 @@ public class OpenTR369Native {
     }
 
     private final static String TAG = "OpenTR369Native";
+    static IOpenTr369Listener mListener;
+
+    public interface IOpenTr369Listener {
+        String openTR369GetAttr(int what, String path);
+        boolean openTR369SetAttr(int what, String path, String value);
+    }
+
+    public static void SetListener(@NonNull IOpenTr369Listener mNotify) {
+        mListener = mNotify;
+    }
 
     public static String OpenTR369CallbackGet(int what, String name, String val) {
-        String ret = Tr369PathInvoke.getInstance().getAttribute(what, name);
+        String ret = mListener.openTR369GetAttr(what, name);
         String str = "<-- what: " + what;
         if (name != null) {
             str = str + ", name: " + name;
@@ -44,11 +55,11 @@ public class OpenTR369Native {
 //                val = val + "###" + str3;
 //            }
 //        }
-        return Tr369PathInvoke.getInstance().setAttribute(what, name, val) ? 0 : -1;
+        return mListener.openTR369SetAttr(what, name, val) ? 0 : -1;
     }
 
     public static String OpenTR369CallbackGetAttr(String path, String method) {
-        String reply = Tr369PathInvoke.getInstance().getAttribute(0, path);
+        String reply = mListener.openTR369GetAttr(0, path);
         String str = "-->: reply: " + reply;
         if (path != null) {
             str = str + ", path: " + path;
@@ -72,13 +83,15 @@ public class OpenTR369Native {
             str = str + ", value: " + value;
         }
         Log.d(TAG, "J OpenTR369CallbackSetAttr " + str);
-        return Tr369PathInvoke.getInstance().setAttribute(0, path, value) ? 0 : -1;
+        return mListener.openTR369SetAttr(0, path, value) ? 0 : -1;
     }
 
     public static native String stringFromJNI();
     public static native int OpenTR369Init(String path);
-    public static native int SetInitFilePath(String db_path, String default_path);
-    public static native String GetDBFilePath();
+    public static native int SetInitFilePath(String default_path);
     public static native String GetDefaultFilePath();
+    public static native String GetDBParam(String path);
+    public static native int SetDBParam(String path, String value);
+    public static native int ShowData(String cmd);
 
 }

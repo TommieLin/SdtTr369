@@ -8,7 +8,9 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -18,9 +20,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Utils.FileUtil;
+import com.sdt.diagnose.Tr369PathInvoke;
+import com.sdt.diagnose.database.DbManager;
 import com.sdt.opentr369.OpenTR369Native;
 
-import java.io.File;
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
 
 public class SdtTr369Service extends Service {
     private static final String TAG = "SdtTr369Service";
@@ -116,15 +122,14 @@ public class SdtTr369Service extends Service {
     }
 
     private void startTR369() {
-        Log.e(TAG, " ############ Outis ### startTR369 start~~");
-        String dbFilePath = getApplicationContext().getDataDir().getPath() + "/sdt_tms_usp.db"; // "/databases/sk_usp.db";
-        Log.e(TAG, " ############ Outis ### startTR369 dbFilePath: " + dbFilePath);
+
+        OpenTR369Native.SetListener(mListener);
 
         FileUtil.copyTr369AssetsToFile(getApplicationContext());
         String defaultFilePath = getApplicationContext().getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_DEFAULT;
         Log.e(TAG, " ############ Outis ### startTR369 defaultFilePath: " + defaultFilePath);
 
-        int ret = OpenTR369Native.SetInitFilePath(dbFilePath, defaultFilePath);
+        int ret = OpenTR369Native.SetInitFilePath(defaultFilePath);
         Log.e(TAG, " ############ Outis ### startTR369 SetInitFilePath ret: " + ret);
 
         String modelFile = getApplicationContext().getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_XML;
@@ -133,6 +138,65 @@ public class SdtTr369Service extends Service {
 
         String test_str = OpenTR369Native.stringFromJNI();
         Log.e(TAG, " ############ Outis ### startTR369 test_str: " + test_str);
+    }
+
+    private final OpenTR369Native.IOpenTr369Listener mListener = new OpenTR369Native.IOpenTr369Listener() {
+        @Override
+        public String openTR369GetAttr(int what, String path) {
+            String ret = Tr369PathInvoke.getInstance().getAttribute(what, path);
+            if (ret == null) {
+                ret = OpenTR369Native.GetDBParam(path);
+            }
+            return ret;
+        }
+
+        @Override
+        public boolean openTR369SetAttr(int what, String path, String value) {
+            boolean ret = Tr369PathInvoke.getInstance().setAttribute(what, path, value);
+            if (!ret) {
+                ret = (OpenTR369Native.SetDBParam(path, value) != 0);
+            }
+            return ret;
+        }
+    };
+
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (checkCallingOrSelfPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: Can't dump ActivityManager from from pid = "
+                    + Binder.getCallingPid() + ", uid = " + Binder.getCallingUid()
+                    + " without permission " + android.Manifest.permission.DUMP);
+            return;
+        }
+        printTr369Message(fd, pw, args);
+    }
+
+    private void printTr369Message(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (args.length > 0) {
+            String cmd = args[0];
+            Log.d(TAG, "mSkParamDB dumpsys args: " + Arrays.toString(args));
+            if (("dbget").equalsIgnoreCase(cmd) && args.length > 1) {
+                pw.println(formatString(args[1]));
+            } else if (("dbset").equalsIgnoreCase(cmd) && args.length > 2) {
+                int ret = DbManager.setDBParam(args[1], args[2]);
+                if (ret == 0) {
+                    pw.println(formatString(args[1]));
+                } else {
+                    pw.println("dbset failed! error code: " + ret);
+                }
+            } else if (("dbdel").equalsIgnoreCase(cmd) && args.length > 1) {
+
+            } else if ("show".equals(cmd)) {
+                // [show] [database|datamodel]
+//                pw.println(DbManager.showData(args[1]));
+                DbManager.showData(args[1]);
+            }
+        }
+    }
+
+    private String formatString(String paramKey) {
+        return paramKey + " : [" + DbManager.getDBParam(paramKey) + "]";
     }
 
 }
