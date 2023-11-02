@@ -11,8 +11,11 @@
 #Device.LocalAgent.EndpointID "os::309176-OUTIS202310071812"
 
 ## Adding boot params
-# Device.LocalAgent.Controller.1.BootParameter.1.Enable "true"
-# Device.LocalAgent.Controller.1.BootParameter.1.ParameterName "Device.LocalAgent.EndpointID"
+Device.LocalAgent.Controller.1.BootParameter.1.Enable "true"
+Device.LocalAgent.Controller.1.BootParameter.1.ParameterName "Device.LocalAgent.EndpointID"
+Device.LocalAgent.Controller.1.BootParameter.2.Enable "true"
+Device.LocalAgent.Controller.1.BootParameter.2.ParameterName "Device.DeviceInfo.SerialNumber"
+
 Device.LocalAgent.Subscription.1.Alias "sdtcpe-1"
 Device.LocalAgent.Subscription.1.Enable "true"
 Device.LocalAgent.Subscription.1.ID "default-boot-event-ACS"

@@ -537,8 +537,11 @@ int StartSendingReport(bdc_connection_t *bc)
     }
 
     // Setup SSL options
-    curl_easy_setopt(curl_ctx, CURLOPT_SSL_VERIFYPEER, true);
-    curl_easy_setopt(curl_ctx, CURLOPT_SSL_VERIFYHOST, 2);
+    // Outis: 使用HTTPS但不进行SSL证书验证
+//    curl_easy_setopt(curl_ctx, CURLOPT_SSL_VERIFYPEER, true);
+//    curl_easy_setopt(curl_ctx, CURLOPT_SSL_VERIFYHOST, 2);
+    curl_easy_setopt(curl_ctx, CURLOPT_SSL_VERIFYPEER, 0);
+    curl_easy_setopt(curl_ctx, CURLOPT_SSL_VERIFYHOST, 0);
     curl_easy_setopt(curl_ctx, CURLOPT_CAINFO, NULL);
     curl_easy_setopt(curl_ctx, CURLOPT_CAPATH, NULL);
     curl_easy_setopt(curl_ctx, CURLOPT_SSL_CTX_FUNCTION, *LoadBulkDataTrustStore);

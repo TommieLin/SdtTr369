@@ -25,6 +25,10 @@ int SK_TR369_GetDBParam(const char *, char *);
 int SK_TR369_SetDBParam(const char *, const char *);
 int SK_TR369_ShowData(const char *);
 
+char *SK_TR369_API_GetCACertString();
+char *SK_TR369_API_GetDevCertString();
+char *SK_TR369_API_GetDevKeyString();
+
 #ifdef __cplusplus
 }
 #endif

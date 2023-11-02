@@ -1,0 +1,180 @@
+package com.sdt.diagnose.Device.X_Skyworth.Tcpdump;
+
+import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.StatFs;
+import android.os.SystemProperties;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.sdt.annotations.Tr369Set;
+import com.sdt.diagnose.command.Event;
+import com.sdt.diagnose.database.DbManager;
+
+import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
+
+/**
+ * @Author Outis
+ * @Date 2022/8/26 10:52
+ * @Version 1.0
+ */
+public class TcpdumpX {
+    private static final String TAG = "TcpdumpX";
+    TcpdumpBean tcpdumpBean = new TcpdumpBean();
+    private Timer timer;
+    Handler handler;
+
+    @Tr369Set("Device.X_Skyworth.Tcpdump.")
+    public boolean SK_TR369_SetTcpdumpParams(String path, String value) {
+        Log.i(TAG, "path: " + path + ", value: " + value);
+        String[] split = path.split("\\.");
+        switch (split[split.length - 1]) {
+            case "Enable":
+                tcpdumpBean.setEnable(value);
+                break;
+            case "Url":
+                tcpdumpBean.setUrl(value);
+                checkStart();
+                break;
+            case "Ip":
+                tcpdumpBean.setIp(value);
+                break;
+            case "Port":
+                tcpdumpBean.setPort(value);
+                break;
+            case "Duration":
+                if (! TextUtils.isEmpty(value)) {
+                    tcpdumpBean.setDuration(value);
+                } else {  //如果前端没有设置抓包时长，默认抓包30S
+                    tcpdumpBean.setDuration(DbManager.getDBParam("skyworth.params.tcpdump.duration"));
+                }
+                break;
+            case "NetType":
+                tcpdumpBean.setNetType(value);
+                break;
+            case "FileSize":
+                tcpdumpBean.setFileSize(Integer.parseInt(value));
+                break;
+        }
+
+        return true;
+    }
+
+    HandlerThread handlerThread;
+
+    public void startTcpdump() {
+        Log.i(TAG, "startTcpdump called.");
+        SystemProperties.set("persist.sys.skyworth.tcpdump", "1");
+        File file = new File("/data/tcpdump/test1.pcap");
+        handlerThread = new HandlerThread("tcpdump");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (! file.exists()) {
+                    Log.e(TAG, "The pcap file already exist.");
+                    stopTcpdump();
+                    return;
+                }
+                long fileSize = getFileSize();
+                while (true) {
+                    if (file.length() >= fileSize * 1024 * 1024L) {
+                        Log.e(TAG, "startTcpdump getFileSize: " + tcpdumpBean.getFileSize());
+                        stopTcpdump();
+                        Event.uploadLogFile(tcpdumpBean.getUrl(), file.getAbsolutePath(), 1);
+                        timer.cancel();
+                        return;
+                    }
+                }
+            }
+        }, 500);
+
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.i(TAG, "startTcpdump Tcpdump Timer");
+                stopTcpdump();
+                handler.removeCallbacksAndMessages(null);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Timer operation error, " + e.getMessage());
+                }
+                Event.uploadLogFile(tcpdumpBean.getUrl(), file.getAbsolutePath(), 1);
+            }
+        }, Integer.parseInt(tcpdumpBean.getDuration()) * 1000L);
+    }
+
+    public void stopTcpdump() {
+        Log.i(TAG, "stopTcpdump called.");
+        SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
+        SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
+        handlerThread.quit();
+    }
+
+
+    public void generateArgs() {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (! TextUtils.isEmpty(tcpdumpBean.getNetType())) {
+            stringBuilder.append(tcpdumpBean.getNetType());
+        }
+        if (! TextUtils.isEmpty(tcpdumpBean.getPort())) {
+            stringBuilder.append(" port ").append(tcpdumpBean.getPort());
+        }
+        if (! TextUtils.isEmpty(tcpdumpBean.getIp())) {
+            if (! TextUtils.isEmpty(stringBuilder.toString())) {
+                stringBuilder.append(" and");
+            }
+            stringBuilder.append(" dst ").append(tcpdumpBean.getIp());
+        }
+        if (! TextUtils.isEmpty(stringBuilder.toString())) {
+            Log.e(TAG, "The parameter cannot be empty.");
+            SystemProperties.set("persist.sys.skyworth.tcpdump.args", stringBuilder.toString());
+        }
+    }
+
+    public void checkStart() {
+        if (tcpdumpBean.getEnable().equals("1") && ! TextUtils.isEmpty(tcpdumpBean.getUrl())) {
+            generateArgs();
+            startTcpdump();
+        }
+    }
+
+
+    /**
+     * @return 抓包文件大小限制
+     */
+    public long getFileSize() {
+        long fileSizePercent = Long.parseLong(DbManager.getDBParam("skyworth.params.tcpdump.percent"));
+        if (tcpdumpBean.getFileSize() > 0) {
+            //前端指定文件大小
+            return getFreeRom() >=
+                    (tcpdumpBean.getFileSize() * fileSizePercent)
+                    ? tcpdumpBean.getFileSize()
+                    : getFreeRom() / fileSizePercent;
+        } else if (TextUtils.isEmpty(DbManager.getDBParam("skyworth.params.tcpdump.size"))) {
+            //默认文件大小
+            return getFreeRom() / fileSizePercent;
+        } else {
+            //配置文件指定文件大小
+            return getFreeRom() >=
+                    (Integer.parseInt(DbManager.getDBParam("skyworth.params.tcpdump.size")) * fileSizePercent)
+                    ? Integer.parseInt(DbManager.getDBParam("skyworth.params.tcpdump.size"))
+                    : getFreeRom() / fileSizePercent;
+        }
+    }
+
+    public long getFreeRom() {
+        File file = Environment.getDataDirectory();
+        StatFs stat = new StatFs(file.getPath());
+        long blockSize = stat.getBlockSizeLong();
+        long availableBlocks = stat.getAvailableBlocksLong();
+        Log.d(TAG, "getFreeRom result : " + (blockSize * availableBlocks / 1000000));
+        return blockSize * availableBlocks / 1000000;//单位MB
+    }
+}

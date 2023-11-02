@@ -160,24 +160,24 @@ void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
     xmlChar *name = xmlGetProp(xml_node, (const xmlChar *)"name");
     xmlChar *getter = xmlGetProp(xml_node, (const xmlChar *)"getter");
     xmlChar *setter = xmlGetProp(xml_node, (const xmlChar *)"setter");
-    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
+//    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Getter: %s, Setter: %s", schema_node->path, name, getter, setter);
 
     if (name != NULL) sprintf(schema_node->name, "%s", name);
-    if (inform != NULL) {
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform != NULL");
-        if (xmlStrcmp(inform, (const xmlChar *)"true") == 0) {
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform == true");
-            schema_node->inform = 1;
-        }
-    }
+//    if (inform != NULL) {
+//        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform != NULL");
+//        if (xmlStrcmp(inform, (const xmlChar *)"true") == 0) {
+//            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform == true");
+//            schema_node->inform = 1;
+//        }
+//    }
     schema_node->getter = SK_TR369_GetVendorParam;
     schema_node->setter = (setter != NULL && (xmlStrcmp(setter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_SetVendorParam : NULL;
 
     xmlFree(name);
     xmlFree(getter);
     xmlFree(setter);
-    xmlFree(inform);
+//    xmlFree(inform);
 }
 
 
@@ -251,10 +251,10 @@ void SK_TR369_ParseSchema(xmlNodePtr node)
                 SK_TR369_AddNodeToUspDataModel(&schema_node);
 
                 // 判断该节点是否需要放到启动参数里上报
-                if (schema_node.inform == 1) {
-                    boot_param_number++;
-                    SK_TR369_AddNodeToBootParameter(&schema_node, boot_param_number);
-                }
+//                if (schema_node.inform == 1) {
+//                    boot_param_number++;
+//                    SK_TR369_AddNodeToBootParameter(&schema_node, boot_param_number);
+//                }
             }
 
             xmlFree(type);

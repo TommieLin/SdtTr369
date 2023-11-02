@@ -144,7 +144,7 @@
 // These defines are only used if USP Agent core implements DeviceInfo (see REMOVE_DEVICE_INFO above)
 // These defines MUST be modified by the vendor
 #define VENDOR_PRODUCT_CLASS "USP Agent"   // Configures the value of Device.DeviceInfo.ProductClass
-#define VENDOR_MANUFACTURER  "Manufacturer"   // Configures the value of Device.DeviceInfo.Manufacturer
+#define VENDOR_MANUFACTURER  "SkyworthDigital"   // Configures the value of Device.DeviceInfo.Manufacturer
 #define VENDOR_MODEL_NAME    "USP Agent"   // Configures the value of Device.DeviceInfo.ModelName
 
 // URI of data model implemented by USP Agent

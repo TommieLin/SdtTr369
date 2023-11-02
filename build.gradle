@@ -5,7 +5,7 @@ plugins {
 }
 
 allprojects {
-    String path = getRootDir().getAbsolutePath() + '/app/libs/framework.jar'
+    String path = getRootDir().getAbsolutePath() + '/accessor/libs/framework.jar'
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
             options.compilerArgs << '-Xbootclasspath/p:' + path

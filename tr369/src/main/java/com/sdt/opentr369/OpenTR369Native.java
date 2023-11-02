@@ -50,11 +50,6 @@ public class OpenTR369Native {
         }
         Log.d(TAG, "J OpenTR369CallbackSet " + str);
 
-//        if ("skyworth.tr369.event".equals(name)) {
-//            if ("tr069_ping".equals(val) || "tr069_traceroute".equals(val)) {
-//                val = val + "###" + str3;
-//            }
-//        }
         return mListener.openTR369SetAttr(what, name, val) ? 0 : -1;
     }
 
@@ -93,5 +88,8 @@ public class OpenTR369Native {
     public static native String GetDBParam(String path);
     public static native int SetDBParam(String path, String value);
     public static native int ShowData(String cmd);
+    public static native String GetCACertString();
+    public static native String GetDevCertString();
+    public static native String GetDevKeyString();
 
 }

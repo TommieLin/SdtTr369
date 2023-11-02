@@ -4,6 +4,7 @@
 #include "sk_tr369_jni.h"
 #include "sk_tr369_log.h"
 #include "sk_jni_callback.h"
+#include "sk_jni_network.h"
 #include "vendor_defs.h"
 #include "usp_err_codes.h"
 
@@ -77,7 +78,9 @@ int SK_TR369_Callback_Get(const int what, char *dst, int size, const char *str1,
         auto reply = (jstring) env->CallStaticObjectMethod(mClass, funcGet, what, req1, req2);
         if (reply) pStr = env->GetStringUTFChars(reply, nullptr);
         if (pStr) {
+            memset(dst, 0, size);
             size_t len = strlen(pStr);
+            TX_ERR("Outis: SK_TR369_Callback_Get Len: %d, Size: %d", len, size);
             len = (len > size) ? size : len;
             memcpy(dst, pStr, len);
             env->ReleaseStringUTFChars(reply, pStr);
@@ -255,4 +258,43 @@ Java_com_sdt_opentr369_OpenTR369Native_ShowData(JNIEnv *env, jclass clazz, const
     int ret = SK_TR369_ShowData(command);
     env->ReleaseStringUTFChars(cmd, command);
     return ret;
+}
+
+/* Network */
+
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetCACertString(JNIEnv *env, jclass clazz) {
+    // TODO: implement GetCACertString()
+    jstring strRet = env->NewStringUTF("");
+    char *ca = SK_TR369_API_GetCACertString();
+    if (ca) {
+        strRet = env->NewStringUTF(ca);
+        free(ca);
+    }
+    return strRet;
+}
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetDevCertString(JNIEnv *env, jclass clazz) {
+    // TODO: implement GetDevCertString()
+    jstring strRet = env->NewStringUTF("");
+    char *cert = SK_TR369_API_GetDevCertString();
+    if (cert) {
+        strRet = env->NewStringUTF(cert);
+        free(cert);
+    }
+    return strRet;
+}
+extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetDevKeyString(JNIEnv *env, jclass clazz) {
+    // TODO: implement GetDevKeyString()
+    jstring strRet = env->NewStringUTF("");
+    char *key = SK_TR369_API_GetDevKeyString();
+    if (key) {
+        strRet = env->NewStringUTF(key);
+        free(key);
+    }
+    return strRet;
 }

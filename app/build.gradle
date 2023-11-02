@@ -125,4 +125,5 @@ dependencies {
     implementation project(path: ':tr369')
     implementation project(path: ':accessor')
     implementation 'androidx.leanback:leanback:1.0.0'
+//    implementation "com.skyworthdigital.common:log:1.0.19"
 }

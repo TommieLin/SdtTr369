@@ -46,6 +46,16 @@
 
 <!--        </schema>-->
 
+        <schema name="DeviceInfo" type="object">
+            <schema name="MemoryStatus" type="object">
+                <schema name="Total"  inform="true" type="unsignedInt" getter="diagnose"/>
+                <schema name="Free"  inform="true" type="unsignedInt" getter="diagnose"/>
+            </schema>
+            <schema name="ProcessStatus" type="object">
+                <schema name="CPUUsage"  inform="true" type="unsignedInt" getter="diagnose" />
+            </schema>
+        </schema>
+
         <schema name="X_Skyworth" type="object">
 
             <schema name="DreamInfo" type="string" write="W" getter="diagnose" setter="diagnose"/>

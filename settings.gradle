@@ -8,6 +8,18 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+//        maven {
+//            allowInsecureProtocol = true
+//            url 'http://maven01.sdt.com/repository/maven-public/'
+//        }
+//        maven {
+//            allowInsecureProtocol = true
+//            url 'http://maven01.sdt.com/repository/maven-snapshots/'
+//        }
+        maven {
+            allowInsecureProtocol = true
+            url 'http://maven.aliyun.com/nexus/content/groups/public/'
+        }
         google()
         mavenCentral()
     }
@@ -17,3 +29,6 @@ include ':app'
 include ':tr369'
 include ':accessor'
 include ':annotation'
+include ':netspeed'
+include ':pty'
+include ':remote'

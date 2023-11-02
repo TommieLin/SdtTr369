@@ -20,7 +20,11 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Utils.FileUtil;
+import com.sdt.diagnose.Device.LanX;
+import com.sdt.diagnose.Device.X_Skyworth.FTIMonitor;
+import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
 import com.sdt.diagnose.Tr369PathInvoke;
+import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.database.DbManager;
 import com.sdt.opentr369.OpenTR369Native;
 
@@ -67,6 +71,8 @@ public class SdtTr369Service extends Service {
         manager.createNotificationChannel(channel);
         Notification notification = new Notification.Builder(getApplicationContext(), CHANNEL_ID).build();
         startForeground(1, notification);
+
+        GlobalContext.setContext(getApplicationContext());
         Log.e(TAG, " ####### Outis ### onCreate return");
     }
 
@@ -93,6 +99,13 @@ public class SdtTr369Service extends Service {
             };
         }
         registerSdtTr369Receiver();
+
+        // 初始化FTI停留时间监控程序
+        new FTIMonitor();
+        // 初始化系统数据采集程序
+        new SystemDataStat(this);
+        // 初始化LanX用于检测静态IP是否能访问互联网
+        new LanX();
     }
 
     private void registerSdtTr369Receiver() {

@@ -2817,6 +2817,13 @@ int bulkdata_schedule_sending_http_report(profile_ctrl_params_t *ctrl, bulkdata_
         flags |= BDC_FLAG_DATE_HEADER;
     }
 
+    USP_LOG_Info(" ####### Outis ### BULK DATA: bp->profile_id='%d'", bp->profile_id);
+    USP_LOG_Info(" ####### Outis ### BULK DATA: full_url='%s'", full_url);
+    USP_LOG_Info(" ####### Outis ### BULK DATA: username='%s'", username);
+    USP_LOG_Info(" ####### Outis ### BULK DATA: password='%s'", password);
+    USP_LOG_Info(" ####### Outis ### BULK DATA: report='%s'", report);
+    USP_LOG_Info(" ####### Outis ### BULK DATA: flags='%X'", flags);
+
     // Exit if failed to post a message to BDC thread
     // NOTE: Ownership of full_url, query_string, report, username and password passes to BDC_EXEC
     err = BDC_EXEC_PostReportToSend(bp->profile_id, full_url, query_string, username, password, report, report_len, flags);

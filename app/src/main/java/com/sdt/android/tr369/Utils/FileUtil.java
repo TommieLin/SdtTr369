@@ -26,20 +26,20 @@ public class FileUtil {
         File modelFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_XML);
         File defaultFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_DEFAULT);
 
-//        if (!modelFile.exists() || !defaultFile.exists()) {
+        if (!modelFile.exists() || !defaultFile.exists()) {
             copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
             copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
-//        } else {
-//            /* 判断model是否已经更新过了 */
-//            boolean isUpdated = SystemProperties.getBoolean(SYS_PROP_TR369_MODE_ISUPDATED, false);
-//            if (!isUpdated || "eng".equalsIgnoreCase(Build.TYPE)) {
-//                SystemProperties.set(SYS_PROP_TR369_MODE_ISUPDATED, Boolean.TRUE.toString());
-//                modelFile.delete();
-//                defaultFile.delete();
-//                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
-//                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
-//            }
-//        }
+        } else {
+            /* 判断model是否已经更新过了 */
+            boolean isUpdated = SystemProperties.getBoolean(SYS_PROP_TR369_MODE_ISUPDATED, false);
+            if (!isUpdated || "eng".equalsIgnoreCase(Build.TYPE)) {
+                SystemProperties.set(SYS_PROP_TR369_MODE_ISUPDATED, Boolean.TRUE.toString());
+                modelFile.delete();
+                defaultFile.delete();
+                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
+                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
+            }
+        }
     }
 
     private static void copyAssetFile(Context context, String inFileName, File outFile) {
