@@ -23,6 +23,8 @@ char *SK_TR369_GetDefaultFilePath();
 
 int SK_TR369_GetDBParam(const char *, char *);
 int SK_TR369_SetDBParam(const char *, const char *);
+int SK_TR369_AddMultiObject(const char *, int);
+int SK_TR369_DelMultiObject(const char *);
 int SK_TR369_ShowData(const char *);
 
 char *SK_TR369_API_GetCACertString();

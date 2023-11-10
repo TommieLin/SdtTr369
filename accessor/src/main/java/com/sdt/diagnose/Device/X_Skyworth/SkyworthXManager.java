@@ -225,7 +225,6 @@ public class SkyworthXManager {
             if (result.BSSID.equalsIgnoreCase(wifiInfo.getBSSID())
                     && result.SSID.equalsIgnoreCase(
                     wifiInfo.getSSID().substring(1, wifiInfo.getSSID().length() - 1))) {
-                /**/
                 if (result.capabilities.contains("WEP")) {
                     str = "WEP";
                 } else if (result.capabilities.contains("PSK")) {
@@ -238,7 +237,6 @@ public class SkyworthXManager {
                 break;
             }
         }
-
         return str;
     }
 
@@ -267,7 +265,6 @@ public class SkyworthXManager {
             }
             reader.close();
             is.close();
-
             if (pos >= 0) {
                 len = line.length();
                 i = pos + targetStr.length();

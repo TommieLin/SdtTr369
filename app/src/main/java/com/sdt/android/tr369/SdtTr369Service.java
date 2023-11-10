@@ -5,6 +5,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -20,6 +22,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Utils.FileUtil;
+import com.sdt.diagnose.Device.DeviceInfo.ProcessInfoX;
 import com.sdt.diagnose.Device.LanX;
 import com.sdt.diagnose.Device.X_Skyworth.FTIMonitor;
 import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
@@ -37,6 +40,8 @@ public class SdtTr369Service extends Service {
     private static final String CHANNEL_ID = "SdtTr369ServiceChannelId";
     private static final String CHANNEL_NAME = "SdtTr369ServiceChannelName";
     private SdtTr369Receiver mSdtTr369Receiver = null;
+    private PackageReceiver mPackageReceiver = null;
+    private BluetoothMonitorReceiver mBluetoothMonitorReceiver = null;
     private HandlerThread mHandlerThread = null;
     private Handler mHandler = null;
     public static final int MSG_START_TR369 = 3300;
@@ -99,6 +104,8 @@ public class SdtTr369Service extends Service {
             };
         }
         registerSdtTr369Receiver();
+        registerPackageReceiver();
+        registerBluetoothMonitorReceiver();
 
         // 初始化FTI停留时间监控程序
         new FTIMonitor();
@@ -117,12 +124,40 @@ public class SdtTr369Service extends Service {
         registerReceiver(mSdtTr369Receiver, intentFilter);
     }
 
+    private void registerPackageReceiver() {
+        mPackageReceiver = new PackageReceiver();
+        IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
+        intentFilter.addDataScheme("package");
+        registerReceiver(mPackageReceiver, intentFilter);
+    }
+
+    private void registerBluetoothMonitorReceiver() {
+        if (mBluetoothMonitorReceiver == null) {
+            mBluetoothMonitorReceiver = new BluetoothMonitorReceiver();
+        }
+        //注册监听
+        IntentFilter stateChangeFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        IntentFilter connectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
+        IntentFilter disConnectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        IntentFilter nameChangeFilter = new IntentFilter(BluetoothDevice.ACTION_ALIAS_CHANGED);
+
+        registerReceiver(mBluetoothMonitorReceiver, stateChangeFilter);
+        registerReceiver(mBluetoothMonitorReceiver, connectedFilter);
+        registerReceiver(mBluetoothMonitorReceiver, disConnectedFilter);
+        registerReceiver(mBluetoothMonitorReceiver, nameChangeFilter);
+    }
+
     @Override
     public void onDestroy() {
         Log.e(TAG, " ####### Outis ### onDestroy start");
-        if (mSdtTr369Receiver != null) {
-            unregisterReceiver(mSdtTr369Receiver);
-        }
+        if (mSdtTr369Receiver != null)  unregisterReceiver(mSdtTr369Receiver);
+        if (mBluetoothMonitorReceiver != null) unregisterReceiver(mBluetoothMonitorReceiver);
+        if (mPackageReceiver != null) unregisterReceiver(mPackageReceiver);
+
         if (mHandler != null) {
             mHandler.sendEmptyMessage(MSG_STOP_TR369);
             mHandler = null;
@@ -166,7 +201,7 @@ public class SdtTr369Service extends Service {
         @Override
         public boolean openTR369SetAttr(int what, String path, String value) {
             boolean ret = Tr369PathInvoke.getInstance().setAttribute(what, path, value);
-            if (!ret) {
+            if (! ret) {
                 ret = (OpenTR369Native.SetDBParam(path, value) != 0);
             }
             return ret;

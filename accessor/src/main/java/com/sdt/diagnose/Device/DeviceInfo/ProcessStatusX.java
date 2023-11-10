@@ -11,7 +11,7 @@ import com.sdt.diagnose.extra.CmsExtraServiceManager;
 import java.util.List;
 
 public class ProcessStatusX {
-    private static final String TAG = "ProcessStatusX";
+    private static final String TAG = "ProcessStatusX Outis";
     private ModelX.Type mStbModelType = null;
 
     @Tr369Get("Device.DeviceInfo.ProcessStatus.CPUUsage")
@@ -40,12 +40,11 @@ public class ProcessStatusX {
     @Tr369Get("Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries")
     public String SK_TR369_GetProcessNumber() {
         int processNum = 0;
-//        List<ProcessInfo> mProcessList =
-//                CacheArrayManager.getInstance(GlobalContext.getContext()).getProcessInfo();
-//        if (mProcessList != null) {
-//            processNum = mProcessList.size();
-//            Log.d(TAG, "getProcessNum: " + processNum);
-//        }
+        List<ProcessInfo> mProcessList = ProcessInfoX.getProcessInfo();
+        if (mProcessList != null) {
+            processNum = mProcessList.size();
+            Log.d(TAG, "getProcessNum: " + processNum);
+        }
         return String.valueOf(processNum);
     }
 

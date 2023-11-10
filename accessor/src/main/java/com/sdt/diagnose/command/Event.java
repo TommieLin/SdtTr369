@@ -282,7 +282,7 @@ public class Event {
     }
 
     private void deleteObject(String path) {
-//        DbManager.deleteObject(path);
+//        DbManager.delMultiObject(path);
         int l1 = path.lastIndexOf(".");
         int l2 = path.lastIndexOf(".", l1 - 1);
         String numPath = path.substring(0, path.length() - (l1 - l2) - 1) + "NumberOfEntries";

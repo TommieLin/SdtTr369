@@ -1,10 +1,16 @@
 package com.sdt.diagnose.common;
 
+import android.app.ActivityManager;
+import android.app.backup.BackupManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.content.res.Configuration;
+import android.icu.text.TimeZoneFormat;
+import android.icu.text.TimeZoneNames;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -12,10 +18,19 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
+import android.text.format.DateUtils;
+import android.text.style.TtsSpan;
 import android.util.Log;
+import android.view.View;
 
+import androidx.core.text.BidiFormatter;
+import androidx.core.text.TextDirectionHeuristicsCompat;
+
+import com.android.internal.app.LocalePicker;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
 import java.io.BufferedReader;
@@ -23,12 +38,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.TimeZone;
 
 public class DeviceInfoUtil {
     private static final String TAG = "DeviceInfoUtil";
@@ -142,6 +163,32 @@ public class DeviceInfoUtil {
         return getSecurityPatch();
     }
 
+    public static String getScreenSaver(Context context) {
+        String result = "";
+        IDreamManager mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.getService(DreamService.DREAM_SERVICE));
+        if (mDreamManager == null)
+            return result;
+        try {
+            ComponentName[] dreams = mDreamManager.getDreamComponents();
+            ComponentName cn = dreams != null && dreams.length > 0 ? dreams[0] : null;
+            if (cn != null) {
+                PackageManager pm = context.getPackageManager();
+                try {
+                    ServiceInfo ri = pm.getServiceInfo(cn, 0);
+                    if (ri != null) {
+                        result = ri.loadLabel(pm).toString();
+                    }
+                } catch (PackageManager.NameNotFoundException exc) {
+                    Log.e(TAG, "Failed to get service info, " + exc.getMessage());
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get default dream, " + e.getMessage());
+        }
+        return result;
+    }
+
     public static String getBluetoothMac(Context context) {
         BluetoothAdapter bluetooth = BluetoothAdapter.getDefaultAdapter();
         String result = "unavailable";
@@ -167,5 +214,219 @@ public class DeviceInfoUtil {
         }
     }
 
+    public static int getAutoDateTimeType(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.AUTO_TIME, 0);
+    }
+
+    public static boolean is24Hour() {
+        ContentResolver cv = GlobalContext.getContext().getContentResolver();
+        String strTimeFormat = android.provider.Settings.System.getString(cv,
+                android.provider.Settings.System.TIME_12_24);
+        Log.d(TAG, "is24Hour: " + strTimeFormat);
+        return Objects.equals("24", strTimeFormat);
+    }
+
+    public static String getTime() {
+        final Calendar now = Calendar.getInstance();
+        StringBuilder sb = new StringBuilder();
+
+        if (is24Hour()) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            return sdf.format(new Date());
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.getDefault());
+            return sdf.format(new Date());
+        }
+    }
+
+    private static void appendWithTtsSpan(SpannableStringBuilder builder, CharSequence content, TtsSpan span) {
+        int start = builder.length();
+        builder.append(content);
+        builder.setSpan(span, start, builder.length(), 0);
+    }
+
+    // Input must be positive. minDigits must be 1 or 2.
+    private static String formatDigits(int input, int minDigits, String localizedDigits) {
+        final int tens = input / 10;
+        final int units = input % 10;
+        StringBuilder builder = new StringBuilder(minDigits);
+        if (input >= 10 || minDigits == 2) {
+            builder.append(localizedDigits.charAt(tens));
+        }
+        builder.append(localizedDigits.charAt(units));
+        return builder.toString();
+    }
+
+    /**
+     * Get the GMT offset text label for the given time zone, in the format "GMT-08:00". This will
+     * also add TTS spans to give hints to the text-to-speech engine for the type of data it is.
+     *
+     * @param tzFormatter The timezone formatter to use.
+     * @param locale      The locale which the string is displayed in. This should be the same as the
+     *                    locale of the time zone formatter.
+     * @param tz          Time zone to get the GMT offset from.
+     * @param now         The current time, used to tell whether daylight savings is active.
+     * @return A CharSequence suitable for display as the offset label of {@code tz}.
+     */
+    private static CharSequence getGmtOffsetText(TimeZoneFormat tzFormatter, Locale locale,
+                                                 TimeZone tz, Date now) {
+        final SpannableStringBuilder builder = new SpannableStringBuilder();
+
+        final String gmtPattern = tzFormatter.getGMTPattern();
+        final int placeholderIndex = gmtPattern.indexOf("{0}");
+        final String gmtPatternPrefix, gmtPatternSuffix;
+        if (placeholderIndex == - 1) {
+            // Bad pattern. Replace with defaults.
+            gmtPatternPrefix = "GMT";
+            gmtPatternSuffix = "";
+        } else {
+            gmtPatternPrefix = gmtPattern.substring(0, placeholderIndex);
+            gmtPatternSuffix = gmtPattern.substring(placeholderIndex + 3); // After the "{0}".
+        }
+
+        if (! gmtPatternPrefix.isEmpty()) {
+            appendWithTtsSpan(builder, gmtPatternPrefix,
+                    new TtsSpan.TextBuilder(gmtPatternPrefix).build());
+        }
+
+        int offsetMillis = tz.getOffset(now.getTime());
+        final boolean negative = offsetMillis < 0;
+        final TimeZoneFormat.GMTOffsetPatternType patternType;
+        if (negative) {
+            offsetMillis = - offsetMillis;
+            patternType = TimeZoneFormat.GMTOffsetPatternType.NEGATIVE_HM;
+        } else {
+            patternType = TimeZoneFormat.GMTOffsetPatternType.POSITIVE_HM;
+        }
+        final String gmtOffsetPattern = tzFormatter.getGMTOffsetPattern(patternType);
+        final String localizedDigits = tzFormatter.getGMTOffsetDigits();
+
+        final int offsetHours = (int) (offsetMillis / DateUtils.HOUR_IN_MILLIS);
+        final int offsetMinutes = (int) (offsetMillis / DateUtils.MINUTE_IN_MILLIS);
+        final int offsetMinutesRemaining = Math.abs(offsetMinutes) % 60;
+
+        for (int i = 0; i < gmtOffsetPattern.length(); i++) {
+            char c = gmtOffsetPattern.charAt(i);
+            if (c == '+' || c == '-' || c == '\u2212' /* MINUS SIGN */) {
+                final String sign = String.valueOf(c);
+                appendWithTtsSpan(builder, sign, new TtsSpan.VerbatimBuilder(sign).build());
+            } else if (c == 'H' || c == 'm') {
+                final int numDigits;
+                if (i + 1 < gmtOffsetPattern.length() && gmtOffsetPattern.charAt(i + 1) == c) {
+                    numDigits = 2;
+                    i++; // Skip the next formatting character.
+                } else {
+                    numDigits = 1;
+                }
+                final int number;
+                final String unit;
+                if (c == 'H') {
+                    number = offsetHours;
+                    unit = "hour";
+                } else { // c == 'm'
+                    number = offsetMinutesRemaining;
+                    unit = "minute";
+                }
+                appendWithTtsSpan(builder, formatDigits(number, numDigits, localizedDigits),
+                        new TtsSpan.MeasureBuilder().setNumber(number).setUnit(unit).build());
+            } else {
+                builder.append(c);
+            }
+        }
+
+        if (! gmtPatternSuffix.isEmpty()) {
+            appendWithTtsSpan(builder, gmtPatternSuffix,
+                    new TtsSpan.TextBuilder(gmtPatternSuffix).build());
+        }
+
+        CharSequence gmtText = new SpannableString(builder);
+
+        // Ensure that the "GMT+" stays with the "00:00" even if the digits are RTL.
+        final BidiFormatter bidiFormatter = BidiFormatter.getInstance();
+        boolean isRtl = TextUtils.getLayoutDirectionFromLocale(locale) == View.LAYOUT_DIRECTION_RTL;
+        gmtText = bidiFormatter.unicodeWrap(gmtText,
+                isRtl ? TextDirectionHeuristicsCompat.RTL : TextDirectionHeuristicsCompat.LTR);
+        return gmtText;
+    }
+
+    /**
+     * Returns the long name for the timezone for the given locale at the time specified.
+     * Can return {@code null}.
+     */
+    private static String getZoneLongName(TimeZoneNames names, TimeZone tz, Date now) {
+        final TimeZoneNames.NameType nameType =
+                tz.inDaylightTime(now) ? TimeZoneNames.NameType.LONG_DAYLIGHT
+                        : TimeZoneNames.NameType.LONG_STANDARD;
+        return names.getDisplayName(tz.getID(), nameType, now.getTime());
+    }
+
+    public static String getTimeZone(Context context) {
+        final Calendar now = Calendar.getInstance();
+        TimeZone tz = now.getTimeZone();
+        Date date = now.getTime();
+        Locale locale = context.getResources().getConfiguration().locale;
+        TimeZoneFormat tzFormatter = TimeZoneFormat.getInstance(locale);
+        CharSequence gmtText = getGmtOffsetText(tzFormatter, locale, tz, date);
+        TimeZoneNames timeZoneNames = TimeZoneNames.getInstance(locale);
+        String zoneNameString = getZoneLongName(timeZoneNames, tz, date);
+        if (zoneNameString == null) {
+            return gmtText.toString();
+        }
+        // We don't use punctuation here to avoid having to worry about localizing that too!
+        return TextUtils.concat(gmtText, " ", zoneNameString).toString();
+    }
+
+    public static String getLanguage() {
+        Locale currentLocale = null;
+        try {
+            currentLocale = ActivityManager.getService().getConfiguration()
+                    .getLocales().get(0);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not retrieve locale, " + e.getMessage());
+        }
+        if (currentLocale == null) {
+            return new Locale("en-US").getDisplayName();
+        }
+        return currentLocale.getDisplayName();
+    }
+
+    public static boolean changeSystemLanguage(String language) {
+        // Locale mLocale = new Locale("en", "ZA");
+        final List<LocalePicker.LocaleInfo> localeInfoList =
+                LocalePicker.getAllAssetLocales(GlobalContext.getContext(), false);
+        List<String> languageTags = new ArrayList<>();
+        for (int i = 0; i < localeInfoList.size(); i++) {
+            String languageTag = localeInfoList.get(i).getLocale().toLanguageTag();
+            languageTags.add(languageTag);
+        }
+        if (! languageTags.contains(language)) {
+            return false;
+        }
+        try {
+            String[] arr = language.split("-");
+            Log.d(TAG, "changeSystemLanguage: language = " + language);
+            Locale mLocale = new Locale(arr[0], arr[1]);
+            Class iActivityManager = Class.forName("android.app.IActivityManager");
+            Class activityManagerNative = Class.forName("android.app.ActivityManagerNative");
+            Method getDefault = activityManagerNative.getDeclaredMethod("getDefault");
+            Object objIActMag = getDefault.invoke(activityManagerNative);
+            Method getConfiguration = iActivityManager.getDeclaredMethod("getConfiguration");
+            Configuration config = (Configuration) getConfiguration.invoke(objIActMag);
+            if (config == null) return false;
+            config.locale = mLocale;
+            Class clzConfig = Class.forName("android.content.res.Configuration");
+            java.lang.reflect.Field userSetLocale = clzConfig.getField("userSetLocale");
+            userSetLocale.set(config, true);
+            Class[] clzParams = {Configuration.class};
+            Method updateConfiguration = iActivityManager.getDeclaredMethod("updateConfiguration", clzParams);
+            updateConfiguration.invoke(objIActMag, config);
+            BackupManager.dataChanged("com.android.providers.settings");
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "changeSystemLanguage call failed, " + e.getMessage());
+        }
+        return false;
+    }
 
 }

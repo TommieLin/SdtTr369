@@ -87,9 +87,14 @@ public class OpenTR369Native {
     public static native String GetDefaultFilePath();
     public static native String GetDBParam(String path);
     public static native int SetDBParam(String path, String value);
+    public static native int AddMultiObject(String path, int num);
+    public static native int DelMultiObject(String path);
     public static native int ShowData(String cmd);
     public static native String GetCACertString();
     public static native String GetDevCertString();
     public static native String GetDevKeyString();
+    public static native String GetNetDevInterfaceStatus(String name);
+    public static native int GetWirelessNoise(String name);
+    public static native String GetNetInterfaceStatus(String name);
 
 }

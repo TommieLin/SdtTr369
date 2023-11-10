@@ -34,14 +34,12 @@ public class ProcessInfo {
         mSize = size;
     }
 
-
     public int getPriority() {
         return mPriority;
     }
 
     public void setCpuTime(int cpuTime) {
         mCpuTime = cpuTime;
-
     }
 
     public int getCpuTime() {
@@ -53,8 +51,12 @@ public class ProcessInfo {
     }
 
     public String toString() {
-        return "process info:{ mPid:" + mPid + "  mCommand:" + mCommand + "  mSize:" + mSize
-                + "   mPriority:" + mPriority + "   mCpuTime:" + mCpuTime + "   mState:" + mState
+        return "process info:{mPid:" + mPid
+                + ", mCommand:" + mCommand
+                + ", mSize:" + mSize
+                + ", mPriority:" + mPriority
+                + ", mCpuTime:" + mCpuTime
+                + ", mState:" + mState
                 + "}";
     }
 }

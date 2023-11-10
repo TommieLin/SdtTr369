@@ -55,6 +55,7 @@
 #include "sk_jni_callback.h"
 #include "data_model.h"
 #include "database.h"
+#include "dm_trans.h"
 
 
 /*********************************************************************//**
@@ -80,16 +81,16 @@
 // Skyworth Customized Content
 typedef struct
 {
-    char name[MAX_PATH_SEGMENTS]; // name="InternetGatewayDevice" 属性的名字
-    char path[MAX_DM_PATH];
-    unsigned type; // object or multipleObject or something else
-    int inform;
-    int app_inform;
-    char write;
+    char name[MAX_PATH_SEGMENTS];   // 节点的名字
+    char path[MAX_DM_PATH];         // 节点完整路径
+    unsigned type;                  // 节点存储的数据类型
+//    int inform;
+//    int app_inform;
+//    char write;
     dm_get_value_cb_t getter;
     dm_set_value_cb_t setter;
     dm_notify_set_cb_t notification;
-    char value[MAX_DM_VALUE_LEN];  //默认的值 对应default
+    char value[MAX_DM_VALUE_LEN];   // 默认的值 对应default
 } sk_schema_node_t;
 
 char *sk_tr369_model_xml = NULL;
@@ -156,14 +157,27 @@ void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
 
 void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
 {
+    if (schema_node == NULL)
+    {
+        USP_LOG_Error("%s: Parameter error.", __FUNCTION__);
+        return;
+    }
+
     SK_TR369_GetNodeFullName(xml_node, schema_node->path);
     xmlChar *name = xmlGetProp(xml_node, (const xmlChar *)"name");
     xmlChar *getter = xmlGetProp(xml_node, (const xmlChar *)"getter");
     xmlChar *setter = xmlGetProp(xml_node, (const xmlChar *)"setter");
-//    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Getter: %s, Setter: %s", schema_node->path, name, getter, setter);
 
     if (name != NULL) sprintf(schema_node->name, "%s", name);
+    schema_node->getter = (getter != NULL && (xmlStrcmp(getter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_GetVendorParam : NULL;
+    schema_node->setter = (setter != NULL && (xmlStrcmp(setter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_SetVendorParam : NULL;
+
+    xmlChar *default_value = xmlGetProp(xml_node, (const xmlChar *)"default");
+    if (default_value != NULL) sprintf(schema_node->value, "%s", default_value);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Default_Value: %s", schema_node->path, name, schema_node->value);
+
+//    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
 //    if (inform != NULL) {
 //        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform != NULL");
 //        if (xmlStrcmp(inform, (const xmlChar *)"true") == 0) {
@@ -171,13 +185,65 @@ void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
 //            schema_node->inform = 1;
 //        }
 //    }
-    schema_node->getter = SK_TR369_GetVendorParam;
-    schema_node->setter = (setter != NULL && (xmlStrcmp(setter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_SetVendorParam : NULL;
-
+//    xmlFree(inform);
     xmlFree(name);
     xmlFree(getter);
     xmlFree(setter);
-//    xmlFree(inform);
+}
+
+
+void SK_TR369_ParseType(xmlChar *type, sk_schema_node_t *schema_node)
+{
+    if (schema_node == NULL)
+    {
+        USP_LOG_Error("%s: Parameter error.", __FUNCTION__);
+        return;
+    }
+
+    if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"string"))
+    {
+        schema_node->type = DM_STRING;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"boolean"))
+    {
+        schema_node->type = DM_BOOL;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"dateTime"))
+    {
+        schema_node->type = DM_DATETIME;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"int"))
+    {
+        schema_node->type = DM_INT;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"unsignedInt"))
+    {
+        schema_node->type = DM_UINT;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"long"))
+    {
+        schema_node->type = DM_LONG;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"unsignedLong"))
+    {
+        schema_node->type = DM_ULONG;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"base64"))
+    {
+        schema_node->type = DM_BASE64;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"hex"))
+    {
+        schema_node->type = DM_HEXBIN;
+    }
+    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"decimal"))
+    {
+        schema_node->type = DM_DECIMAL;
+    }
+    else
+    {
+        schema_node->type = DM_STRING;
+    }
 }
 
 
@@ -185,29 +251,41 @@ int SK_TR369_AddNodeToUspDataModel(sk_schema_node_t *schema_node)
 {
     int err = USP_ERR_OK;
 
+    if (schema_node == NULL)
+    {
+        USP_LOG_Error("%s: Parameter error.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
     if (schema_node->setter != NULL)
     {
         if (schema_node->getter != NULL)
         {
             USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter != NULL, setter != NULL", schema_node->path);
+            err |= USP_REGISTER_VendorParam_ReadWrite(schema_node->path, schema_node->getter, schema_node->setter, NULL, DM_STRING);
         }
         else
         {
             USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter == NULL, setter != NULL", schema_node->path);
+            err |= USP_REGISTER_VendorParam_ReadWrite(schema_node->path, SK_TR369_GetVendorParam, schema_node->setter, NULL, DM_STRING);
         }
-        err |= USP_REGISTER_VendorParam_ReadWrite(schema_node->path, schema_node->getter, schema_node->setter, NULL, DM_STRING);
     }
     else
     {
         if (schema_node->getter != NULL)
         {
             USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter != NULL, setter == NULL", schema_node->path);
+            err |= USP_REGISTER_VendorParam_ReadOnly(schema_node->path, schema_node->getter, DM_STRING);
         }
         else
         {
             USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter == NULL, setter == NULL", schema_node->path);
+            if (strlen(schema_node->value) != 0)
+            {
+                USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, value: %s, type: 0x%08X", schema_node->path, schema_node->value, schema_node->type);
+                err |= USP_REGISTER_DBParam_ReadOnly(schema_node->path, schema_node->value, schema_node->type);
+            }
         }
-        err |= USP_REGISTER_VendorParam_ReadOnly(schema_node->path, schema_node->getter, DM_STRING);
     }
 
     return err;
@@ -218,6 +296,12 @@ int SK_TR369_AddNodeToBootParameter(sk_schema_node_t *schema_node, int num)
 {
     int err = USP_ERR_OK;
     char enable_path[MAX_DM_PATH], param_path[MAX_DM_PATH];
+
+    if (schema_node == NULL)
+    {
+        USP_LOG_Error("%s: Parameter error.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
 
     USP_SNPRINTF(enable_path, sizeof(enable_path), "Device.LocalAgent.Controller.1.BootParameter.%d.Enable", num);
     USP_SNPRINTF(param_path, sizeof(param_path), "Device.LocalAgent.Controller.1.BootParameter.%d.ParameterName", num);
@@ -242,15 +326,36 @@ void SK_TR369_ParseSchema(xmlNodePtr node)
         {
             xmlChar *type = xmlGetProp(current, (const xmlChar *)"type");
 
-            if (xmlStrcmp(type, (const xmlChar *)"object") &&
-                xmlStrcmp(type, (const xmlChar *)"multipleObject") &&
-                xmlStrcmp(type, (const xmlChar *)"unknown"))
+            if (!xmlStrcmp(type, (const xmlChar *)"multipleObject"))
+            {
+                USP_LOG_Info(" ************ Outis *** multipleObject find!!!");
+                char node_path[MAX_DM_PATH] = {0};
+                SK_TR369_GetNodeFullName(current, node_path);
+                USP_LOG_Info(" ######### Outis *** multipleObject node_path: %s", node_path);
+                USP_REGISTER_Object(node_path, NULL, NULL, NULL, NULL, NULL, NULL);
+            }
+            else if (!xmlStrcmp(type, (const xmlChar *)"multipleNumber"))
+            {
+                xmlChar *table = xmlGetProp(current, (const xmlChar *)"table");
+                if (table != NULL) {
+                    char node_path[MAX_DM_PATH] = {0};
+                    char table_path[MAX_DM_PATH] = {0};
+                    sprintf(table_path, "%s", table);
+                    SK_TR369_GetNodeFullName(current, node_path);
+                    USP_LOG_Info(" ######### Outis *** multipleNumber node_path: %s, table_path: %s", node_path, table_path);
+                    USP_REGISTER_Param_NumEntries(node_path, table_path);
+                    free(table);
+                }
+            }
+            else if (xmlStrcmp(type, (const xmlChar *)"object")
+                    && xmlStrcmp(type, (const xmlChar *)"unknown"))
             {
                 sk_schema_node_t schema_node = {0};
                 SK_TR369_ParseNode(current, &schema_node);
+                SK_TR369_ParseType(type, &schema_node);
                 SK_TR369_AddNodeToUspDataModel(&schema_node);
 
-                // 判断该节点是否需要放到启动参数里上报
+//                // 判断该节点是否需要放到启动参数里上报
 //                if (schema_node.inform == 1) {
 //                    boot_param_number++;
 //                    SK_TR369_AddNodeToBootParameter(&schema_node, boot_param_number);
@@ -316,6 +421,109 @@ int VENDOR_Init(void)
     return USP_ERR_OK;
 }
 
+char *sk_multi_object_map[] =
+{
+    "Device.DeviceInfo.TemperatureStatus.TemperatureSensor",
+    "Device.DeviceInfo.FirmwareImage",
+    "Device.Ethernet.Link",
+    "Device.IP.Diagnostics.TraceRoute.RouteHops",
+    "Device.IP.Interface",
+    "Device.IP.Interface.1.IPv4Address",
+    "Device.WiFi.Radio",
+    "Device.WiFi.SSID",
+    "Device.WiFi.EndPoint",
+    "Device.WiFi.EndPoint.1.Profile",
+    "Device.Services.STBService",
+    "Device.Services.STBService.1.AVPlayer",
+    "Device.Services.STBService.1.Components.HDMI",
+    "Device.Services.STBService.1.Components.AudioOutput",
+    "Device.Services.STBService.1.Components.AudioDecoder",
+    "Device.Services.STBService.1.Components.VideoOutput",
+    "Device.Services.STBService.1.Components.VideoDecoder",
+    "Device.Services.STBService.1.Capabilities.VideoDecoder.MPEG2Part2.ProfileLevel",
+    "Device.Services.STBService.1.Capabilities.VideoDecoder.MPEG4Part2.ProfileLevel",
+    "Device.Services.STBService.1.Capabilities.VideoDecoder.MPEG4Part10.ProfileLevel",
+    "Device.USB.USBHosts.Host",
+    "Device.USB.USBHosts.Host.1.Device"
+//    "Device.DeviceInfo.ProcessStatus.Process",          // 该节点需要动态添加
+//    "Device.WiFi.NeighboringWiFiDiagnostic.Result",     // 该节点需要动态添加
+//    "Device.X_Skyworth.App",                    // 该节点需要动态添加
+//    "Device.X_Skyworth.App.1.Permissions",      // 该节点需要动态添加
+//    "Device.X_Skyworth.BluetoothDevice"         // 该节点需要动态添加
+};
+
+int SK_TR369_SetDefaultMultiObject()
+{
+    int i;
+    int err;
+    int instance = INVALID;
+    int_vector_t iv;
+
+    int map_size = sizeof(sk_multi_object_map) / sizeof(sk_multi_object_map[0]);
+    for (i = 0; i < map_size; i++)
+    {
+        INT_VECTOR_Init(&iv);
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject path: %s", sk_multi_object_map[i]);
+        err = DATA_MODEL_GetInstances(sk_multi_object_map[i], &iv);
+        if (err != USP_ERR_OK)
+        {
+            INT_VECTOR_Destroy(&iv);
+            continue;
+        }
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject num_entries: %d", iv.num_entries);
+        if (iv.num_entries == 0)
+        {
+            err = DATA_MODEL_AddInstance(sk_multi_object_map[i], &instance, 0);
+            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject instance: %d", instance);
+            if (err != USP_ERR_OK)
+            {
+                INT_VECTOR_Destroy(&iv);
+                continue;
+            }
+        }
+        INT_VECTOR_Destroy(&iv);
+    }
+
+    // 初始化 ProcessStatus.Process.{i} MultiObject节点
+    char num_buf[MAX_DM_INSTANCE_ORDER] = {0};
+    err = SK_TR369_DelMultiObject("Device.DeviceInfo.ProcessStatus.Process");
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+    SK_TR369_API_GetParams("Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries", num_buf, sizeof(num_buf));
+    int num = atoi(num_buf);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject ProcessNumberOfEntries: %s(%d)", num_buf, num);
+    if (num > 0)
+    {
+        err = SK_TR369_AddMultiObject("Device.DeviceInfo.ProcessStatus.Process", num);
+        if (err != USP_ERR_OK)
+        {
+            return err;
+        }
+    }
+
+    // 初始化 NeighboringWiFiDiagnostic.Result.{i} MultiObject节点
+    err = SK_TR369_DelMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result");
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+    SK_TR369_API_GetParams("Device.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries", num_buf, sizeof(num_buf));
+    num = atoi(num_buf);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject ResultNumberOfEntries: %s(%d)", num_buf, num);
+    if (num > 0)
+    {
+        err = SK_TR369_AddMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result", num);
+        if (err != USP_ERR_OK)
+        {
+            return err;
+        }
+    }
+
+    return err;
+}
+
 
 /*********************************************************************//**
 **
@@ -332,7 +540,10 @@ int VENDOR_Init(void)
 **************************************************************************/
 int VENDOR_Start(void)
 {
-    return USP_ERR_OK;
+    int err = USP_ERR_OK;
+    err = SK_TR369_SetDefaultMultiObject();
+
+    return err;
 }
 
 /*********************************************************************//**
@@ -409,6 +620,136 @@ int SK_TR369_SetDBParam(const char *param, const char *value)
     // Since successful, send back the value of the parameter
     USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
 
+    return USP_ERR_OK;
+}
+
+int SK_TR369_AddInstance(const char *param, int num)
+{
+    int i, err;
+    int instance = INVALID;
+    char path[MAX_DM_PATH];
+    kv_vector_t unique_key_params;
+
+    KV_VECTOR_Init(&unique_key_params);
+
+    for (i = 0; i < num; i++)
+    {
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddInstance for: %d", i);
+        err = DATA_MODEL_AddInstance(param, &instance, 0);
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddInstance instance: %d", instance);
+        if (err != USP_ERR_OK)
+        {
+            goto exit;
+        }
+        USP_SNPRINTF(path, sizeof(path), "%s.%d", param, instance);
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddInstance path: %s", path);
+
+        // Exit if unable to retrieve the parameters used as unique keys for this object
+        err = DATA_MODEL_GetUniqueKeyParams(path, &unique_key_params, INTERNAL_ROLE);
+        if (err != USP_ERR_OK)
+        {
+            goto exit;
+        }
+
+        // Exit if any unique keys have been left with a default value which is not unique
+        err = DATA_MODEL_ValidateDefaultedUniqueKeys(path, &unique_key_params, NULL);
+        if (err != USP_ERR_OK)
+        {
+            goto exit;
+        }
+    }
+
+exit:
+    KV_VECTOR_Destroy(&unique_key_params);
+    return err;
+}
+
+int SK_TR369_AddMultiObject(const char *param, int num)
+{
+    int err;
+    dm_trans_vector_t trans;
+
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddMultiObject num: %d", num);
+
+    // Exit if unable to start a transaction
+    err = DM_TRANS_Start(&trans);
+    if (err != USP_ERR_OK)
+    {
+        DM_TRANS_Abort();
+        return err;
+    }
+
+    err = SK_TR369_AddInstance(param, num);
+    if (err != USP_ERR_OK)
+    {
+        DM_TRANS_Abort();
+        return err;
+    }
+
+    err = DM_TRANS_Commit();
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+    return USP_ERR_OK;
+}
+
+int SK_TR369_DeleteInstance(const char *param)
+{
+    int i, err;
+    int_vector_t iv;
+
+    INT_VECTOR_Init(&iv);
+    err = DATA_MODEL_GetInstances(param, &iv);
+    if (err != USP_ERR_OK)
+    {
+        goto exit;
+    }
+
+    for (i = 0; i < iv.num_entries; i++)
+    {
+        char path[MAX_DM_PATH] = {0};
+        USP_SNPRINTF(path, sizeof(path), "%s.%d", param, iv.vector[i]);
+        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_DeleteInstance path: %s", path);
+        err = DATA_MODEL_DeleteInstance(path, 0);
+        if (err != USP_ERR_OK)
+        {
+            break;
+        }
+    }
+
+exit:
+    INT_VECTOR_Destroy(&iv);
+    return err;
+}
+
+int SK_TR369_DelMultiObject(const char *param)
+{
+    int err;
+    dm_trans_vector_t trans;
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_DelMultiObject param: %s", param);
+
+    // Exit if unable to start a transaction
+    err = DM_TRANS_Start(&trans);
+    if (err != USP_ERR_OK)
+    {
+        DM_TRANS_Abort();
+        return err;
+    }
+
+    err = SK_TR369_DeleteInstance(param);
+    if (err != USP_ERR_OK)
+    {
+        DM_TRANS_Abort();
+        return err;
+    }
+
+    // Exit if unable to commit the transaction
+    err = DM_TRANS_Commit();
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
     return USP_ERR_OK;
 }
 

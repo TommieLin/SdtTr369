@@ -63,9 +63,11 @@
 #include "nu_ipaddr.h"
 #include "stomp.h"
 #include "dm_inst_vector.h"
+#include "sk_jni_callback.h"
 
 #if defined(E2ESESSION_EXPERIMENTAL_USP_V_1_2)
 #include "e2e_context.h"
+
 #endif
 
 #ifdef ENABLE_COAP
@@ -1345,11 +1347,14 @@ void DM_EXEC_HandleScheduledExit(void)
             break;
 
         case kExitAction_Reboot:
+            USP_LOG_Info("Performing Controller initiated Reboot.");
+            MAIN_Stop();
+            USP_LOG_Info(" ######### Outis !!! SK_TR369_API_SendEvent Reboot");
+            SK_TR369_API_SendEvent("Reboot", NULL);
+
             // NOTE: If reboot is scheduled, then the default for the vendor hook (in Test mode) is to exit here
             // The vendor hook may return or may exit the executable itself
-            USP_LOG_Info("Performing Controller initiated Reboot.");
             reboot_cb = vendor_hook_callbacks.reboot_cb;
-            MAIN_Stop();
             if (reboot_cb != NULL)
             {
                 reboot_cb();
@@ -1360,9 +1365,11 @@ void DM_EXEC_HandleScheduledExit(void)
             USP_LOG_Info("Performing Controller initiated FactoryReset");
             // If a file exists containing the factory reset database, then copy it, and modify the reboot cause
             // NOTE: This must be called before the data model is shutdown, as programmatic factory reset validates the parameter paths against the data model
-            DATABASE_PerformFactoryReset_ControllerInitiated();
+//            DATABASE_PerformFactoryReset_ControllerInitiated();
 
             MAIN_Stop();
+            USP_LOG_Info(" ######### Outis !!! SK_TR369_API_SendEvent FactoryReset");
+            SK_TR369_API_SendEvent("FactoryReset", NULL);
 
             // NOTE: If factory reset is scheduled, then the default is to exit here
             // The vendor hook may return or may exit the executable itself
@@ -1379,6 +1386,6 @@ void DM_EXEC_HandleScheduledExit(void)
     }
 
     // If nothing else has exited yet, then exit
-    usleep(100000); // Sleep for 100us, just to allow all other threads to exit (that sent the kDmExecMsg_MtpThreadExited message)
+    sleep(5); // Sleep for 5s, just to allow all other threads to exit (that sent the kDmExecMsg_MtpThreadExited message)
     exit(0);
 }

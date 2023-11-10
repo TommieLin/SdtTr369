@@ -93,6 +93,11 @@ public class SkyworthX {
         return DeviceInfoUtil.getAndroidSecurityPatchLevel(); // about - Android security patch level
     }
 
+    @Tr369Get("Device.X_Skyworth.ScreenSaver")
+    public String SK_TR369_GetScreenSaver() {
+        return DeviceInfoUtil.getScreenSaver(GlobalContext.getContext()); // about - screensaver
+    }
+
     @Tr369Get("Device.X_Skyworth.InternalDataStorageFree")
     public String SK_TR369_GetStorageFree() {
         return SkyworthXManager.getInstance().getInternalDataStorageFree();

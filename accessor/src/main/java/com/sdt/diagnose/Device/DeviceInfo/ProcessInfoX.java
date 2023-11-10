@@ -6,8 +6,10 @@ import android.util.Log;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
+import com.sdt.diagnose.common.ProcessManager;
 import com.sdt.diagnose.common.ProtocolPathUtl;
 import com.sdt.diagnose.common.bean.ProcessInfo;
+import com.sdt.diagnose.database.DbManager;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -15,13 +17,13 @@ import java.util.List;
 
 
 public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
-    private static final String TAG = "ProcessInfoX";
-
+    private static final String TAG = "ProcessInfoX Outis";
     private final static String REFIX = "Device.DeviceInfo.ProcessStatus.Process.";
+    private static ProcessManager mProcessManager = null;
 
     @Tr369Get("Device.DeviceInfo.ProcessStatus.Process.")
     public String SK_TR369_GetProcessInfo(String path) {
-        Log.d(TAG, "getProcessInfo: >>> path: " + path);
+        Log.d(TAG, "getProcessInfo: path = " + path);
         return handleProcessInfoX(path);
     }
 
@@ -29,10 +31,17 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
         return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
     }
 
+    public static List<ProcessInfo> getProcessInfo() {
+        if (mProcessManager != null && !mProcessManager.isEmpty()) {
+            return mProcessManager.getList();
+        }
+        mProcessManager = new ProcessManager(GlobalContext.getContext());
+        return mProcessManager.getList();
+    }
+
     @Override
     public List<ProcessInfo> getArray() {
-//        return CacheArrayManager.getInstance(GlobalContext.getContext()).getProcessInfo();
-        return null;
+        return getProcessInfo();
     }
 
     @Override
@@ -62,5 +71,19 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
                 break;
         }
         return null;
+    }
+
+    public static void updateProcessList() {
+        if (mProcessManager != null) {
+            if (! mProcessManager.isEmpty()) {
+                DbManager.delMultiObject("Device.DeviceInfo.ProcessStatus.Process");
+                mProcessManager.clear();
+            }
+            mProcessManager = null;
+        }
+        mProcessManager = new ProcessManager(GlobalContext.getContext());
+        int size = mProcessManager.getList().size();
+        Log.d(TAG, "Get the number of Process list: " + size);
+        if (size > 0) DbManager.addMultiObject("Device.DeviceInfo.ProcessStatus.Process", size);
     }
 }

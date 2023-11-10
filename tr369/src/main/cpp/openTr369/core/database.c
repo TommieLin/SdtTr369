@@ -673,10 +673,10 @@ int DATABASE_StartTransaction(void)
     int err;
 
     // Exit if this function is not being called from the data model thread
-    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
+//    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
+//    {
+//        return USP_ERR_INTERNAL_ERROR;
+//    }
 
     err = sqlite3_exec(db_handle, "begin transaction;", NULL, NULL, NULL);
     if (err != SQLITE_OK)
@@ -704,10 +704,10 @@ int DATABASE_CommitTransaction(void)
     int err;
 
     // Exit if this function is not being called from the data model thread
-    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
+//    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
+//    {
+//        return USP_ERR_INTERNAL_ERROR;
+//    }
 
     err = sqlite3_exec(db_handle, "commit transaction;", NULL, NULL, NULL);
     if (err != SQLITE_OK)
@@ -733,10 +733,10 @@ int DATABASE_CommitTransaction(void)
 int DATABASE_AbortTransaction(void)
 {
     // Exit if this function is not being called from the data model thread
-    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
-    {
-        return USP_ERR_INTERNAL_ERROR;
-    }
+//    if (OS_UTILS_IsDataModelThread(__FUNCTION__, PRINT_WARNING)==false)
+//    {
+//        return USP_ERR_INTERNAL_ERROR;
+//    }
 
     // Intentionally ignoring errors because if the database has already been rolled back because of an error
     // whilst writing the transactions, then an error will be returned here

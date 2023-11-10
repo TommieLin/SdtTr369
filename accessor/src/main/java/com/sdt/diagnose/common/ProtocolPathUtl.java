@@ -6,14 +6,14 @@ public class ProtocolPathUtl {
     private final static String REGEX = "\\.";
 
     public static String[] parse(String prefix, String path) {
-        if (!path.startsWith(prefix)) {
+        if (! path.startsWith(prefix)) {
             return null;
         }
         return path.replace(prefix, "").split(REGEX);
     }
 
     public static String getInfoFromArray(String prefix, String path, IProtocolArray array) {
-        if (!path.startsWith(prefix)) {
+        if (! path.startsWith(prefix)) {
             return null;
         }
 

@@ -12,6 +12,14 @@ public class DbManager {
         return OpenTR369Native.SetDBParam(path, value);
     }
 
+    public static int delMultiObject(String path) {
+        return OpenTR369Native.DelMultiObject(path);
+    }
+
+    public static int addMultiObject(String path, int num) {
+        return OpenTR369Native.AddMultiObject(path, num);
+    }
+
     public static int showData(String cmd) {
         return OpenTR369Native.ShowData(cmd);
     }

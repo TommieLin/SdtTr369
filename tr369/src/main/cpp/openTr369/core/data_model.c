@@ -796,7 +796,7 @@ int DATA_MODEL_AddInstance(char *path, int *instance, unsigned flags)
     int len;
     char *p;
 
-    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
+//    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
 
     // Exit if path is too long
     len = strlen(path);
@@ -1050,7 +1050,7 @@ int DATA_MODEL_DeleteInstance(char *path, unsigned flags)
     bool exists;
     bool is_qualified_instance;
 
-    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
+//    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
 
     // Exit if unable to find node representing this object
     node = DM_PRIV_GetNodeFromPath(path, &inst, &is_qualified_instance);

@@ -226,12 +226,8 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     //-------------------------------------------------------------
     // ManufacturerOUI
     // Exit if unable to get the default value of ManufacturerOUI (ie the value if not overridden by the USP DB)
-    err = GetDefaultOUI(default_value, sizeof(default_value));
+    GetDefaultOUI(default_value, sizeof(default_value));
     USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultOUI: %s", default_value);
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
 
 #ifndef REMOVE_DEVICE_INFO
     // Register the default value of OUI (if DeviceInfo parameters are being registered by USP Agent core)
@@ -264,12 +260,8 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     //-------------------------------------------------------------
     // SERIAL NUMBER
     // Exit if unable to get the default value of Serial Number (ie the value if not overridden by the USP DB)
-    err = GetDefaultSerialNumber(default_value, sizeof(default_value));
+    GetDefaultSerialNumber(default_value, sizeof(default_value));
     USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultSerialNumber: %s", default_value);
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
 
 #ifndef REMOVE_DEVICE_INFO
     // Register the default value of SerialNumber (if DeviceInfo parameters are being registered by USP Agent core)
@@ -649,12 +641,9 @@ int GetKernelUpTime(dm_req_t *req, char *buf, int len)
 int ScheduleReboot(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err;
-
     // Ensure that no output arguments are returned for this sync operation
     USP_ARG_Init(output_args);
-
     err = DEVICE_LOCAL_AGENT_ScheduleReboot(kExitAction_Reboot, "RemoteReboot", command_key, INVALID);
-
     return err;
 }
 
@@ -677,12 +666,9 @@ int ScheduleReboot(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv
 int ScheduleFactoryReset(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err;
-
     // Ensure that no output arguments are returned for this sync operation
     USP_ARG_Init(output_args);
-
     err = DEVICE_LOCAL_AGENT_ScheduleReboot(kExitAction_FactoryReset, "RemoteFactoryReset", command_key, INVALID);
-
     return err;
 }
 

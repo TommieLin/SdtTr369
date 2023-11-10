@@ -93,7 +93,11 @@ int DM_TRANS_Start(dm_trans_vector_t *trans)
     trans->vector = NULL;
 
     // Save this vector - it will be used when adding all subsequent operations
-    USP_ASSERT(cur_transaction == NULL);
+//    USP_ASSERT(cur_transaction == NULL);
+    if (cur_transaction != NULL)
+    {
+        return USP_ERR_OK;
+    }
     cur_transaction = trans;
 
     // Exit if unable to start a database transaction
@@ -226,8 +230,11 @@ int DM_TRANS_Commit(void)
     dm_trans_vector_t cascade_trans;
     dm_vendor_commit_trans_cb_t   commit_trans_cb;
 
-    USP_ASSERT(cur_transaction != NULL);
-
+//    USP_ASSERT(cur_transaction != NULL);
+    if (cur_transaction == NULL)
+    {
+        return USP_ERR_OK;
+    }
 
     // Exit if unable to commit the vendor's database successfully, aborting the transaction
     commit_trans_cb = vendor_hook_callbacks.commit_trans_cb;

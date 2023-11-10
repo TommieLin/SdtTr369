@@ -39,7 +39,13 @@ include_directories(
         libs/armeabi-v7a/include/mosquitto
 )
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DENABLE_MQTT -DDISABLE_STOMP")
+set(CMAKE_C_FLAGS
+        "${CMAKE_C_FLAGS} \
+        -DENABLE_MQTT \
+        -DDISABLE_STOMP \
+        -DE2ESESSION_EXPERIMENTAL_USP_V_1_2 \
+        -DREMOVE_DEVICE_INFO \
+        -DREMOVE_DEVICE_TIME")
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
