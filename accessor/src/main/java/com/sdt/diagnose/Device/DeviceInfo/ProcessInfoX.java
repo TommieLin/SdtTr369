@@ -17,7 +17,7 @@ import java.util.List;
 
 
 public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
-    private static final String TAG = "ProcessInfoX Outis";
+    private static final String TAG = "ProcessInfoX";
     private final static String REFIX = "Device.DeviceInfo.ProcessStatus.Process.";
     private static ProcessManager mProcessManager = null;
 

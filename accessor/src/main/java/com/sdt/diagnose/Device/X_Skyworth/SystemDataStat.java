@@ -69,11 +69,11 @@ public class SystemDataStat {
         mDataStatListMap = new ArrayList<>();
         mCmsExtraServiceManager = CmsExtraServiceManager.getInstance(mContext);
         setPeriodicMillisTime();
-//        String rxTraffic = DbManager.getDBParam("Device.X_Skyworth.TotalBytes.RxTraffic");
+
         String rxTraffic = SystemProperties.get("persist.sys.tr369.TotalBytes.RxTraffic", "");
         if (rxTraffic.length() != 0 && Integer.parseInt(rxTraffic) >= 0)
             lastRxTotal = Integer.parseInt(rxTraffic);
-//        String txTraffic = DbManager.getDBParam("Device.X_Skyworth.TotalBytes.TxTraffic");
+
         String txTraffic = SystemProperties.get("persist.sys.tr369.TotalBytes.TxTraffic", "");
         if (txTraffic.length() != 0 && Integer.parseInt(txTraffic) >= 0)
             lastTxTotal = Integer.parseInt(txTraffic);
@@ -411,12 +411,12 @@ public class SystemDataStat {
 
         // 当前时刻所产生的下载流量
         long nowRxTotal = getRxTotalTraffic();
-//        DbManager.setDBParam("Device.X_Skyworth.TotalBytes.RxTraffic", String.valueOf(nowRxTotal));
         SystemProperties.set("persist.sys.tr369.TotalBytes.RxTraffic", String.valueOf(nowRxTotal));
+
         // 当前时刻所产生的上传流量
         long nowTxTotal = getTxTotalTraffic();
-//        DbManager.setDBParam("Device.X_Skyworth.TotalBytes.TxTraffic", String.valueOf(nowTxTotal));
-        SystemProperties.set("persist.sys.tr369.TotalBytes.TxTraffic", String.valueOf(nowRxTotal));
+        SystemProperties.set("persist.sys.tr369.TotalBytes.TxTraffic", String.valueOf(nowTxTotal));
+
         // 更新当日的总流量
         DbManager.setDBParam("Device.X_Skyworth.TotalBytes.Today", String.valueOf(nowRxTotal + nowTxTotal));
         // 计算差值

@@ -23,6 +23,9 @@ import java.util.TimerTask;
  */
 public class TcpdumpX {
     private static final String TAG = "TcpdumpX";
+    private final int MAX_TCPDUMP_DURATION = 30;    // 单位秒
+    private final long MAX_TCPDUMP_SIZE = 300;  // 单位MB
+    private final long MAX_TCPDUMP_PERCENT = 5;
     TcpdumpBean tcpdumpBean = new TcpdumpBean();
     private Timer timer;
     Handler handler;
@@ -49,14 +52,14 @@ public class TcpdumpX {
                 if (! TextUtils.isEmpty(value)) {
                     tcpdumpBean.setDuration(value);
                 } else {  //如果前端没有设置抓包时长，默认抓包30S
-                    tcpdumpBean.setDuration(DbManager.getDBParam("skyworth.params.tcpdump.duration"));
+                    tcpdumpBean.setDuration(String.valueOf(MAX_TCPDUMP_DURATION));
                 }
                 break;
             case "NetType":
                 tcpdumpBean.setNetType(value);
                 break;
             case "FileSize":
-                tcpdumpBean.setFileSize(Integer.parseInt(value));
+                tcpdumpBean.setFileSize(Long.parseLong(value));
                 break;
         }
 
@@ -150,22 +153,18 @@ public class TcpdumpX {
      * @return 抓包文件大小限制
      */
     public long getFileSize() {
-        long fileSizePercent = Long.parseLong(DbManager.getDBParam("skyworth.params.tcpdump.percent"));
         if (tcpdumpBean.getFileSize() > 0) {
             //前端指定文件大小
             return getFreeRom() >=
-                    (tcpdumpBean.getFileSize() * fileSizePercent)
+                    (tcpdumpBean.getFileSize() * MAX_TCPDUMP_PERCENT)
                     ? tcpdumpBean.getFileSize()
-                    : getFreeRom() / fileSizePercent;
-        } else if (TextUtils.isEmpty(DbManager.getDBParam("skyworth.params.tcpdump.size"))) {
-            //默认文件大小
-            return getFreeRom() / fileSizePercent;
+                    : getFreeRom() / MAX_TCPDUMP_PERCENT;
         } else {
             //配置文件指定文件大小
             return getFreeRom() >=
-                    (Integer.parseInt(DbManager.getDBParam("skyworth.params.tcpdump.size")) * fileSizePercent)
-                    ? Integer.parseInt(DbManager.getDBParam("skyworth.params.tcpdump.size"))
-                    : getFreeRom() / fileSizePercent;
+                    (MAX_TCPDUMP_SIZE * MAX_TCPDUMP_PERCENT)
+                    ? MAX_TCPDUMP_SIZE
+                    : getFreeRom() / MAX_TCPDUMP_PERCENT;
         }
     }
 

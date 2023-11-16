@@ -1349,8 +1349,9 @@ void DM_EXEC_HandleScheduledExit(void)
         case kExitAction_Reboot:
             USP_LOG_Info("Performing Controller initiated Reboot.");
             MAIN_Stop();
-            USP_LOG_Info(" ######### Outis !!! SK_TR369_API_SendEvent Reboot");
-            SK_TR369_API_SendEvent("Reboot", NULL);
+            USP_LOG_Info(" ######### Outis !!! The device will reboot in 3 seconds.");
+            sleep(3);
+            SK_TR369_API_SendEvent("Reboot");
 
             // NOTE: If reboot is scheduled, then the default for the vendor hook (in Test mode) is to exit here
             // The vendor hook may return or may exit the executable itself
@@ -1368,8 +1369,9 @@ void DM_EXEC_HandleScheduledExit(void)
 //            DATABASE_PerformFactoryReset_ControllerInitiated();
 
             MAIN_Stop();
-            USP_LOG_Info(" ######### Outis !!! SK_TR369_API_SendEvent FactoryReset");
-            SK_TR369_API_SendEvent("FactoryReset", NULL);
+            USP_LOG_Info(" ######### Outis !!! The device will reset to factory settings after 3 seconds.");
+            sleep(3);
+            SK_TR369_API_SendEvent("FactoryReset");
 
             // NOTE: If factory reset is scheduled, then the default is to exit here
             // The vendor hook may return or may exit the executable itself

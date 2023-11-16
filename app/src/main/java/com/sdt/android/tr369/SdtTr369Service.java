@@ -17,20 +17,27 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.sdt.android.tr369.Receiver.BluetoothMonitorReceiver;
+import com.sdt.android.tr369.Receiver.PackageReceiver;
+import com.sdt.android.tr369.Receiver.StandbyModeReceiver;
 import com.sdt.android.tr369.Utils.FileUtil;
-import com.sdt.diagnose.Device.DeviceInfo.ProcessInfoX;
 import com.sdt.diagnose.Device.LanX;
+import com.sdt.diagnose.Device.SkyworthX;
 import com.sdt.diagnose.Device.X_Skyworth.FTIMonitor;
+import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogCmd;
+import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogRepository;
 import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
 import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.database.DbManager;
 import com.sdt.opentr369.OpenTR369Native;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -42,6 +49,7 @@ public class SdtTr369Service extends Service {
     private SdtTr369Receiver mSdtTr369Receiver = null;
     private PackageReceiver mPackageReceiver = null;
     private BluetoothMonitorReceiver mBluetoothMonitorReceiver = null;
+    private StandbyModeReceiver mStandbyModeReceiver = null;
     private HandlerThread mHandlerThread = null;
     private Handler mHandler = null;
     public static final int MSG_START_TR369 = 3300;
@@ -106,7 +114,23 @@ public class SdtTr369Service extends Service {
         registerSdtTr369Receiver();
         registerPackageReceiver();
         registerBluetoothMonitorReceiver();
+        registerStandbyReceiver();
 
+        // 开机同步后台logcat状态
+        LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
+        // 初始化tcpdump参数
+        SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
+        SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
+        // 在启动时，检测抓包文件是否存在，如果存在就删除文件
+        File file = new File("/data/tcpdump/test1.pcap");
+        if (file.exists()) {
+            file.delete();
+        }
+        // 开机同步STB Lock状态
+        if (SystemProperties.get("persist.sys.tr069.lock", "0").equals("1")) {
+            SkyworthX skyworthX = new SkyworthX();
+            skyworthX.SK_TR369_SetLockEnable(null, "1");
+        }
         // 初始化FTI停留时间监控程序
         new FTIMonitor();
         // 初始化系统数据采集程序
@@ -151,12 +175,21 @@ public class SdtTr369Service extends Service {
         registerReceiver(mBluetoothMonitorReceiver, nameChangeFilter);
     }
 
+    private void registerStandbyReceiver() {
+        mStandbyModeReceiver = new StandbyModeReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.SCREEN_ON");
+        intentFilter.addAction("android.intent.action.SCREEN_OFF");
+        registerReceiver(mStandbyModeReceiver, intentFilter);
+    }
+
     @Override
     public void onDestroy() {
         Log.e(TAG, " ####### Outis ### onDestroy start");
-        if (mSdtTr369Receiver != null)  unregisterReceiver(mSdtTr369Receiver);
+        if (mSdtTr369Receiver != null) unregisterReceiver(mSdtTr369Receiver);
         if (mBluetoothMonitorReceiver != null) unregisterReceiver(mBluetoothMonitorReceiver);
         if (mPackageReceiver != null) unregisterReceiver(mPackageReceiver);
+        if (mStandbyModeReceiver != null) unregisterReceiver(mStandbyModeReceiver);
 
         if (mHandler != null) {
             mHandler.sendEmptyMessage(MSG_STOP_TR369);
@@ -221,30 +254,32 @@ public class SdtTr369Service extends Service {
     }
 
     private void printTr369Message(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (args.length > 0) {
+        if (args.length > 1) {
             String cmd = args[0];
+            String path = args[1];
             Log.d(TAG, "mSkParamDB dumpsys args: " + Arrays.toString(args));
-            if (("dbget").equalsIgnoreCase(cmd) && args.length > 1) {
-                pw.println(formatString(args[1]));
-            } else if (("dbset").equalsIgnoreCase(cmd) && args.length > 2) {
-                int ret = DbManager.setDBParam(args[1], args[2]);
-                if (ret == 0) {
-                    pw.println(formatString(args[1]));
+            if ("dbget".equalsIgnoreCase(cmd)) {
+                pw.println(formatString(path));
+            } else if ("dbset".equalsIgnoreCase(cmd) && args.length > 2) {
+                String value = args[2];
+                boolean ret = mListener.openTR369SetAttr(0, path, value);
+                if (ret) {
+                    pw.println(formatString(path));
                 } else {
-                    pw.println("dbset failed! error code: " + ret);
+                    pw.println("dbset execution failed!");
                 }
-            } else if (("dbdel").equalsIgnoreCase(cmd) && args.length > 1) {
+//            } else if (("dbdel").equalsIgnoreCase(cmd) && args.length > 1) {
 
             } else if ("show".equals(cmd)) {
                 // [show] [database|datamodel]
 //                pw.println(DbManager.showData(args[1]));
-                DbManager.showData(args[1]);
+                DbManager.showData(path);
             }
         }
     }
 
     private String formatString(String paramKey) {
-        return paramKey + " : [" + DbManager.getDBParam(paramKey) + "]";
+        return paramKey + " : [" + mListener.openTR369GetAttr(0, paramKey) + "]";
     }
 
 }

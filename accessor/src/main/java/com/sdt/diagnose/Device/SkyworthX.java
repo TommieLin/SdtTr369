@@ -778,7 +778,7 @@ public class SkyworthX {
 
     @Tr369Set("Device.X_Skyworth.Logcat.Background.Enable")
     public boolean SK_TR369_SetLogcatEnable(String path, String value) {
-        DbManager.setDBParam("Device.X_Skyworth.Logcat.Background.Enable", value);
+        SystemProperties.set("persist.sys.tr369.logcat.background.enable", value);
         boolean isEnable = "1".equals(value) || "true".equals(value);
         if (isEnable) {
             LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
@@ -790,7 +790,7 @@ public class SkyworthX {
 
     @Tr369Get("Device.X_Skyworth.Logcat.Background.Enable")
     public String SK_TR369_GetLogcatEnable(String path) {
-        return DbManager.getDBParam("Device.X_Skyworth.Logcat.Background.Enable");
+        return SystemProperties.get("persist.sys.tr369.logcat.background.enable", "0");
     }
 
     @Tr369Set("Device.X_Skyworth.Notification.")

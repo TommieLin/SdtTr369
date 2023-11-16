@@ -112,10 +112,6 @@ public class ApplicationUtil {
         return true;
     }
 
-    public static boolean upgradeApplication(String pkg) {
-        return true;
-    }
-
     public static boolean openApp(String pkg) {
         Context context = GlobalContext.getContext();
         PackageManager pm = context.getPackageManager();

@@ -11,7 +11,7 @@ import com.sdt.diagnose.extra.CmsExtraServiceManager;
 import java.util.List;
 
 public class ProcessStatusX {
-    private static final String TAG = "ProcessStatusX Outis";
+    private static final String TAG = "ProcessStatusX";
     private ModelX.Type mStbModelType = null;
 
     @Tr369Get("Device.DeviceInfo.ProcessStatus.CPUUsage")

@@ -1,4 +1,4 @@
-package com.sdt.android.tr369;
+package com.sdt.android.tr369.Receiver;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

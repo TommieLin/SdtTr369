@@ -304,6 +304,7 @@ int MQTT_Init(void)
 void MQTT_Destroy(void)
 {
     int i;
+    USP_LOG_Info(" ######### Outis !!! MQTT_Destroy start.");
 
     mqtt_client_t* client = NULL;
     for (i = 0; i < MAX_MQTT_CLIENTS; i++)
@@ -1682,6 +1683,10 @@ void ResetRetryCount(mqtt_client_t* client)
 void DestroyClient(mqtt_client_t *client)
 {
     int i;
+    USP_LOG_Info(" ######### Outis !!! DestroyClient start.");
+
+//    CleanMqttClient(client, false);
+//    DisconnectClient(client);
 
     MQTT_DestroyConnParams(&client->conn_params);
     MQTT_DestroyConnParams(&client->next_params);
@@ -1732,6 +1737,7 @@ void DestroyClient(mqtt_client_t *client)
 void CleanMqttClient(mqtt_client_t *client, bool is_reconnect)
 {
     int sock;
+    USP_LOG_Info(" ######### Outis !!! CleanMqttClient start.");
 
     // NOTE: It is expected that this function is called only when we know that no socket is open
     // If a socket is still open, it is not safe to forcibly close it here, as that creates a SIGPIPE exception when libmosquitto accesses the socket next
@@ -2555,6 +2561,7 @@ void DisconnectClient(mqtt_client_t *client)
 {
     int result;
     int sock;
+    USP_LOG_Info(" ######### Outis !!! DisconnectClient start.");
 
     // Send a disconnect frame, if the socket is still connected
     sock = mosquitto_socket(client->mosq);

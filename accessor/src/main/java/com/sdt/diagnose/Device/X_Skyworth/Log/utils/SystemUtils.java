@@ -35,7 +35,7 @@ public final class SystemUtils {
             SystemProperties.set("ctl.start", SKY_SCRIPT_NAME);
             Log.i(TAG, "set property ctl.start." + SKY_SCRIPT_NAME + " success");
         } catch (Exception e) {
-            Log.e(TAG, "set property ctl.start." + SKY_SCRIPT_NAME + " error:" + e.getMessage());
+            Log.e(TAG, "set property ctl.start." + SKY_SCRIPT_NAME + " error: " + e.getMessage());
         }
     }
 
@@ -47,7 +47,7 @@ public final class SystemUtils {
             SystemProperties.set("ctl.stop", SKY_SCRIPT_NAME);
             Log.i(TAG, "set property ctl.stop." + SKY_SCRIPT_NAME + " success");
         } catch (Exception e) {
-            Log.e(TAG, "set property ctl.stop." + SKY_SCRIPT_NAME + " error:" + e.getMessage());
+            Log.e(TAG, "set property ctl.stop." + SKY_SCRIPT_NAME + " error: " + e.getMessage());
         }
     }
 

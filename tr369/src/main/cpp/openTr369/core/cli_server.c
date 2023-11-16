@@ -177,6 +177,8 @@ int CLI_SERVER_Init(void)
     int err;
     struct sockaddr_un sa;
 
+    USP_LOG_Info(" ####### Outis ### CLI_SERVER_Init start");
+
     // Exit if unable to remove the unix domain socket from the filing system
     err = remove(CLI_UNIX_DOMAIN_FILE);
     if ((err == -1) && (errno != ENOENT))
@@ -206,6 +208,21 @@ int CLI_SERVER_Init(void)
     memset(&sa, 0, sizeof(sa));
     sa.sun_family = AF_UNIX;
     USP_STRNCPY(sa.sun_path, CLI_UNIX_DOMAIN_FILE, sizeof(sa.sun_path));
+
+//    char socket_path[256];
+//    sprintf(socket_path, "%s-%ld", CLI_UNIX_DOMAIN_FILE, (long)time(NULL));
+//    USP_STRNCPY(sa.sun_path, socket_path, sizeof(sa.sun_path));
+//    USP_LOG_Info(" ####### Outis ### CLI_SERVER_Init socket_path: %s, sa.sun_path: %s", socket_path, sa.sun_path);
+
+//    // 在连接之前检查套接字文件是否存在，存在则删除
+//    if (access(CLI_UNIX_DOMAIN_FILE, F_OK) != -1) {
+//        // 套接字文件存在，删除它
+//        if (unlink(CLI_UNIX_DOMAIN_FILE) == -1) {
+//            USP_ERR_ERRNO("unlink", errno);
+//            close(sock);
+//            return USP_ERR_INTERNAL_ERROR;
+//        }
+//    }
 
     // Exit if unable to bind the socket to the unix domain file
     err = bind(sock, (struct sockaddr *) &sa, sizeof(struct sockaddr_un));

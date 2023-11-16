@@ -129,31 +129,41 @@
             <schema name="IPv4Enable" getter="diagnose" setter="diagnose" type="boolean" />
             <schema name="IPv6Capable" getter="diagnose" type="boolean" />
             <schema name="IPv6Enable" getter="diagnose" setter="diagnose" type="boolean" />
-            <!-- ping指令过程会用到的参数 -->
+
             <schema name="Diagnostics" type="object">
                 <schema name="IPPing" type="object">
-                    <schema name="Interface" getter="diagnose" setter="diagnose" type="string" write="W" />
-                    <schema name="DiagnosticsState" getter="sk_tr069_get_ping_state" type="string" write="W" />
-                    <schema name="Host" setter="sk_tr069_set_ping_host" type="string" write="W" />
-                    <schema name="NumberOfRepetitions" setter="sk_tr069_set_ping_repeat" type="unsignedInt" write="W" />
-                    <schema name="Timeout" setter="sk_tr069_set_ping_timeout" type="unsignedInt" write="W" />
-                    <schema name="DataBlockSize" setter="sk_tr069_set_ping_datasize" type="unsignedInt" write="W" />
-                    <schema name="DSCP" setter="sk_tr069_set_ping_dscp" type="unsignedInt" write="W" />
-                    <schema name="SuccessCount" getter="sk_tr069_get_ping_successcount" type="unsignedInt" write="W" />
-                    <schema name="FailureCount" getter="sk_tr069_get_ping_failurecount" type="unsignedInt" write="W" />
-                    <schema name="AverageResponseTime" getter="sk_tr069_get_ping_average" type="unsignedInt" write="W" />
-                    <schema name="MinimumResponseTime" getter="sk_tr069_get_ping_mintime" type="unsignedInt" write="W" />
-                    <schema name="MaximumResponseTime" getter="sk_tr069_get_ping_maxtime" type="unsignedInt" write="W" />
+                    <!-- Input -->
+                    <schema name="Host" setter="diagnose" type="string" write="W" />
+                    <schema name="NumberOfRepetitions" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="Timeout" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="DataBlockSize" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="DSCP" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="Interface" setter="diagnose" type="string" write="W" />
+                    <schema name="ProtocolVersion" setter="diagnose" type="string" write="W" />
+                    <!-- Output -->
+                    <schema name="Status" getter="diagnose" type="string" write="W" />
+                    <schema name="IPAddressUsed" getter="diagnose" type="string" write="W" />
+                    <schema name="SuccessCount" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="FailureCount" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="AverageResponseTime" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="MinimumResponseTime" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="MaximumResponseTime" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="AverageResponseTimeDetailed" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="MinimumResponseTimeDetailed" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="MaximumResponseTimeDetailed" getter="diagnose" type="unsignedInt" write="W" />
                 </schema>
 
                 <schema name="TraceRoute" type="object">
-                    <schema name="Interface" getter="diagnose" setter="diagnose" type="string" write="W" />
-                    <schema name="DiagnosticsState" getter="diagnose" setter="diagnose" type="string" write="W" />
+                    <!-- Input -->
                     <schema name="Host" getter="diagnose" setter="diagnose" type="string" write="W" />
-                    <schema name="Timeout" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="DataBlockSize" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="MaxHopCount" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
                     <schema name="DSCP" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="Timeout" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="MaxHopCount" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="DataBlockSize" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="Interface" getter="diagnose" setter="diagnose" type="string" write="W" />
+                    <schema name="ProtocolVersion" getter="diagnose" setter="diagnose" type="string" write="W" />
+                    <!-- Output -->
+                    <schema name="Status" getter="diagnose" setter="diagnose" type="string" write="W" />
                     <schema name="ResponseTime" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
                     <schema name="RouteHopsNumberOfEntries" table="Device.IP.Diagnostics.TraceRoute.RouteHops.{i}"
                         type="multipleNumber" />
@@ -163,11 +173,14 @@
                         <schema name="RTTimes" getter="diagnose" type="string" />
                     </schema>
                 </schema>
+
                 <schema name="DownloadDiagnostics" type="object">
-                    <schema name="DiagnosticsState" getter="diagnose" setter="diagnose" type="string" />
+                    <!-- Input -->
                     <schema name="DownloadURL" constraint="256" getter="diagnose" setter="diagnose" type="string"
                         write="W" />
                     <schema name="TimeBasedTestDuration" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
+                    <!-- Output -->
+                    <schema name="Status" getter="diagnose" type="string" />
                     <schema name="BOMTime" getter="diagnose" type="dateTime" />
                     <schema name="EOMTime" getter="diagnose" type="dateTime" />
                     <schema name="TestBytesReceived" getter="diagnose" type="unsignedInt" />
@@ -568,6 +581,7 @@
             <schema name="AppBatchUnBlock" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="AppBlackList" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="AppWhiteList" getter="diagnose" setter="diagnose" type="string" write="W" />
+            <schema name="BlockListPkgNames" getter="diagnose" setter="diagnose" type="string" write="W" />
 
             <schema name="SyncParamInterval" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
 

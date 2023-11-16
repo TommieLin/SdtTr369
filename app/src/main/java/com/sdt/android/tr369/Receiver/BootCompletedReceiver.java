@@ -1,9 +1,11 @@
-package com.sdt.android.tr369;
+package com.sdt.android.tr369.Receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
+import com.sdt.android.tr369.SdtTr369Service;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
     private final static String TAG = "BootCompletedReceiver";

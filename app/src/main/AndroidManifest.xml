@@ -32,7 +32,7 @@
             android:exported="false">
         </service>
 
-        <receiver android:name=".BootCompletedReceiver"
+        <receiver android:name=".Receiver.BootCompletedReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter android:priority="20000">
@@ -40,8 +40,8 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.sdt.android.tr369.PackageReceiver" android:exported="true">
-            <intent-filter>
+        <receiver android:name=".Receiver.PackageReceiver" android:exported="true">
+            <intent-filter android:priority="20000">
                 <!-- 一个新应用包已经安装在设备上，数据包括包名（监听所在的app，新安装时，不能接收到这个广播） -->
                 <action android:name="android.intent.action.PACKAGE_ADDED" />
                 <!-- 一个新版本的应用安装到设备，替换之前已经存在的版本  替换时会先收到卸载的再收到替换的， 替换自身也能收到-->
@@ -52,12 +52,19 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.sdt.android.tr369.BluetoothMonitorReceiver" android:exported="true">
-            <intent-filter>
+        <receiver android:name=".Receiver.BluetoothMonitorReceiver" android:exported="true">
+            <intent-filter android:priority="20000">
                 <action android:name="android.bluetooth.adapter.action.STATE_CHANGED" />
                 <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
                 <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
                 <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".Receiver.StandbyModeReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SCREEN_OFF" />
+                <action android:name="android.intent.action.SCREEN_ON" />
             </intent-filter>
         </receiver>
 

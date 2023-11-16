@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
+import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
@@ -51,7 +52,7 @@ public class LogRepository {
     private static volatile LogRepository sLogRepository;
     private final Handler mHandler;
     private final HandlerThread mThread;
-    private final int MSG_START_SPLIT_LOG_FILE = 3302;
+    private final int MSG_START_SPLIT_LOG_FILE = 3301;
     private int mPeriodicMillisTime = 0;
     private final int DEFAULT_PERIOD_MILLIS_TIME = 1800000;   // 默认三十分钟统计一次
     private boolean isAllowAutoUpload = false;
@@ -396,7 +397,7 @@ public class LogRepository {
      * @param param:param
      */
     public void startCommand(LogCmd cmd, String param) {
-        String enable = DbManager.getDBParam("Device.X_Skyworth.Logcat.Background.Enable");
+        String enable = SystemProperties.get("persist.sys.tr369.logcat.background.enable", "0");
         if (!("1".equals(enable) || "true".equals(enable))) {
             Log.i(TAG, "logcat background task is prohibited from being executed.");
             return;

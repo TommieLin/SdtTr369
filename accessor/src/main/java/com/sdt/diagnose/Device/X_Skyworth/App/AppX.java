@@ -424,37 +424,37 @@ public class AppX implements IProtocolArray<AppInfo> {
     }
 
     private void clearAppBlackList() {
-        int numBlacklist = SystemProperties.getInt("persist.sys.tr369.blacklist.number", 0);
+        int numBlacklist = SystemProperties.getInt("persist.sys.tr069.blacklist.number", 0);
         for (int i = 1; i <= numBlacklist; ++ i) {
-            SystemProperties.set("persist.sys.tr369.blacklist.part" + i, "");
+            SystemProperties.set("persist.sys.tr069.blacklist.part" + i, "");
         }
-        SystemProperties.set("persist.sys.tr369.blacklist.number", "0");
+        SystemProperties.set("persist.sys.tr069.blacklist.number", "0");
     }
 
     private void clearAppWhiteList() {
-        int numWhitelist = SystemProperties.getInt("persist.sys.tr369.whitelist.number", 0);
+        int numWhitelist = SystemProperties.getInt("persist.sys.tr069.whitelist.number", 0);
         for (int i = 1; i <= numWhitelist; ++ i) {
-            SystemProperties.set("persist.sys.tr369.whitelist.part" + i, "");
+            SystemProperties.set("persist.sys.tr069.whitelist.part" + i, "");
         }
-        SystemProperties.set("persist.sys.tr369.whitelist.number", "0");
+        SystemProperties.set("persist.sys.tr069.whitelist.number", "0");
     }
 
     private void setBlackListData(int num, String data) {
-        SystemProperties.set("persist.sys.tr369.blacklist.number", String.valueOf(num));
-        SystemProperties.set("persist.sys.tr369.blacklist.part" + num, data);
+        SystemProperties.set("persist.sys.tr069.blacklist.number", String.valueOf(num));
+        SystemProperties.set("persist.sys.tr069.blacklist.part" + num, data);
     }
 
     private void setWhiteListData(int num, String data) {
-        SystemProperties.set("persist.sys.tr369.whitelist.number", String.valueOf(num));
-        SystemProperties.set("persist.sys.tr369.whitelist.part" + num, data);
+        SystemProperties.set("persist.sys.tr069.whitelist.number", String.valueOf(num));
+        SystemProperties.set("persist.sys.tr069.whitelist.part" + num, data);
     }
 
     @Tr369Get("Device.X_Skyworth.AppBlackList")
     public String SK_TR369_GetAppBlackList(String path) {
-        int numBlacklist = SystemProperties.getInt("persist.sys.tr369.blacklist.number", 0);
+        int numBlacklist = SystemProperties.getInt("persist.sys.tr069.blacklist.number", 0);
         ArrayList<String> blacklist = new ArrayList<>();
         for (int i = 1; i <= numBlacklist; ++ i) {
-            String array = SystemProperties.get("persist.sys.tr369.blacklist.part" + i, "");
+            String array = SystemProperties.get("persist.sys.tr069.blacklist.part" + i, "");
 
             List<String> packageNames = ApplicationUtil.parseStringList(array);
             blacklist.addAll(packageNames);
@@ -515,10 +515,10 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     @Tr369Get("Device.X_Skyworth.AppWhiteList")
     public String SK_TR369_GetAppWhiteList(String path) {
-        int numWhitelist = SystemProperties.getInt("persist.sys.tr369.whitelist.number", 0);
+        int numWhitelist = SystemProperties.getInt("persist.sys.tr069.whitelist.number", 0);
         ArrayList<String> whitelist = new ArrayList<>();
         for (int i = 1; i <= numWhitelist; ++ i) {
-            String array = SystemProperties.get("persist.sys.tr369.whitelist.part" + i, "");
+            String array = SystemProperties.get("persist.sys.tr069.whitelist.part" + i, "");
 
             List<String> packageNames = ApplicationUtil.parseStringList(array);
             whitelist.addAll(packageNames);
@@ -527,7 +527,7 @@ public class AppX implements IProtocolArray<AppInfo> {
     }
 
     @Tr369Set("Device.X_Skyworth.AppWhiteList")
-    public boolean setAppWhiteList(String path, String value) {
+    public boolean SK_TR369_SetAppWhiteList(String path, String value) {
         clearAppBlackList();
         clearAppWhiteList();
 
@@ -602,7 +602,7 @@ public class AppX implements IProtocolArray<AppInfo> {
     public UsageStats getUsageStats(String packageName, Context context) {
         Calendar calendar = Calendar.getInstance();
         long endTime = calendar.getTimeInMillis();
-        String dbParam = DbManager.getDBParam("Device.X_Skyworth.AppInfoPeriodicInformInterval");
+        String dbParam = String.valueOf(1800);  // DbManager.getDBParam("Device.X_Skyworth.AppInfoPeriodicInformInterval");
         long startTime = TextUtils.isEmpty(dbParam) ? 0 : (endTime - Long.parseLong(dbParam) * 1000);
         if (endTime - firstTime > 10000) {
             list = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);

@@ -12,13 +12,13 @@ public class TcpdumpBean {
     String netType;
     String duration;
     String url;
-    int fileSize;
+    long fileSize;
 
-    public int getFileSize() {
+    public long getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(int fileSize) {
+    public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
 

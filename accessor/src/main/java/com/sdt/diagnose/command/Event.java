@@ -18,19 +18,18 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.sdt.annotations.Tr369Set;
-import com.sdt.diagnose.common.ApplicationUtil;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.ScreenRecordActivity;
 import com.sdt.diagnose.common.ScreenRecordService;
-import com.sdt.diagnose.common.ScreenShot;
 import com.sdt.diagnose.common.ScreenShot2;
 import com.sdt.diagnose.common.ShellUtils;
-import com.sdt.diagnose.common.bean.AppIntent;
-import com.sdt.diagnose.common.bean.SysIntent;
 import com.sdt.diagnose.common.net.CreateSSL;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
+import com.sdt.diagnose.traceroute.TraceRoute;
+import com.sdt.diagnose.traceroute.TraceRouteManager;
 import com.skyworth.scrrtcsrv.Device;
 
 import org.jetbrains.annotations.NotNull;
@@ -46,10 +45,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -71,31 +67,18 @@ import okhttp3.logging.HttpLoggingInterceptor;
 public class Event {
     private static final String TAG = "TR369 Event";
     private static final String REBOOT = "Reboot";
-    private static final String FACTORYRESET = "FactoryReset";
-    private static final String UPLOADFILE = "uploadfile";
-    private static final String DOWNLOADFILE = "downloadfile";
-    private static final String REBOOT_XMPP = "REBOOT_XMPP";
-    private static final String CHECK_DOWNLOAD_SPEED = "check_download_speed";
-    private static final String IPTV_PLAY_CHECK = "iptv_play_check";
-    private static final String SYSTEM_UPGRADE_CHECK = "system_upgrade_check";
-    private static final String ADDOBJECT = "AddObject";
-    private static final String DELETEOBJECT = "DeleteObject";
-    private static final String PING = "tr369_ping";
-    private static final String TRACEROUTE = "tr069_traceroute";
-    private static final String SCREENCAP = "ScreenCap";
-    private static final String UPGRADE_APPLICATION = "Upgrade_application";
-    private static final String LOADBLELIST = "load_bluetoothlist";
-    private static final String UNPAIR_BLE_DEVICE = "Unpair_ble_device";
-    private static final String UPGRADEFILE = "upgradeFile";
-    private static final String SYS_UPGRADE_TYPE = "Device.X_Skyworth.Upgrade.FWForceUpgradeType";
-    private static final String APK_UPGRADE_TYPE = "Device.X_Skyworth.Upgrade.APKForceUpgradeType";
+    private static final String FACTORY_RESET = "FactoryReset";
+    private static final String UPLOAD_FILE = "UploadFile";
+    private static final String DOWNLOAD_FILE = "DownloadFile";
+    private static final String UPGRADE_FILE = "UpgradeFile";
+    private static final String IP_PING = "IPPing";
+    private static final String TRACE_ROUTE = "TraceRoute";
+    private static final String DOWNLOAD_DIAGNOSTICS = "DownloadDiagnostics";
     private static final String SCREENSHOT_TYPE = "X Skyworth Screenshot File";
     private static final String VIDEO_TYPE = "X Skyworth Video File";
     private static final String APP_ICON_TYPE = "X Skyworth App Icon File";
     private static final String Config_File = "1 Vendor Configuration File";
     private static final String Log_File = "2 Vendor Log File";
-    public static final String OTA_SYS_DATA = "otaSys";
-    public static final String OTA_APP_DATA = "otaApp";
     private static final String ACTION_BOOT_EXTERNAL_SYS = "com.skw.ota.update.ExternalSysUpdate";
     private static final String ACTION_BOOT_EXTERNAL_APP = "com.skw.ota.update.ExternalAppUpdate";
     private static final String OTA_NEW_PARAMS = "newParams";
@@ -107,14 +90,6 @@ public class Event {
     private static final int INDEX_PARAM_3 = 3;
     private static final int INDEX_PARAM_4 = 4;
 
-    private static final int SYS_UPGRADE_FORCE = 0;
-    private static final int SYS_UPGRADE_REMINDER = 1;
-
-    private static final int APP_UPGRADE_FORCE = 2;
-    private static final int APP_UPGRADE_REMINDER = 1;
-
-    private static final String FILE_TYPE_LOG = "uploadLog";
-    private static final String FILE_TYPE_CONFIG = "uploadConfig";
     private static final String format = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final SimpleDateFormat df = new SimpleDateFormat(format);
     public static String RAW_LOG_FILE = "logcat.log";
@@ -132,58 +107,38 @@ public class Event {
             case REBOOT:
                 ((PowerManager) GlobalContext.getContext().getSystemService(Context.POWER_SERVICE)).reboot("");
                 break;
-            case FACTORYRESET:
+            case FACTORY_RESET:
                 factoryReset();
                 break;
-            case UPLOADFILE:
+            case UPLOAD_FILE:
                 upload(strings[INDEX_PARAM_4], strings[INDEX_PARAM_2], strings[INDEX_PARAM_3]);
                 break;
-            case DOWNLOADFILE:
+            case DOWNLOAD_FILE:
                 downloadFile(strings);
                 break;
-            case CHECK_DOWNLOAD_SPEED:
-                calcNetSpeed();
-            case UPGRADEFILE:
+            case UPGRADE_FILE:
                 //发送升级广播
                 upgradeSw(strings);
                 break;
-            case REBOOT_XMPP:
-                rebootXmpp();
-                break;
-            case IPTV_PLAY_CHECK:
-                checkIptvPlay();
-                break;
-            case SYSTEM_UPGRADE_CHECK:
-                checkSystemUpgrade();
-                break;
-            case ADDOBJECT:
-//                addObject(strings[1]);
-                break;
-            case DELETEOBJECT:
-//                deleteObject(strings[1]);
-                break;
-            case PING:
+            case IP_PING:
                 try {
-                    ping();
+                    ping(strings);
                 } catch (Exception e) {
-                    Log.e(TAG, "tr369 ping error, " + e.getMessage());
+                    Log.e(TAG, "IP_PING event execution failed, " + e.getMessage());
                 }
                 break;
-            case TRACEROUTE:
-//                TraceRoute traceroute = TraceRouteManager.getInstance().getTraceRoute();
-//                SkyDiagnoseServiceManager.getInstance().deleteMultiObject("Device.IP.Diagnostics.TraceRoute.RouteHops.%d.", traceroute.traces.size());
-//                traceroute.getTraces().clear();
-//
-//                String host = DbManager.getDBParam(Tr069Param.DEVICE_IP_DIAGNOSE_TRACEROUTE_HOST);
-//                traceroute.executeTraceroute();
+            case TRACE_ROUTE:
+                TraceRoute traceroute = TraceRouteManager.getInstance().getTraceRoute();
+                DbManager.delMultiObject("Device.IP.Diagnostics.TraceRoute.RouteHops");
+                traceroute.getTraces().clear();
+                traceroute.executeTraceroute();
                 break;
-            case SCREENCAP:
-                screenCap();
-                break;
-            case UPGRADE_APPLICATION:
-                ApplicationUtil.upgradeApplication(strings[INDEX_PARAM_1]);
-            case UNPAIR_BLE_DEVICE:
-//                BluetoothUtil.unpair(strings[INDEX_PARAM_1]);
+            case DOWNLOAD_DIAGNOSTICS:
+                try {
+                    calcNetSpeed(strings);
+                } catch (Exception e) {
+                    Log.e(TAG, "DOWNLOAD_DIAGNOSTICS event execution failed, " + e.getMessage());
+                }
                 break;
             default:
                 Log.d(TAG, "Not Implemented, skyworth.tr369.event: " + value);
@@ -192,11 +147,16 @@ public class Event {
         return true;
     }
 
-    private void calcNetSpeed() {
-        CountDownLatch lock = new CountDownLatch(1);
-        String url = DbManager.getDBParam("Device.IP.Diagnostics.DownloadDiagnostics.DownloadURL");
-        String duration = DbManager.getDBParam("Device.IP.Diagnostics.DownloadDiagnostics.TimeBasedTestDuration");
+    private void calcNetSpeed(String[] params) {
+        if (params.length < 3) {
+            DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_Internal");
+            return;
+        }
+        String url = params[INDEX_PARAM_1];
+        String duration = params[INDEX_PARAM_2];
         Log.d(TAG, "calcNetSpeed url = " + url + ", duration = " + duration);
+
+        long startTime = System.currentTimeMillis();
         long exc_duration;
         if (TextUtils.isEmpty(duration)) {
             exc_duration = 10000;
@@ -204,11 +164,10 @@ public class Event {
             exc_duration = Long.parseLong(duration) * 1000 - 500;
         }
 
+        CountDownLatch lock = new CountDownLatch(1);
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(url).build();
         Call call = client.newCall(request);
-
-        long startTime = System.currentTimeMillis();
 
         call.enqueue(new Callback() {
             @Override
@@ -216,6 +175,7 @@ public class Event {
                 long endTime = System.currentTimeMillis();
                 DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.EOMTime", df.format(endTime));
                 Log.e(TAG, "Failed to calculate network speed. Failure Message: " + e.getMessage());
+                DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_TransferFailed");
                 call.cancel();
                 lock.countDown();
             }
@@ -261,6 +221,8 @@ public class Event {
                 call.cancel();
                 Log.d(TAG, "calcNetSpeed onResponse: TestBytesReceived = " + cureeLength);
                 Log.d(TAG, "calcNetSpeed call.isCanceled: " + call.isCanceled());
+
+                DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Complete");
                 inputStream.close();
                 lock.countDown();
             }
@@ -271,9 +233,8 @@ public class Event {
             lock.await(exc_duration + 1, TimeUnit.SECONDS);
         } catch (Exception e) {
             Log.e(TAG, "calcNetSpeed lock.await call failed, " + e.getMessage());
+            DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_Internal");
         }
-        DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.DiagnosticsState", "Complete");
-
     }
 
     private String[] split(String value) {
@@ -281,94 +242,35 @@ public class Event {
         return value.split(SPLIT);
     }
 
-    private void deleteObject(String path) {
-//        DbManager.delMultiObject(path);
-        int l1 = path.lastIndexOf(".");
-        int l2 = path.lastIndexOf(".", l1 - 1);
-        String numPath = path.substring(0, path.length() - (l1 - l2) - 1) + "NumberOfEntries";
-        DbManager.setDBParam(numPath, String.valueOf(Math.max((Integer.parseInt(DbManager.getDBParam(numPath)) - 1), 0)));
-    }
-
-    private void addObject(String path) {
-        String numPath = path.substring(0, path.length() - 1) + "NumberOfEntries";
-        if (TextUtils.isEmpty(DbManager.getDBParam(numPath))) {
-            DbManager.setDBParam(numPath, "1");
-        } else {
-            DbManager.setDBParam(numPath, String.valueOf(Integer.parseInt(DbManager.getDBParam(numPath)) + 1));
-        }
-    }
-
-    private void checkSystemUpgrade() {
-    }
-
-    private void checkIptvPlay() {
-    }
-
-    private void rebootXmpp() {
-        Log.d(TAG, "rebootXmpp called.");
-        Intent rebootIntent = new Intent("skyworth.intent.action.REBOOT_XMPP"/*Intent.ACTION_FACTORY_RESET*/);
-        rebootIntent.setPackage("com.skyworth.xmppservice");
-        GlobalContext.getContext().sendBroadcast(rebootIntent);
-    }
-
     private void upgradeSw(String[] params) {
         int paramLen = params.length;
         String upgradeUrl;
         String upgradeFileSize;
         String upgradeFileName;
-        Map<String, Object> upgradeData = new HashMap<>();
         Log.d(TAG, "upgradeSw: params.lenth = " + params.length);
 
         if (paramLen > INDEX_PARAM_3) {
             upgradeUrl = params[INDEX_PARAM_1];
             upgradeFileName = params[INDEX_PARAM_2];
             upgradeFileSize = params[INDEX_PARAM_3];
-            Log.d(TAG, "upgradeSw: fileUrl>> " + upgradeUrl + ", fileSize>> " + upgradeFileSize);
+            Log.d(TAG, "upgradeSw: fileUrl>> " + upgradeUrl
+                    + ", fileName>> " + upgradeFileName
+                    + ", fileSize>> " + upgradeFileSize);
             Intent intent = new Intent();
             intent.setPackage("com.sdt.ota");
             //如果是.zip结尾表示是系统升级,.apk结尾表示是app升级
             if (upgradeUrl.contains(".zip")) {
-                SysIntent sysIntent = new SysIntent();
-                SysIntent.SysBean bean = new SysIntent.SysBean();
-                String force_upgrade = DbManager.getDBParam(SYS_UPGRADE_TYPE);
-                bean.setFileUrl(upgradeUrl);
-                bean.setFileName(upgradeFileName);
-                bean.setFileSize(Long.parseLong(upgradeFileSize));
-                bean.setUpgradeType(2);
-
-                if (force_upgrade.equals("0")) {
-                    bean.setUpgradeMode(SYS_UPGRADE_REMINDER);
-                } else {
-                    bean.setUpgradeMode(SYS_UPGRADE_FORCE);
-                }
-                sysIntent.setBeanList(Collections.singletonList(bean));
                 intent.setAction(ACTION_BOOT_EXTERNAL_SYS);
                 intent.putExtra(OTA_NEW_PARAMS, upgradeUrl);
             } else if (upgradeUrl.contains(".apk")) {
-                AppIntent appIntent = new AppIntent();
-                AppIntent.AppBean appBean = new AppIntent.AppBean();
-                String force_upgrade = DbManager.getDBParam(APK_UPGRADE_TYPE);
-                appBean.setFileUrl(upgradeUrl);
-                appBean.setFileName(upgradeFileName);
-                appBean.setFileSize(Long.parseLong(upgradeFileSize));
-                if (force_upgrade.equals("0")) {
-                    appBean.setUpgradeMode(APP_UPGRADE_REMINDER);
-                } else {
-                    appBean.setUpgradeMode(APP_UPGRADE_FORCE);
-                }
-                appBean.setUpgradeType(1);
-                appIntent.setBeanList(Collections.singletonList(appBean));
                 intent.setAction(ACTION_BOOT_EXTERNAL_APP);
                 intent.putExtra(OTA_NEW_PARAMS, upgradeUrl);
             }
             GlobalContext.getContext().sendBroadcast(intent);
         }
-
     }
 
-
     private void downloadFile(String[] params) {
-
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
         okHttpClientBuilder.addNetworkInterceptor(new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
@@ -517,7 +419,6 @@ public class Event {
         }
     }
 
-
     private static void uploadLogFileByHttp(HttpURLConnection con, String filePath, int fileCount) {
         try {
             // 允许Input、Output，不使用Cache
@@ -601,7 +502,6 @@ public class Event {
                 handleVideoFile(uploadUrl, delaySeconds);
                 break;
             case Config_File:
-                //uploadFile("vendor/etc/skyconfig/config.properties", uploadUrl); // https 证书问题
                 String configFilePath = GlobalContext.getContext().getFilesDir().getPath() + "refresh.txt";
                 getRefreshData(configFilePath);
                 uploadLogFile(uploadUrl, configFilePath, 1);
@@ -807,35 +707,98 @@ public class Event {
      * ping -c %d -s %d -t %d %s
      * 示例：ping -c 5 -s 1024 -t 64 www.baidu.com
      */
-    private void ping() {
-        String addr = DbManager.getDBParam("Device.IP.Diagnostics.IPPing.Host");
-        String dscp = DbManager.getDBParam("Device.IP.Diagnostics.IPPing.DSCP");
-        String len = DbManager.getDBParam("Device.IP.Diagnostics.IPPing.DataBlockSize");
-        String pingCount = DbManager.getDBParam("Device.IP.Diagnostics.IPPing.NumberOfRepetitions");
+    private void ping(String[] params) {
+        // 先初始化Output节点
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.IPAddressUsed",
+                NetworkUtils.getIpv4Address(GlobalContext.getContext()));
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.SuccessCount", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.FailureCount", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTime", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTime", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTime", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTimeDetailed", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTimeDetailed", "0");
+        DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed", "0");
+
+        if (params.length < 5) {
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error");
+            return;
+        }
+        String addr = params[INDEX_PARAM_1];
+        String size = params[INDEX_PARAM_2];
+        String count = params[INDEX_PARAM_3];
+        String timeout_ms = params[INDEX_PARAM_4];
+
         StringBuilder cmd = new StringBuilder("/system/bin/");
-        cmd.append("ping -c ").append(pingCount)
-                .append(" -s ").append(len)
-                .append(" -t ").append(64)
+        cmd.append("ping -c ").append(count)
+                .append(" -s ").append(size)
+                .append(" -t ").append(Integer.parseInt(timeout_ms) / 1000)    // 毫秒转换为秒
                 .append(" ").append(addr);
 
         Log.d(TAG, "tr369_ping cmd: " + cmd);
 
         ShellUtils.CommandResult commandResult = ShellUtils.execCommand(cmd.toString(), false);
-        Log.d(TAG, "tr369_ping getString: " + commandResult.toString());
+        Log.d(TAG, "tr369_ping commandResult: " + commandResult);
 
-        String ret = (commandResult.result == 0 ? commandResult.successMsg : commandResult.errorMsg);
-        DbManager.setDBParam("skyworth.param.tr369_ping", ret);
+        String result = (commandResult.result == 0 ? commandResult.successMsg : commandResult.errorMsg);
+        Log.d(TAG, "tr369_ping result: " + result);
+
+//        DbManager.setDBParam("skyworth.param.tr369_ping", ret);
+        parsePingResult(result);
     }
 
-    private void screenCap() {
-        ScreenShot screenShot = new ScreenShot(GlobalContext.getContext());
-        Bitmap bitmap = screenShot.takeScreenshot();
-    }
+    private void parsePingResult(String msg) {
+        // 开始解析
+        if (msg == null || msg.isEmpty()) {
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error");
+        } else if (msg.contains("unknown host")) {
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error_CannotResolveHostName");
+        } else if (msg.contains("Destination Host Unreachable") || msg.contains("Network is unreachable")) {
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error_NoRouteToHost");
+        } else if (msg.contains("min/avg/max/mdev")) {
+            // 期望的情况
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Complete");
+            String[] times = msg.split("min/avg/max/mdev = ")[1].split(" ms")[0].split("/");
+            if (times.length < 4) {
+                DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error");
+                return;
+            }
 
-    static class HttpLogger implements HttpLoggingInterceptor.Logger {
-        @Override
-        public void log(String message) {
-            Log.d(TAG, "HttpLogInfo: " + message);
+            float min_ms = Float.parseFloat(times[0]);
+            float avg_ms = Float.parseFloat(times[1]);
+            float max_ms = Float.parseFloat(times[2]);
+            int min_us = (int)(min_ms * 1000);
+            int avg_us = (int)(avg_ms * 1000);
+            int max_us = (int)(max_ms * 1000);
+            Log.d(TAG, "tr369_ping parsePingResult min_ms: " + min_ms
+                    + ", avg_ms: " + avg_ms
+                    + ", max_ms: " + max_ms
+                    + ", min_us: " + min_us
+                    + ", avg_us: " + avg_us
+                    + ", max_us: " + max_us);
+
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTime", String.valueOf((int)avg_ms));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTime", String.valueOf((int)min_ms));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTime", String.valueOf((int)max_ms));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTimeDetailed", String.valueOf(avg_us));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTimeDetailed", String.valueOf(min_us));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed", String.valueOf(max_us));
+
+            String[] counts_part1 = msg.split("ping statistics ---\n")[1].split(" packets transmitted, ");
+            if (counts_part1.length > 1) {
+                int totalCount = Integer.parseInt(counts_part1[0]);
+                Log.d(TAG, "tr369_ping parsePingResult totalCount: " + totalCount);
+                String[] counts_part2 = counts_part1[1].split(" received,");
+                if (counts_part2.length > 1) {
+                    int successCount = Integer.parseInt(counts_part2[0]);
+                    Log.d(TAG, "tr369_ping parsePingResult successCount: " + successCount);
+                    DbManager.setDBParam("Device.IP.Diagnostics.IPPing.SuccessCount", String.valueOf(successCount));
+                    DbManager.setDBParam("Device.IP.Diagnostics.IPPing.FailureCount", String.valueOf(totalCount - successCount));
+                }
+            }
+
+        } else {
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Canceled");
         }
     }
 
