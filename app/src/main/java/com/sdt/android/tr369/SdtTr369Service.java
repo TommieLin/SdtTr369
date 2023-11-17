@@ -235,7 +235,7 @@ public class SdtTr369Service extends Service {
         public boolean openTR369SetAttr(int what, String path, String value) {
             boolean ret = Tr369PathInvoke.getInstance().setAttribute(what, path, value);
             if (! ret) {
-                ret = (OpenTR369Native.SetDBParam(path, value) != 0);
+                ret = (OpenTR369Native.SetDBParam(path, value) == 0);
             }
             return ret;
         }

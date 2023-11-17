@@ -111,7 +111,7 @@ public class Event {
                 factoryReset();
                 break;
             case UPLOAD_FILE:
-                upload(strings[INDEX_PARAM_4], strings[INDEX_PARAM_2], strings[INDEX_PARAM_3]);
+                upload(strings);
                 break;
             case DOWNLOAD_FILE:
                 downloadFile(strings);
@@ -148,7 +148,8 @@ public class Event {
     }
 
     private void calcNetSpeed(String[] params) {
-        if (params.length < 3) {
+        if (params.length <= INDEX_PARAM_2) {
+            Log.e(TAG, "Parameter error in calcNetSpeed() function, params.len: " + params.length);
             DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_Internal");
             return;
         }
@@ -271,6 +272,11 @@ public class Event {
     }
 
     private void downloadFile(String[] params) {
+        if (params.length <= INDEX_PARAM_3) {
+            Log.e(TAG, "Parameter error in downloadFile() function, params.len: " + params.length);
+            return;
+        }
+
         OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
         okHttpClientBuilder.addNetworkInterceptor(new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
@@ -279,7 +285,7 @@ public class Event {
             }
         }));
         Request request = new Request.Builder()
-                .url(params[2])
+                .url(params[INDEX_PARAM_2])
                 .build();
         Call call = okHttpClientBuilder.build().newCall(request);
         try {
@@ -489,7 +495,14 @@ public class Event {
         }
     }
 
-    private void upload(String uploadUrl, String fileType, String delaySeconds) {
+    private void upload(String[] params) {
+        if (params.length <= INDEX_PARAM_4) {
+            Log.e(TAG, "Parameter error in upload() function, params.len: " + params.length);
+            return;
+        }
+        String fileType = params[INDEX_PARAM_2];
+        String delaySeconds = params[INDEX_PARAM_3];
+        String uploadUrl = params[INDEX_PARAM_4];
         switch (fileType) {
             case SCREENSHOT_TYPE:
                 if (! Device.isScreenOn()) {
@@ -720,8 +733,9 @@ public class Event {
         DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTimeDetailed", "0");
         DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed", "0");
 
-        if (params.length < 5) {
-            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error");
+        if (params.length <= INDEX_PARAM_4) {
+            Log.e(TAG, "Parameter error in ping() function, params.len: " + params.length);
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error_Internal");
             return;
         }
         String addr = params[INDEX_PARAM_1];

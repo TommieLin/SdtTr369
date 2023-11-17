@@ -692,9 +692,9 @@ static char *trace_route_input_args[] =
     "Host",
     "Timeout",
     "MaxHopCount",
-    "DataBlockSize",
     // Not used.
     "DSCP",
+    "DataBlockSize",
     "Interface",
     "ProtocolVersion",
 };
@@ -719,15 +719,13 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
     input_host = USP_ARG_Get(input_args, "Host", "");
     input_timeout = USP_ARG_Get(input_args, "Timeout", "");
     input_max_hop_count = USP_ARG_Get(input_args, "MaxHopCount", "");
-    input_size = USP_ARG_Get(input_args, "DataBlockSize", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute Host: %s, Timeout: %s, MaxHopCount: %s, DataBlockSize: %s",
-                 input_host, input_timeout, input_max_hop_count, input_size);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute Host: %s, Timeout: %s, MaxHopCount: %s",
+                 input_host, input_timeout, input_max_hop_count);
 
     if (strcmp(input_host, "") == 0
         || strcmp(input_timeout, "") == 0
-        || strcmp(input_max_hop_count, "") == 0
-        || strcmp(input_size, "") == 0)
+        || strcmp(input_max_hop_count, "") == 0)
     {
         // if it doesn't, return invalid value
         USP_ERR_SetMessage("%s: Invalid value - The parameters for TraceRoute() are empty.", __FUNCTION__);

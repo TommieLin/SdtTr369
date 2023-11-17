@@ -64,82 +64,82 @@ public class SkyworthX {
     private static final String TAG = "SkyworthX";
 
     @Tr369Get("Device.X_Skyworth.DeviceName")
-    public String SK_TR369_GetDeviceName() {
+    public String SK_TR369_GetDeviceName(String path) {
         return DeviceInfoUtil.getDeviceName(GlobalContext.getContext()); // about - Device Name
     }
 
     @Tr369Get("Device.X_Skyworth.OperatorName")
-    public String SK_TR369_GetOperatorName() {
+    public String SK_TR369_GetOperatorName(String path) {
         return DeviceInfoUtil.getOperatorName();
     }
 
     @Tr369Get("Device.X_Skyworth.BluetoothMac")
-    public String SK_TR369_GetBluetoothMac() {
+    public String SK_TR369_GetBluetoothMac(String path) {
         return DeviceInfoUtil.getBluetoothMac(GlobalContext.getContext()); // about - Status - Bluetooth mac
     }
 
     @Tr369Get("Device.X_Skyworth.AndroidVersion")
-    public String SK_TR369_GetAndroidVersion() {
+    public String SK_TR369_GetAndroidVersion(String path) {
         return DeviceInfoUtil.getDeviceFirmwareVersion(); // about - Version
     }
 
     @Tr369Get("Device.X_Skyworth.AndroidTVOS")
-    public String SK_TR369_GetAndroidTVOS() {
+    public String SK_TR369_GetAndroidTVOS(String path) {
         return DeviceInfoUtil.getBuildInfo(); // about - build
     }
 
     @Tr369Get("Device.X_Skyworth.PatchLevel")
-    public String SK_TR369_GetPatchLevel() {
+    public String SK_TR369_GetPatchLevel(String path) {
         return DeviceInfoUtil.getAndroidSecurityPatchLevel(); // about - Android security patch level
     }
 
     @Tr369Get("Device.X_Skyworth.ScreenSaver")
-    public String SK_TR369_GetScreenSaver() {
+    public String SK_TR369_GetScreenSaver(String path) {
         return DeviceInfoUtil.getScreenSaver(GlobalContext.getContext()); // about - screensaver
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageFree")
-    public String SK_TR369_GetStorageFree() {
+    public String SK_TR369_GetStorageFree(String path) {
         return SkyworthXManager.getInstance().getInternalDataStorageFree();
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageTotal")
-    public String SK_TR369_GetStorageTotal() {
+    public String SK_TR369_GetStorageTotal(String path) {
         return SkyworthXManager.getInstance().getInternalDataStorageTotal();
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageUtilisation")
-    public String SK_TR369_GetStorageUtil() {
+    public String SK_TR369_GetStorageUtil(String path) {
         return SkyworthXManager.getInstance().getInternalDataStorageUtilisation();
     }
 
     @Tr369Get("Device.X_Skyworth.MemoryUtilisation")
-    public String SK_TR369_GetMemoryUtil() {
+    public String SK_TR369_GetMemoryUtil(String path) {
         return SkyworthXManager.getInstance().getMemoryUtilisation();
     }
 
     @Tr369Get("Device.X_Skyworth.ActiveNetworkConnection")
-    public String SK_TR369_GetActiveNetworkConnection() {
+    public String SK_TR369_GetActiveNetworkConnection(String path) {
         return NetworkUtils.getActiveNetworkType(GlobalContext.getContext());
     }
 
     @Tr369Get("Device.X_Skyworth.CpuTemperature")
-    public String SK_TR369_GetCPUTemperature() {
+    public String SK_TR369_GetCPUTemperature(String path) {
         return SkyworthXManager.getInstance().getCpuTemperature();
     }
 
     @Tr369Get("Device.X_Skyworth.DownlinkRate")
-    public String SK_TR369_GetDownlinkRate() {
+    public String SK_TR369_GetDownlinkRate(String path) {
         return String.valueOf(NetWorkSpeedUtils.calcDownSpeed());
     }
 
     @Tr369Get("Device.X_Skyworth.UplinkRate")
-    public String SK_TR369_GetUplinkRate() {
+    public String SK_TR369_GetUplinkRate(String path) {
         return String.valueOf(NetWorkSpeedUtils.calcUpSpeed());
     }
 
     @Tr369Get("Device.X_Skyworth.TotalRAMUsageCapacity")
-    public String SK_TR369_GetTotalRAMUsageCapacity() {
+    public String SK_TR369_GetTotalRAMUsageCapacity(String path) {
         ActivityManager manager =
                 (ActivityManager) GlobalContext.getContext().getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
@@ -237,7 +237,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.WiFiChannelBand")
-    public String SK_TR369_GetWiFiChannelBand() {
+    public String SK_TR369_GetWiFiChannelBand(String path) {
         WifiManager mWifiManager = (WifiManager) GlobalContext.getContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = mWifiManager.getConnectionInfo(); // 已连接wifi信息
         if (info != null) {
@@ -247,17 +247,17 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.WiFiSecureConnection")
-    public String SK_TR369_GetWiFiSecureConnection() {
+    public String SK_TR369_GetWiFiSecureConnection(String path) {
         return SkyworthXManager.getInstance().getWiFiSecureConnection();
     }
 
     @Tr369Get("Device.X_Skyworth.WifiPHYType")
-    public String SK_TR369_GetWifiPHYType() {
+    public String SK_TR369_GetWifiPHYType(String path) {
         return SkyworthXManager.getInstance().getWifiPHYType();
     }
 
     @Tr369Get("Device.X_Skyworth.WiFiMIMOMode")
-    public String SK_TR369_GetWiFiMIMOMode() {
+    public String SK_TR369_GetWiFiMIMOMode(String path) {
         return SkyworthXManager.getInstance().getWiFiMIMOMode();
     }
 
@@ -662,7 +662,7 @@ public class SkyworthX {
     private static final int DEFAULT_SLEEP_TIME_MS = (int) (20 * DateUtils.MINUTE_IN_MILLIS);
 
     @Tr369Get("Device.X_Skyworth.SleepTime")
-    public String SK_TR369_GetAttentiveSleepTime() {
+    public String SK_TR369_GetAttentiveSleepTime(String path) {
         int time = Settings.Secure.getInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Secure.SLEEP_TIMEOUT, DEFAULT_SLEEP_TIME_MS);
         Log.d(TAG, "Get sleep time: " + time);
@@ -670,8 +670,9 @@ public class SkyworthX {
     }
 
     @Tr369Set("Device.X_Skyworth.SleepTime")
-    public void SK_TR369_SetAttentiveSleepTime(String ms) {
-        Settings.Secure.putInt(GlobalContext.getContext().getContentResolver(),
+    public boolean SK_TR369_SetAttentiveSleepTime(String path, String ms) {
+        Log.d(TAG, "Set sleep time: " + ms);
+        return Settings.Secure.putInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Secure.SLEEP_TIMEOUT, Integer.parseInt(ms));
     }
 

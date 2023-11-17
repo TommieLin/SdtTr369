@@ -14,6 +14,8 @@ import android.content.pm.Signature;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Process;
 import android.print.PrintManager;
 import android.util.Log;
 
@@ -27,9 +29,12 @@ import java.util.List;
 
 public class ApplicationUtil {
     private static final String TAG = "ApplicationUtil";
-    private static Handler mHandler = new Handler();
 
     public static boolean uninstall(String pkg) {
+        HandlerThread handlerThread = new HandlerThread("AppUtilThread", Process.THREAD_PRIORITY_BACKGROUND);
+        handlerThread.start();
+        Handler handler = new Handler(handlerThread.getLooper());
+
         Context context = GlobalContext.getContext();
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -37,7 +42,7 @@ public class ApplicationUtil {
         PackageInstaller mPackageInstaller = context.getPackageManager().getPackageInstaller();
         // 卸载APK
         mPackageInstaller.uninstall(pkg, sender.getIntentSender());
-        mHandler.postDelayed(new Runnable() {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 HttpsUtils.uploadNotificationStatus(true);
