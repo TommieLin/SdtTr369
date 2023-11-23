@@ -30,7 +30,8 @@ public class SkyworthXManager {
     private final Context mContext = GlobalContext.getContext();
     final StorageManager sm = mContext.getSystemService(StorageManager.class);
 
-    private SkyworthXManager() {}
+    private SkyworthXManager() {
+    }
 
     public static SkyworthXManager getInstance() {
         synchronized (SkyworthXManager.class) {
@@ -169,8 +170,8 @@ public class SkyworthXManager {
     }
 
     public String getWiFiRFSNR() {
-        int pos = - 1;
-        int i = - 1, len = - 1;
+        int pos = -1;
+        int i = -1, len = -1;
         int findNumber = 0, snrInt = 0;
         String line; // 用来保存每行读取的内容
         String targetStr = "signal_qual:";
@@ -241,8 +242,8 @@ public class SkyworthXManager {
     }
 
     public String getWifiPHYType() {
-        int pos = - 1;
-        int i = - 1, len = - 1;
+        int pos = -1;
+        int i = -1, len = -1;
 
         String phyStr = "unknown";
         String line; // 用来保存每行读取的内容
@@ -287,7 +288,7 @@ public class SkyworthXManager {
     }
 
     public String getWiFiMIMOMode() {
-        int pos = - 1, mimo_type = - 1;
+        int pos = -1, mimo_type = -1;
         int i = 0, len = 0, findNumber = 0;
         String mimoStr;
         String line; // 用来保存每行读取的内容

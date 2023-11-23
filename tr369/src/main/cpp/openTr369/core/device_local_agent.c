@@ -223,13 +223,13 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     char oui[MAX_DM_SHORT_VALUE_LEN];
     char serial_number[MAX_DM_SHORT_VALUE_LEN];
 
+#ifndef REMOVE_DEVICE_INFO
     //-------------------------------------------------------------
     // ManufacturerOUI
     // Exit if unable to get the default value of ManufacturerOUI (ie the value if not overridden by the USP DB)
     GetDefaultOUI(default_value, sizeof(default_value));
     USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultOUI: %s", default_value);
 
-#ifndef REMOVE_DEVICE_INFO
     // Register the default value of OUI (if DeviceInfo parameters are being registered by USP Agent core)
     err = DM_PRIV_ReRegister_DBParam_Default(manufacturer_oui_path, default_value);
     if (err != USP_ERR_OK)
@@ -257,13 +257,13 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
         return err;
     }
 
+#ifndef REMOVE_DEVICE_INFO
     //-------------------------------------------------------------
     // SERIAL NUMBER
     // Exit if unable to get the default value of Serial Number (ie the value if not overridden by the USP DB)
     GetDefaultSerialNumber(default_value, sizeof(default_value));
     USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultSerialNumber: %s", default_value);
 
-#ifndef REMOVE_DEVICE_INFO
     // Register the default value of SerialNumber (if DeviceInfo parameters are being registered by USP Agent core)
     err = DM_PRIV_ReRegister_DBParam_Default(serial_number_path, default_value);
     if (err != USP_ERR_OK)
@@ -316,31 +316,6 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     {
         return err;
     }
-
-    // Outis test
-    char Local_agent_uptime[MAX_DM_SHORT_VALUE_LEN];
-    err = DATA_MODEL_GetParameterValue("Device.LocalAgent.UpTime", Local_agent_uptime, sizeof(Local_agent_uptime), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue device_uptime: %s, err: %d", Local_agent_uptime, err);
-
-    // Outis test
-    char model_name[MAX_DM_SHORT_VALUE_LEN];
-    err = DATA_MODEL_GetParameterValue("Device.DeviceInfo.ModelName", model_name, sizeof(model_name), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue model_name: %s, err: %d", model_name, err);
-
-    // Outis test
-    char device_uptime[MAX_DM_SHORT_VALUE_LEN];
-    err = DATA_MODEL_GetParameterValue("Device.DeviceInfo.UpTime", device_uptime, sizeof(device_uptime), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue device_uptime: %s, err: %d", device_uptime, err);
-
-    // Outis test
-    char operator_name[MAX_DM_SHORT_VALUE_LEN];
-    err = DATA_MODEL_GetParameterValue("Device.X_Skyworth.OperatorName", operator_name, sizeof(operator_name), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue operator_name: %s, err: %d", operator_name, err);
-
-    // Outis test
-//    char enable[MAX_DM_SHORT_VALUE_LEN] = "OutisTest";
-//    err = DATA_MODEL_SetParameterValue("Device.X_Skyworth.Background.Enable", enable, sizeof(enable));
-//    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue Background.Enable: %s, err: %d", enable, err);
 
     return USP_ERR_OK;
 }

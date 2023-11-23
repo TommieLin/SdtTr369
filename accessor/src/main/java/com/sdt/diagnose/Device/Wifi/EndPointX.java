@@ -14,7 +14,7 @@ import com.sdt.diagnose.Device.Wifi.NeighboringWiFiDiagnostic.Result;
 import com.sdt.diagnose.Device.X_Skyworth.SkyworthXManager;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.NetworkStatisticsInfo;
 import com.sdt.diagnose.common.bean.ScanedWifiInfo;
 
@@ -65,7 +65,7 @@ public class EndPointX {
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Tr369Get("Device.WiFi.EndPoint.")
     public String SK_TR369_GetEndPointInfo(String path) {
-        String[] params = ProtocolPathUtl.parse(REFIX, path);
+        String[] params = ProtocolPathUtils.parse(REFIX, path);
         if (params == null || params.length < 1) {
             return null;
         }
@@ -159,7 +159,7 @@ public class EndPointX {
     }
 
     private ScanedWifiInfo getActiveScanedWifiInfo() {
-        if (! NetworkUtils.isWifiConnected(GlobalContext.getContext())) return null;
+        if (!NetworkUtils.isWifiConnected(GlobalContext.getContext())) return null;
         List<ScanedWifiInfo> scans = Result.getScanWifiInfos();
         ScanedWifiInfo scanedWifiInfo = null;
         if (scans != null && scans.size() > 0) {
@@ -178,7 +178,7 @@ public class EndPointX {
         if (params == null || params.length < 3 || context == null) return null;
         String thirdParam = params[2];
         // 默认就1个
-        if (! TextUtils.equals(params[0], "1"))
+        if (!TextUtils.equals(params[0], "1"))
             return null;
         WifiInfo info = NetworkUtils.getConnectedWifiInfo(context);
         switch (thirdParam) {
@@ -210,7 +210,7 @@ public class EndPointX {
         }
         String thirdParam = params[2];
         // 默认就1个
-        if (! TextUtils.equals(thirdParam, "1"))
+        if (!TextUtils.equals(thirdParam, "1"))
             return null;
         String forthParam = params[3];
         switch (forthParam) {
@@ -240,11 +240,11 @@ public class EndPointX {
         }
         String thirdParam = params[2];
         // 默认就1个
-        if (! TextUtils.equals(thirdParam, "1"))
+        if (!TextUtils.equals(thirdParam, "1"))
             return null;
         String forthParam = params[3];
         // 默认就1个
-        if (! TextUtils.equals(forthParam, "Stats"))
+        if (!TextUtils.equals(forthParam, "Stats"))
             return null;
         NetworkStatisticsInfo statisticsInfo = NetworkUtils.getWlanStatisticsInfo();
         String fifthParam = params[4];

@@ -36,7 +36,7 @@ public class LanX {
                     public void handleMessage(@NonNull Message msg) {
                         if (msg.what == MSG_CHECK_INTERNET_CONNECTION) {
                             mHandler.removeMessages(MSG_CHECK_INTERNET_CONNECTION);
-                            if (! NetworkUtils.canAccessInternet(GlobalContext.getContext())) {
+                            if (!NetworkUtils.canAccessInternet(GlobalContext.getContext())) {
                                 Log.e(TAG, "Unable to access the internet, switching to dynamic IP soon.");
                                 NetworkUtils.setStaticIP(GlobalContext.getContext(), "DHCP", null);
                             }
@@ -74,7 +74,7 @@ public class LanX {
         Lan.ip = value;
         NetworkUtils.setStaticIP(GlobalContext.getContext(), Lan.AddressType, Lan.ip);
         if (Lan.AddressType.equals("Static")) {
-            if (! mHandler.hasMessages(MSG_CHECK_INTERNET_CONNECTION)) {
+            if (!mHandler.hasMessages(MSG_CHECK_INTERNET_CONNECTION)) {
                 Log.i(TAG, "Switched to static IP, about to verify if this IP can access the internet.");
                 mHandler.sendEmptyMessageDelayed(MSG_CHECK_INTERNET_CONNECTION, 10000);
             }

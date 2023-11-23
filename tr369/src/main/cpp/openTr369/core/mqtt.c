@@ -54,6 +54,7 @@
 #include "retry_wait.h"
 #include "text_utils.h"
 #include "msg_handler.h"
+#include "sk_jni_callback.h"
 
 #include <openssl/ssl.h>
 #include <openssl/bio.h>
@@ -3353,6 +3354,17 @@ void MessageV5Callback(struct mosquitto *mosq, void *userdata, const struct mosq
 
         if (client->state == kMqttState_Running)
         {
+            // Add by Skyworth: Handle short message topic
+            if (!strncmp(message->topic, "sdtcpe/agent/shortmsg/", strlen("sdtcpe/agent/shortmsg/")))
+            {
+                char param[2048] = {0};
+                strcpy(param, "ShortMessage###");
+                strcat(param, (char *)message->payload);
+                USP_LOG_Info("%s: Wait to handle Short-Message: %s", __FUNCTION__, param);
+                SK_TR369_API_SendEvent(param);
+                goto exit;
+            }
+
             // Now we have a message from somewhere
             char *response_info_ptr = NULL;
 
@@ -3362,6 +3374,7 @@ void MessageV5Callback(struct mosquitto *mosq, void *userdata, const struct mosq
                 USP_LOG_Debug("%s: Failed to read response topic in message info: %s, payload: %s\n", __FUNCTION__, response_info_ptr, (char *)message->payload);
             }
 
+            if (response_info_ptr != NULL) USP_LOG_Debug("%s: Response Topic: '%s'", __FUNCTION__, response_info_ptr);
             ReceiveMqttMessage(client, message, response_info_ptr);
 
             if (response_info_ptr != NULL)

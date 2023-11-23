@@ -92,7 +92,7 @@ public class SPUtils {
      * @return 存在返回对应值，不存在返回默认值-1
      */
     public int getInt(@NonNull String key) {
-        return getInt(key, - 1);
+        return getInt(key, -1);
     }
 
     /**
@@ -123,7 +123,7 @@ public class SPUtils {
      * @return 存在返回对应值，不存在返回默认值-1
      */
     public long getLong(@NonNull String key) {
-        return getLong(key, - 1L);
+        return getLong(key, -1L);
     }
 
     /**
@@ -154,7 +154,7 @@ public class SPUtils {
      * @return 存在返回对应值，不存在返回默认值-1
      */
     public float getFloat(@NonNull String key) {
-        return getFloat(key, - 1f);
+        return getFloat(key, -1f);
     }
 
     /**
@@ -267,8 +267,8 @@ public class SPUtils {
 
     private static boolean isSpace(String s) {
         if (s == null) return true;
-        for (int i = 0, len = s.length(); i < len; ++ i) {
-            if (! Character.isWhitespace(s.charAt(i))) {
+        for (int i = 0, len = s.length(); i < len; ++i) {
+            if (!Character.isWhitespace(s.charAt(i))) {
                 return false;
             }
         }

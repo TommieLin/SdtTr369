@@ -8,7 +8,7 @@ import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.BluetoothDeviceManager;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.BluetoothDeviceInfo;
 import com.sdt.diagnose.database.DbManager;
 
@@ -57,7 +57,7 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
     }
 
     private String handleBluetoothX(String path) {
-        return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
+        return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
         }
 
         if (mBluetoothDevices != null) {
-            if (! mBluetoothDevices.isEmpty()) {
+            if (!mBluetoothDevices.isEmpty()) {
                 DbManager.delMultiObject("Device.X_Skyworth.BluetoothDevice");
                 mBluetoothDevices.clear();
             }

@@ -1,4 +1,4 @@
-package com.sdt.diagnose.common.net;
+package com.sdt.diagnose.common.bean;
 
 /**
  * @Author Outis

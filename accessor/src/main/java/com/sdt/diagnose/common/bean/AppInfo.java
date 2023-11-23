@@ -11,13 +11,12 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.UserHandle;
 
-import com.sdt.diagnose.common.ApplicationUtil;
+import com.sdt.diagnose.common.ApplicationUtils;
 import com.sdt.diagnose.common.GlobalContext;
 
 import java.text.SimpleDateFormat;
 
 public class AppInfo {
-
     private PackageInfo packageInfo;
     private String name;
     private String packageName;
@@ -76,7 +75,7 @@ public class AppInfo {
     }
 
     public boolean isRunning() {
-        return ApplicationUtil.isAppRunning(GlobalContext.getContext(), packageName);
+        return ApplicationUtils.isAppRunning(GlobalContext.getContext(), packageName);
     }
 
     public boolean isCanStop() {
@@ -237,7 +236,7 @@ public class AppInfo {
     }
 
     private boolean canShowEnble(Context context, PackageManager pm) {
-        return ! canUninstall && ApplicationUtil.canDisable(context, pm, packageName);
+        return !canUninstall && ApplicationUtils.canDisable(context, pm, packageName);
     }
 
     public PackageInfo getPackageInfo() {

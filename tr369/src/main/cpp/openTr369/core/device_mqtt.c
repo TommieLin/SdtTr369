@@ -89,6 +89,7 @@ static client_t mqtt_client_params[MAX_MQTT_CLIENTS];
 // Database paths associated with device parameters
 static char *endpoint_id_path = "Device.LocalAgent.EndpointID";
 static char *response_topic_path = "Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured";
+static char *short_msg_topic_path = "Device.MQTT.Client.1.Subscription.1.Topic";
 static char *client_id_path = "Device.MQTT.Client.1.ClientID";
 
 //------------------------------------------------------------------------------
@@ -264,6 +265,7 @@ int DEVICE_MQTT_SetDefaults(void)
     int err;
     char endpoint_id[MAX_DM_SHORT_VALUE_LEN];
     char response_topic[MAX_DM_SHORT_VALUE_LEN];
+    char short_msg_topic[MAX_DM_SHORT_VALUE_LEN];
 
     // Get the actual value of EndpointID
     // This may be the value in the USP DB or the default value (if not present in DB)
@@ -275,9 +277,17 @@ int DEVICE_MQTT_SetDefaults(void)
     }
 
     USP_SNPRINTF(response_topic, sizeof(response_topic), "sdtcpe/agent/resptopic/%s", endpoint_id);
+    USP_SNPRINTF(short_msg_topic, sizeof(short_msg_topic), "sdtcpe/agent/shortmsg/%s", endpoint_id);
 
     // Register the default value of ResponseTopicConfigured
     err = DATA_MODEL_SetParameterInDatabase(response_topic_path, response_topic);
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+
+    // Register the default value of Subscription.1.Topic
+    err = DATA_MODEL_SetParameterInDatabase(short_msg_topic_path, short_msg_topic);
     if (err != USP_ERR_OK)
     {
         return err;

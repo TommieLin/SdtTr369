@@ -7,7 +7,7 @@ import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
 import com.sdt.diagnose.common.ProcessManager;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.ProcessInfo;
 import com.sdt.diagnose.database.DbManager;
 
@@ -28,7 +28,7 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
     }
 
     private String handleProcessInfoX(String path) {
-        return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
+        return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     public static List<ProcessInfo> getProcessInfo() {
@@ -75,7 +75,7 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
 
     public static void updateProcessList() {
         if (mProcessManager != null) {
-            if (! mProcessManager.isEmpty()) {
+            if (!mProcessManager.isEmpty()) {
                 DbManager.delMultiObject("Device.DeviceInfo.ProcessStatus.Process");
                 mProcessManager.clear();
             }

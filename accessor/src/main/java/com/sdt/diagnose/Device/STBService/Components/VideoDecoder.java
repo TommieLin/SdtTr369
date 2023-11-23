@@ -33,11 +33,11 @@ public class VideoDecoder {
 
 
     private int getProfileIndex(String[] profilesArray) {
-        int curIndex = - 1;
+        int curIndex = -1;
         String profileContent = FileUtils.readFileToStr(FILE_NODE_VDEC_PROFILE);
         Log.d(TAG, "profileContent: " + profileContent);
         if (null != profileContent && profilesArray != null) {
-            if (! profileContent.contains(ERROR_VDEC_NOT_SUPPORT) && ! profileContent
+            if (!profileContent.contains(ERROR_VDEC_NOT_SUPPORT) && !profileContent
                     .contains(ERROR_VDEC_EMPTY_LIST)) {
                 for (int i = 0; i < profilesArray.length; i++) {
                     if (profileContent.contains(profilesArray[i])) {
@@ -50,11 +50,11 @@ public class VideoDecoder {
     }
 
     private int getLevelIndex(String[] levelsArray) {
-        int curLevelIndex = - 1;
+        int curLevelIndex = -1;
         String levelContent = FileUtils.readFileToStr(FILE_NODE_VDEC_LEVEL);
         Log.d(TAG, "levelContent: " + levelContent);
         if (null != levelContent && levelsArray != null) {
-            if (! levelContent.contains(ERROR_VDEC_NOT_SUPPORT) && ! levelContent
+            if (!levelContent.contains(ERROR_VDEC_NOT_SUPPORT) && !levelContent
                     .contains(ERROR_VDEC_EMPTY_LIST)) {
                 for (int i = 0; i < levelsArray.length; i++) {
                     if (levelContent.contains(levelsArray[i])) {
@@ -70,7 +70,7 @@ public class VideoDecoder {
     public String SK_TR369_GetVdecName(String path) {
         String videoDecoderName = "";
         String decoderInfo = FileUtils.readFileToStr(FILE_NODE_VDEC_STATUS);
-        if (null != decoderInfo && ! decoderInfo.contains("No vdec")) {
+        if (null != decoderInfo && !decoderInfo.contains("No vdec")) {
             int Start = decoderInfo.indexOf("device name");
             int EndIndex = decoderInfo.indexOf("frame width");
             String nameStr = decoderInfo.substring(Start, EndIndex);
@@ -98,11 +98,11 @@ public class VideoDecoder {
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.MPEG2Part2")
     public String SK_TR369_GetVdecMpeg2Part2(String path) {
         String profileLevelValue = "";
-        int profileLevelIndex = - 1;
+        int profileLevelIndex = -1;
         int curProfileIndex = getProfileIndex(MPEG2_PART2_PROFILE);
-        if (- 1 != curProfileIndex) {
+        if (-1 != curProfileIndex) {
             int curLevelIndex = getLevelIndex(MPEG2_PART2_LEVEL);
-            if (curLevelIndex != - 1) {
+            if (curLevelIndex != -1) {
                 profileLevelIndex =
                         curProfileIndex * MPEG2_PART2_LEVEL.length + curLevelIndex + 1;
                 profileLevelValue = String.valueOf(profileLevelIndex);
@@ -115,11 +115,11 @@ public class VideoDecoder {
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.MPEG4Part2")
     public String SK_TR369_GetVdecMpeg4Part2(String path) {
         String profileLevelValue = "";
-        int profileLevelIndex = - 1;
+        int profileLevelIndex = -1;
         int curProfileIndex = getProfileIndex(MPEG4_PART2_PROFILE);
-        if (- 1 != curProfileIndex) {
+        if (-1 != curProfileIndex) {
             int curLevelIndex = getLevelIndex(MPEG4_PART2_LEVEL);
-            if (curLevelIndex != - 1) {
+            if (curLevelIndex != -1) {
                 profileLevelIndex =
                         curProfileIndex * MPEG4_PART2_LEVEL.length + curLevelIndex + 1;
                 profileLevelValue = String.valueOf(profileLevelIndex);
@@ -132,11 +132,11 @@ public class VideoDecoder {
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.MPEG4Part10")
     public String SK_TR369_GetVdecMpeg4Part10(String path) {
         String profileLevelValue = "";
-        int profileLevelIndex = - 1;
+        int profileLevelIndex = -1;
         int curProfileIndex = getProfileIndex(MPEG4_PART10_PROFILE);
-        if (- 1 != curProfileIndex) {
+        if (-1 != curProfileIndex) {
             int curLevelIndex = getLevelIndex(MPEG4_PART10_LEVEL);
-            if (curLevelIndex != - 1) {
+            if (curLevelIndex != -1) {
                 profileLevelIndex =
                         curProfileIndex * MPEG4_PART10_LEVEL.length + curLevelIndex + 1;
                 profileLevelValue = String.valueOf(profileLevelIndex);

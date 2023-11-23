@@ -89,8 +89,8 @@ typedef struct
 //    char write;
     dm_get_value_cb_t getter;
     dm_set_value_cb_t setter;
-    dm_notify_set_cb_t notification;
-    char value[MAX_DM_VALUE_LEN];   // 默认的值 对应default
+//    dm_notify_set_cb_t notification;
+    char value[MAX_DM_SHORT_VALUE_LEN];   // 默认的值 对应default
 } sk_schema_node_t;
 
 char *sk_tr369_model_xml = NULL;
@@ -99,9 +99,9 @@ char *sk_tr369_model_xml = NULL;
 int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
 {
     int err = USP_ERR_OK;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetVendorParam start");
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetVendorParam req->path: %s, req->schema_path: %s", req->path, req->schema_path);
     err = SK_TR369_API_GetParams(req->path, buf, len);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_API_GetParams return: %d", err);
     if (err == -1)
     {
         err = SK_TR369_GetDBParam(req->path, buf);
@@ -114,7 +114,6 @@ int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
 int SK_TR369_SetVendorParam(dm_req_t *req, char *buf)
 {
     int err = USP_ERR_OK;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetVendorParam start");
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetVendorParam req->path: %s, req->schema_path: %s", req->path, req->schema_path);
     err = SK_TR369_API_SetParams(req->path, buf);
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_API_SetParams return: %d", err);
@@ -1037,6 +1036,119 @@ int SK_TR369_SetDefaultMultiObject()
     return err;
 }
 
+#define CONFIG_FILE_PATH_DEFAULT            "/vendor/etc/skyconfig/config.properties"
+#define CONFIG_TMS_URL                      "tms_url"
+#define CONFIG_TMS_TR369_PORT               "tms_tr369_port"
+#define MAX_LINE_LENGTH                     100
+
+void trim(char *str)
+{
+    int len = strlen(str);
+    if (len == 0) return;
+
+    int start = 0;
+    int end = len - 1;
+
+    // Trim leading spaces
+    while (start < len && (str[start] == ' ' || str[start] == '\t'))
+    {
+        start++;
+    }
+
+    // Trim trailing spaces
+    while (end >= start
+            && (str[end] == ' ' || str[end] == '\t' || str[end] == '\n' || str[end] == '\r'))
+    {
+        end--;
+    }
+
+    int trimmed_length = end - start + 1;
+
+    if (start > 0)
+    {
+        memmove(str, str + start, trimmed_length);
+    }
+    str[trimmed_length] = '\0';
+}
+
+int SK_TR369_SetDefaultServerUrl()
+{
+    // Set: Device.X_Skyworth.ManagementServer.
+    FILE *input_file;
+    int err = USP_ERR_OK;
+    char *config_url = NULL;
+
+    input_file = fopen(CONFIG_FILE_PATH_DEFAULT, "r");
+    if (input_file == NULL)
+    {
+        USP_LOG_Error("%s: Failed to open factory reset file (%s)", __FUNCTION__, CONFIG_FILE_PATH_DEFAULT);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    char tms_url[MAX_LINE_LENGTH] = {0};
+    char tms_tr369_port[MAX_LINE_LENGTH] = {0};
+
+    while (!feof(input_file))
+    {
+        char line[MAX_LINE_LENGTH];
+        if (fgets(line, MAX_LINE_LENGTH, input_file) != NULL)
+        {
+            if (strncmp(
+                    line,
+                    CONFIG_TMS_URL"=",
+                    strlen(CONFIG_TMS_URL) + 1) == 0)
+            {
+                strncpy(tms_url, line + strlen(CONFIG_TMS_URL) + 1, MAX_LINE_LENGTH - 1);
+                trim(tms_url);
+            }
+            else if (strncmp(
+                    line,
+                    CONFIG_TMS_TR369_PORT"=",
+                    strlen(CONFIG_TMS_TR369_PORT) + 1) == 0)
+            {
+                strncpy(tms_tr369_port, line + strlen(CONFIG_TMS_TR369_PORT) + 1,
+                        MAX_LINE_LENGTH - 1);
+                trim(tms_tr369_port);
+            }
+        }
+    }
+    fclose(input_file);
+
+    if (strlen(tms_url) * strlen(tms_tr369_port) == 0)
+    {
+        USP_LOG_Error("%s: Length of configuration variable is 0. Url(%d), Port(%d)", __FUNCTION__, strlen(tms_url), strlen(tms_tr369_port));
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    char *tms_tr369_hostname = strstr(tms_url, "://");
+    if (tms_tr369_hostname == NULL)
+    {
+        USP_LOG_Error("%s: The URL(%s) is illegal and cannot obtain the host name.", __FUNCTION__, tms_url);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    tms_tr369_hostname += 3;
+
+    unsigned int url_len = strlen(tms_url) + strlen(tms_tr369_port) + 1;
+    config_url = (char *)malloc(url_len + 1);
+    if (config_url == NULL)
+    {
+        USP_LOG_Error("%s: malloc() execution failed.", __FUNCTION__);
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    sprintf(config_url, "%s:%s", tms_url, tms_tr369_port);
+    config_url[url_len] = '\0';
+
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultServerUrl Url: %s, Hostname: %s, Port: %s",
+                 config_url, tms_tr369_hostname, tms_tr369_port);
+    SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Url", config_url);
+    SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Hostname", tms_tr369_hostname);
+    SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Port", tms_tr369_port);
+
+    free(config_url);
+
+    return err;
+}
 
 /*********************************************************************//**
 **
@@ -1053,10 +1165,10 @@ int SK_TR369_SetDefaultMultiObject()
 **************************************************************************/
 int VENDOR_Start(void)
 {
-    int err = USP_ERR_OK;
-    err = SK_TR369_SetDefaultMultiObject();
+    SK_TR369_SetDefaultMultiObject();
+    SK_TR369_SetDefaultServerUrl();
 
-    return err;
+    return USP_ERR_OK;
 }
 
 /*********************************************************************//**
@@ -1107,20 +1219,19 @@ int SK_TR369_GetDBParam(const char *param, char *value)
     if (err != USP_ERR_OK)
     {
         USP_LOG_Error("Parameter %s exists in the schema, but does not exist in the database", param);
+        err = DATA_MODEL_GetParameterValue(param, value, MAX_DM_VALUE_LEN, 0);
         return err;
     }
 
 exit:
     // Since successful, send back the value of the parameter
     USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
-
     return USP_ERR_OK;
 }
 
 int SK_TR369_SetDBParam(const char *param, const char *value)
 {
     int err;
-
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDBParam param: %s, value: %s", param, value);
 
     // Exit if unable to directly set the parameter in the database
@@ -1132,7 +1243,6 @@ int SK_TR369_SetDBParam(const char *param, const char *value)
 
     // Since successful, send back the value of the parameter
     USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
-
     return USP_ERR_OK;
 }
 

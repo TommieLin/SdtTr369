@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 public class NetUtils {
     private static final String TAG = "NetUtils";
+
     /*
      * convert subMask string to prefix length
      */
@@ -20,7 +21,7 @@ public class NetUtils {
          * check the subMask format
          */
         Pattern pattern = Pattern.compile("(^((\\d|[01]?\\d\\d|2[0-4]\\d|25[0-5])\\.){3}(\\d|[01]?\\d\\d|2[0-4]\\d|25[0-5])$)|^(\\d|[1-2]\\d|3[0-2])$");
-        if (! pattern.matcher(maskStr).matches()) {
+        if (!pattern.matcher(maskStr).matches()) {
             Log.e(TAG, "subMask is error");
             return 0;
         }
@@ -32,7 +33,7 @@ public class NetUtils {
             count = 0;
             for (int i = 0; i < str.length(); i++) {
                 i = str.indexOf("1", i);
-                if (i == - 1)
+                if (i == -1)
                     break;
                 count++;
             }

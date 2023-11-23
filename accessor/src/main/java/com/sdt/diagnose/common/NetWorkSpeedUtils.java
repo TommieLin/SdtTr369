@@ -72,7 +72,7 @@ public class NetWorkSpeedUtils {
             return null;
         }
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        if (networkInfo == null || ! networkInfo.isAvailable()) {
+        if (networkInfo == null || !networkInfo.isAvailable()) {
             //无连接
             return null;
         }

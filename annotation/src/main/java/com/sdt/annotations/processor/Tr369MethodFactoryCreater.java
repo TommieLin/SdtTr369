@@ -15,7 +15,7 @@ import javax.annotation.processing.Filer;
 import javax.lang.model.element.Modifier;
 
 public class Tr369MethodFactoryCreater {
-    public static void create(String mapName,String packageName, String simpleName, HashMap<String, MethodProperty> actionsMap, Filer mFiler) {
+    public static void create(String mapName, String packageName, String simpleName, HashMap<String, MethodProperty> actionsMap, Filer mFiler) {
         ClassName cArrayMap = ClassName.get("android.util", "ArrayMap");
         ClassName cMethodProperty = ClassName.get("com.sdt.annotations.processor", "MethodProperty");
 

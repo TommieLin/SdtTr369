@@ -124,7 +124,7 @@ public class ShellUtils {
      * </ul>
      */
     public static CommandResult execCommand(String[] commands, boolean isRoot, boolean isNeedResultMsg) {
-        int result = - 1;
+        int result = -1;
         if (commands == null || commands.length == 0) {
             return new CommandResult(result, null, null);
         }

@@ -181,7 +181,7 @@ public class DreamBackend {
     }
 
     public @WhenToDream int getWhenToDreamSetting() {
-        if (! isEnabled()) {
+        if (!isEnabled()) {
             return NEVER;
         }
         return isActivatedOnDock() && isActivatedOnSleep() ? EITHER
@@ -334,7 +334,7 @@ public class DreamBackend {
                     && type != XmlPullParser.START_TAG) {
             }
             String nodeName = parser.getName();
-            if (! "dream".equals(nodeName)) {
+            if (!"dream".equals(nodeName)) {
                 Log.w(TAG, "Meta-data does not start with dream tag");
                 return null;
             }

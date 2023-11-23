@@ -97,7 +97,7 @@ public class AmlHdmiX {
         String name = "";
         try {
             String readStr = SystemControlManager.getInstance().readSysFs("/sys/class/amhdmitx/amhdmitx0/edid");
-            if (! readStr.isEmpty()) {
+            if (!readStr.isEmpty()) {
                 name = readStr.split("Rx Product Name: ")[1].split("Manufacture Week")[0];
             }
         } catch (NoClassDefFoundError e) {
@@ -121,7 +121,7 @@ public class AmlHdmiX {
 
     public boolean setHdmiResolutionValueByAml(String value) {
         List<String> listHdmiMode = getHdmiSupportListByAml();
-        if (! listHdmiMode.contains(value)) {
+        if (!listHdmiMode.contains(value)) {
             Log.e(TAG, "This resolution is not supported!");
             return false;
         }
@@ -160,7 +160,7 @@ public class AmlHdmiX {
         Log.d(TAG, "getHdmiSupportList: " + list);
 
         List<String> listHdmiMode;
-        if (list != null && list.length() != 0 && ! list.contains("null")) {
+        if (list != null && list.length() != 0 && !list.contains("null")) {
             final List<String> edidKeyList = new ArrayList<>();
             for (String mode : HDMI_LIST) {
                 if (list.contains(mode)) {
@@ -178,7 +178,7 @@ public class AmlHdmiX {
         String edid = "";
         try {
             String readStr = SystemControlManager.getInstance().readSysFs("/sys/class/amhdmitx/amhdmitx0/edid");
-            if (! readStr.isEmpty()) {
+            if (!readStr.isEmpty()) {
                 String version = readStr.split("EDID Version: ")[1].split("EDID block number")[0];
                 Log.d(TAG, "getHdmiEdidByAml: EDID Version " + version);
                 if (null != version) {

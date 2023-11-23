@@ -22,10 +22,7 @@ import android.location.LocationManager;
 import androidx.annotation.NonNull;
 
 public class LocationUtils {
-
     public static final String LOCATION_PERMISSION = Manifest.permission_group.LOCATION;
-
-    private static final String TAG = LocationUtils.class.getSimpleName();
 
     public static boolean isLocationEnabled(Context context) {
         return context.getSystemService(LocationManager.class).isLocationEnabled();

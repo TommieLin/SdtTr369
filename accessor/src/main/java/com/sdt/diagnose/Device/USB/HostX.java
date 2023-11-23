@@ -9,7 +9,7 @@ import android.util.Log;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class HostX implements IProtocolArray<UsbDevice> {
     private final static String REFIX = "Device.USB.USBHosts.Host.";
 
     private String handleHostInfo(String path) {
-        return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
+        return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     @Tr369Get("Device.USB.USBHosts.Host.")
@@ -50,7 +50,7 @@ public class HostX implements IProtocolArray<UsbDevice> {
         UsbManager usbManager = (UsbManager) GlobalContext.getContext().getSystemService(Context.USB_SERVICE);
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
         List<UsbDevice> usbDeviceList = new ArrayList<>();
-        if (deviceList != null && ! deviceList.isEmpty()) {
+        if (deviceList != null && !deviceList.isEmpty()) {
             Log.d(TAG, "deviceList.size(): " + deviceList.size());
             for (String key : deviceList.keySet()) {
                 Log.d(TAG, "key: " + key);
@@ -134,7 +134,7 @@ public class HostX implements IProtocolArray<UsbDevice> {
             if (null != context) {
                 UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
                 HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
-                if (deviceList != null && ! deviceList.isEmpty()) {
+                if (deviceList != null && !deviceList.isEmpty()) {
                     return String.valueOf(deviceList.size());
                 }
             }

@@ -261,7 +261,7 @@ public class SystemDataStat {
                     getTodayZeroDate().getTime(), System.currentTimeMillis());
             long wifiUsage = (wifi == null) ? 0 : wifi.getRxBytes();
             long ethernetUsage = (ethernet == null) ? 0 : ethernet.getRxBytes();
-            return ( wifiUsage + ethernetUsage ) / (1024 * 1024);   // 单位：MB
+            return (wifiUsage + ethernetUsage) / (1024 * 1024);   // 单位：MB
         } catch (Exception e) {
             Log.e(TAG, "getRxTotalBytes error: " + e.getMessage());
             return 0;
@@ -280,7 +280,7 @@ public class SystemDataStat {
                     getTodayZeroDate().getTime(), System.currentTimeMillis());
             long wifiUsage = (wifi == null) ? 0 : wifi.getTxBytes();
             long ethernetUsage = (ethernet == null) ? 0 : ethernet.getTxBytes();
-            return ( wifiUsage + ethernetUsage ) / (1024 * 1024);   // 单位：MB
+            return (wifiUsage + ethernetUsage) / (1024 * 1024);   // 单位：MB
         } catch (Exception e) {
             Log.e(TAG, "getTxTotalBytes error: " + e.getMessage());
             return 0;
@@ -364,7 +364,7 @@ public class SystemDataStat {
      * <li> wifiSnr                  - Wifi信噪比 </li>
      */
     private void startSystemDataStatInfo() {
-        String timeStamp = String.valueOf(System.currentTimeMillis()/1000);
+        String timeStamp = String.valueOf(System.currentTimeMillis() / 1000);
         int cpuTemperature = (int) getCpuTemp();
         int cpuUsagePercent = (int) getCpuUsageRate();
 
@@ -372,7 +372,7 @@ public class SystemDataStat {
         int memoryUsagePercent = 0;
         long totalMem = getMemoryTotalSizeKb();
         long availMem = getMemoryAvailSizeKb();
-        long memoryUsage = (totalMem > availMem)? (totalMem - availMem) : (0);
+        long memoryUsage = (totalMem > availMem) ? (totalMem - availMem) : (0);
         try {
             memoryUsagePercent = (int) (100 * memoryUsage / totalMem);
             if (memoryUsagePercent < 0) {
@@ -388,7 +388,7 @@ public class SystemDataStat {
         int storageUsagePercent = 0;
         long totalSpace = getInternalDataTotalStorageKb();
         long freeSpace = getInternalDataFreeStorageKb();
-        long storageUsage = (totalSpace > freeSpace)? (totalSpace - freeSpace) : (0);
+        long storageUsage = (totalSpace > freeSpace) ? (totalSpace - freeSpace) : (0);
         try {
             storageUsagePercent = (int) (100 * storageUsage / totalSpace);
             if (storageUsagePercent < 0) {
@@ -420,8 +420,8 @@ public class SystemDataStat {
         // 更新当日的总流量
         DbManager.setDBParam("Device.X_Skyworth.TotalBytes.Today", String.valueOf(nowRxTotal + nowTxTotal));
         // 计算差值
-        long rxDelta = (nowRxTotal > lastRxTotal)? (nowRxTotal - lastRxTotal) : (0);
-        long txDelta = (nowTxTotal > lastTxTotal)? (nowTxTotal - lastTxTotal) : (0);
+        long rxDelta = (nowRxTotal > lastRxTotal) ? (nowRxTotal - lastRxTotal) : (0);
+        long txDelta = (nowTxTotal > lastTxTotal) ? (nowTxTotal - lastTxTotal) : (0);
         // 记录数据
         lastRxTotal = nowRxTotal;
         lastTxTotal = nowTxTotal;
@@ -431,24 +431,24 @@ public class SystemDataStat {
             CUR_CACHE_NUM = 0;
         }
 
-        JSONObject params  = new JSONObject();
+        JSONObject params = new JSONObject();
         try {
-            params.put("timeStamp",             timeStamp);
-            params.put("cpuTemperature",        cpuTemperature);
-            params.put("cpuUsagePercent",       cpuUsagePercent);
-            params.put("memoryUsage",           memoryUsage);
-            params.put("memoryUsagePercent",    memoryUsagePercent);
-            params.put("storageUsage",          storageUsage);
-            params.put("storageUsagePercent",   storageUsagePercent);
-            params.put("downlinkRate",          downlinkRate);
-            params.put("uplinkRate",            uplinkRate);
-            params.put("wifiSignalStrength",    wifiSignalStrength);
-            params.put("screenInUse",           screenInUse);
-            params.put("dailyFlow",             nowRxTotal + nowTxTotal);
-            params.put("flowIncr",              rxDelta + txDelta);
-            params.put("rxDelta",               rxDelta);
-            params.put("txDelta",               txDelta);
-            params.put("wifiSnr",               wifiSnr);
+            params.put("timeStamp", timeStamp);
+            params.put("cpuTemperature", cpuTemperature);
+            params.put("cpuUsagePercent", cpuUsagePercent);
+            params.put("memoryUsage", memoryUsage);
+            params.put("memoryUsagePercent", memoryUsagePercent);
+            params.put("storageUsage", storageUsage);
+            params.put("storageUsagePercent", storageUsagePercent);
+            params.put("downlinkRate", downlinkRate);
+            params.put("uplinkRate", uplinkRate);
+            params.put("wifiSignalStrength", wifiSignalStrength);
+            params.put("screenInUse", screenInUse);
+            params.put("dailyFlow", nowRxTotal + nowTxTotal);
+            params.put("flowIncr", rxDelta + txDelta);
+            params.put("rxDelta", rxDelta);
+            params.put("txDelta", txDelta);
+            params.put("wifiSnr", wifiSnr);
         } catch (Exception e) {
             Log.e(TAG, "JSONObject PUT error: " + e.getMessage());
         }

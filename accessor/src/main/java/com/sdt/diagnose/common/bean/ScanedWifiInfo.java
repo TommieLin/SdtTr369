@@ -242,7 +242,7 @@ public class ScanedWifiInfo implements Comparable<ScanedWifiInfo> {
 
     public void update(WifiConfiguration config) {
         mConfig = config;
-        if (mConfig != null && ! isPasspoint()) {
+        if (mConfig != null && !isPasspoint()) {
             ssid = removeDoubleQuotes(mConfig.SSID);
         }
         mNetworkId = config != null ? config.networkId : WifiConfiguration.INVALID_NETWORK_ID;
@@ -307,16 +307,16 @@ public class ScanedWifiInfo implements Comparable<ScanedWifiInfo> {
     @Override
     public int compareTo(@NonNull ScanedWifiInfo other) {
         // Active one goes first.
-        if (isActive() && ! other.isActive()) return - 1;
-        if (! isActive() && other.isActive()) return 1;
+        if (isActive() && !other.isActive()) return -1;
+        if (!isActive() && other.isActive()) return 1;
 
         // Reachable one goes before unreachable one.
-        if (isReachable() && ! other.isReachable()) return - 1;
-        if (! isReachable() && other.isReachable()) return 1;
+        if (isReachable() && !other.isReachable()) return -1;
+        if (!isReachable() && other.isReachable()) return 1;
 
         // Configured (saved) one goes before unconfigured one.
-        if (isSaved() && ! other.isSaved()) return - 1;
-        if (! isSaved() && other.isSaved()) return 1;
+        if (isSaved() && !other.isSaved()) return -1;
+        if (!isSaved() && other.isSaved()) return 1;
 
         // Sort by signal strength, bucketed by level
         int difference = WifiManager.calculateSignalLevel(other.mRssi, 5)
@@ -337,12 +337,12 @@ public class ScanedWifiInfo implements Comparable<ScanedWifiInfo> {
 
     @Override
     public boolean equals(Object other) {
-        if (! (other instanceof ScanedWifiInfo)) return false;
+        if (!(other instanceof ScanedWifiInfo)) return false;
         return (this.compareTo((ScanedWifiInfo) other) == 0);
     }
 
     public boolean matches(WifiConfiguration config, WifiManager wm) {
-        if (! ssid.equals(removeDoubleQuotes(config.SSID))
+        if (!ssid.equals(removeDoubleQuotes(config.SSID))
                 || (mConfig != null && mConfig.shared != config.shared)) {
             return false;
         }

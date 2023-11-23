@@ -12,7 +12,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
-import com.sdt.diagnose.common.DeviceInfoUtil;
+import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.database.DbManager;
@@ -26,7 +26,7 @@ public class DeviceInfoX {
 
     @Tr369Get("Device.DeviceInfo.Manufacturer")
     public String SK_TR369_GetManufacturer() {
-        return DeviceInfoUtil.getManufacturer();
+        return DeviceInfoUtils.getManufacturer();
     }
 
     @Tr369Get("Device.DeviceInfo.ManufacturerOUI")
@@ -36,17 +36,17 @@ public class DeviceInfoX {
 
     @Tr369Get("Device.DeviceInfo.SerialNumber")
     public String SK_TR369_GetSerialNumber() {
-        return DeviceInfoUtil.getSerialNumber(); // about - Status - Serial Number
+        return DeviceInfoUtils.getSerialNumber(); // about - Status - Serial Number
     }
 
     @Tr369Get("Device.DeviceInfo.ModelName,Device.DeviceInfo.ModelID,Device.DeviceInfo.ProductClass")
     public String SK_TR369_GetModelName() {
-        return DeviceInfoUtil.getDeviceModel(); // about - Model
+        return DeviceInfoUtils.getDeviceModel(); // about - Model
     }
 
     @Tr369Get("Device.DeviceInfo.TvName")
     public String SK_TR369_GetDeviceName() {
-        return DeviceInfoUtil.getDeviceName(GlobalContext.getContext());
+        return DeviceInfoUtils.getDeviceName(GlobalContext.getContext());
     }
 
     @Tr369Get("Device.DeviceInfo.ActiveFirmwareImage")
@@ -114,7 +114,7 @@ public class DeviceInfoX {
             if (prop == null) return result;
             Iterator<InetAddress> iter = prop.getAllAddresses().iterator();
             // If there are no entries, return null
-            if (! iter.hasNext()) return result;
+            if (!iter.hasNext()) return result;
             // Concatenate all available addresses, newline separated
             StringBuilder addresses = new StringBuilder();
             while (iter.hasNext()) {

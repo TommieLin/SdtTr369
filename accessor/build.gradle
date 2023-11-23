@@ -57,6 +57,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.1'
     implementation 'io.socket:socket.io-client:1.0.0'
     implementation 'com.google.guava:guava:30.1-jre'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 
 //    implementation "com.skyworthdigital.common:log:1.0.19"
 

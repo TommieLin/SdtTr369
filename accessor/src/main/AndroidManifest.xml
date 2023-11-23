@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
@@ -35,11 +35,12 @@
     <uses-permission android:name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.SUSPEND_APPS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application>
         <activity
             android:name="com.sdt.diagnose.common.ScreenRecordActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen"/>
+            android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
 
         <service
             android:name="com.sdt.diagnose.common.ScreenRecordService"
@@ -47,8 +48,13 @@
             android:exported="true"
             android:foregroundServiceType="mediaProjection" />
 
-        <activity android:name="com.sdt.diagnose.Device.X_Skyworth.LockUnlockActivity"
-            android:theme="@style/Theme.Design.NoActionBar"/>
+        <activity
+            android:name="com.sdt.diagnose.Device.X_Skyworth.LockUnlockActivity"
+            android:theme="@style/Theme.Design.NoActionBar" />
+
+        <activity
+            android:name="com.sdt.diagnose.command.ShortMessageActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

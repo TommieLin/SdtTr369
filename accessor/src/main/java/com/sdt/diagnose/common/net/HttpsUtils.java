@@ -7,8 +7,9 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.sdt.diagnose.Device.X_Skyworth.LogManager;
-import com.sdt.diagnose.common.DeviceInfoUtil;
+import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.FileUtils;
+import com.sdt.diagnose.common.bean.LogResponseBean;
 import com.sdt.diagnose.common.bean.NotificationBean;
 import com.sdt.diagnose.common.bean.StandbyBean;
 
@@ -115,7 +116,7 @@ public class HttpsUtils {
 
     public static void uploadScreenshotAllowStatus(String url, int status, String transactionId) {
         HashMap<String, String> param = new HashMap<>();
-        param.put("deviceId", DeviceInfoUtil.getSerialNumber());
+        param.put("deviceId", DeviceInfoUtils.getSerialNumber());
         param.put("confirmCode", String.valueOf(status));
         param.put("transactionId", transactionId);
         String wholeUrl = buildUrl(url, param);
@@ -125,7 +126,7 @@ public class HttpsUtils {
 
     public static void uploadAllowStatus(String url, int status, String confirmMessage, String transactionId) {
         HashMap<String, String> param = new HashMap<>();
-        param.put("deviceId", DeviceInfoUtil.getSerialNumber());
+        param.put("deviceId", DeviceInfoUtils.getSerialNumber());
         param.put("confirmCode", String.valueOf(status));
         param.put("confirmMessage", confirmMessage);
         param.put("transactionId", transactionId);
@@ -141,7 +142,7 @@ public class HttpsUtils {
             return;
         }
         HashMap<String, String> param = new HashMap<>();
-        param.put("deviceId", DeviceInfoUtil.getSerialNumber());
+        param.put("deviceId", DeviceInfoUtils.getSerialNumber());
         param.put("confirmCode", String.valueOf(status));
         String wholeUrl = buildUrl(url, param);
         Log.d(TAG, "uploadStandbyStatus wholeUrl: " + wholeUrl);
@@ -186,8 +187,8 @@ public class HttpsUtils {
     public static void noticeResponse(String url, HashMap<String, String> param) {
         CreateSSL createSSL = new CreateSSL();
         OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
-        MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
         String wholeUrl = buildUrl(url, param);
+        Log.d(TAG, "######### Outis ### noticeResponse url: " + url + ", wholeUrl: " + wholeUrl);
         Request request = new Request.Builder()
                 .url(wholeUrl)
                 .get()

@@ -2,18 +2,18 @@ package com.sdt.diagnose.Device;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
-import com.sdt.diagnose.common.DeviceInfoUtil;
+import com.sdt.diagnose.common.DeviceInfoUtils;
 
 public class UserInterfaceX {
 
     @Tr369Get("Device.UserInterface.CurrentLanguage")
     public String SK_TR369_GetCurrentLocalLanguage() {
-        return DeviceInfoUtil.getLanguage();
+        return DeviceInfoUtils.getLanguage();
     }
 
     @Tr369Set("Device.UserInterface.CurrentLanguage")
     public boolean SK_TR369_ChangeSystemLanguage(String path, String value) {
-        return DeviceInfoUtil.changeSystemLanguage(value);
+        return DeviceInfoUtils.changeSystemLanguage(value);
     }
 
     @Tr369Get("Device.UserInterface.AutoUpdateServer")

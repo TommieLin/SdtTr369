@@ -8,7 +8,8 @@ public class RtkProcessStatusX {
     private static final String TAG = "RtkProcessStatusX";
     private static RtkProcessStatusX mRtkProcessStatusX;
 
-    RtkProcessStatusX() {}
+    RtkProcessStatusX() {
+    }
 
     public static RtkProcessStatusX getInstance() {
         if (null == mRtkProcessStatusX) {

@@ -197,7 +197,7 @@ public class NetworkUtils {
                 InetAddress inetAddress = linkAddress.getAddress();
                 Log.d(TAG, "getWifiIPv4Address inetAddress: " + inetAddress
                         + ", isIpv4: " + linkAddress.isIpv4());
-                if (! inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
                     return inetAddress.getHostAddress();
                 }
             }
@@ -253,7 +253,7 @@ public class NetworkUtils {
                 InetAddress inetAddress = linkAddress.getAddress();
                 Log.d(TAG, "getEthernetIPv4Address inetAddress: " + inetAddress
                         + ", isIpv4: " + linkAddress.isIpv4());
-                if (! inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
                     return inetAddress.getHostAddress();
                 }
             }
@@ -637,7 +637,7 @@ public class NetworkUtils {
             String line = null;
             while ((line = lnr.readLine()) != null) {
                 int split = line.indexOf("]: [");
-                if (split == - 1) continue;
+                if (split == -1) continue;
                 String property = line.substring(1, split);
                 String value = line.substring(split + 4, line.length() - 1);
                 if (property.endsWith(".dns")
@@ -756,9 +756,9 @@ public class NetworkUtils {
     //操作 盒子WiFi 开关的方法 false 表示关闭  true 表示打开
     public static boolean wifiSwitch(Context context, boolean open) {
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (wifiManager.isWifiEnabled() && ! open) {
+        if (wifiManager.isWifiEnabled() && !open) {
             wifiManager.setWifiEnabled(false);
-        } else if (! wifiManager.isWifiEnabled() && open) {
+        } else if (!wifiManager.isWifiEnabled() && open) {
             wifiManager.setWifiEnabled(true);
         }
         return true;
@@ -772,8 +772,8 @@ public class NetworkUtils {
                 connectivityManager.getNetworkCapabilities(network);
 
         if (networkCapabilities != null) {
-            return ! networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)
-                    && ! networkCapabilities.hasCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY)
+            return !networkCapabilities.hasCapability(NET_CAPABILITY_CAPTIVE_PORTAL)
+                    && !networkCapabilities.hasCapability(NET_CAPABILITY_PARTIAL_CONNECTIVITY)
                     && networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED);
         }
 
@@ -790,7 +790,7 @@ public class NetworkUtils {
             case "Static":
                 StaticIpConfiguration mStaticIpConfiguration = new StaticIpConfiguration();
                 String[] split = getDns(GlobalContext.getContext()).split(" / ");
-                for (int i = 0; i < split.length && ! TextUtils.isEmpty(split[i]); i++) {
+                for (int i = 0; i < split.length && !TextUtils.isEmpty(split[i]); i++) {
                     InetAddress inetAddress =
                             android.net.NetworkUtils.numericToInetAddress(split[i]);
                     mStaticIpConfiguration.dnsServers.add(inetAddress);
@@ -899,7 +899,7 @@ public class NetworkUtils {
             Log.d(TAG, "getWifiIpAssignment ssid = " + ssid);
             List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
             for (WifiConfiguration wifiConfiguration : list) {
-                if (! TextUtils.isEmpty(ssid) && ssid.equals(wifiConfiguration.SSID)) {
+                if (!TextUtils.isEmpty(ssid) && ssid.equals(wifiConfiguration.SSID)) {
                     return wifiConfiguration.getIpAssignment().name();
                 }
             }
@@ -947,7 +947,7 @@ public class NetworkUtils {
                     ethernetManager.getConfiguration(defLinkProperties.getInterfaceName());
             if (ipConfig != null) {
                 // getIpAssignment需要有setIpAssignment调用才会有变化，否则值始终为UNASSIGNED
-                return (! ipConfig.getIpAssignment().equals(IpConfiguration.IpAssignment.UNASSIGNED))
+                return (!ipConfig.getIpAssignment().equals(IpConfiguration.IpAssignment.UNASSIGNED))
                         ? ipConfig.getIpAssignment().name()
                         : IpConfiguration.IpAssignment.DHCP.name();
             }
@@ -1043,7 +1043,7 @@ public class NetworkUtils {
                             for (LinkAddress linkAddress : linkAddressList) {
                                 if (isIPv4 && (linkAddress.isIpv4())) {
                                     return String.valueOf(linkAddress.isIpv4());
-                                } else if (! isIPv4 && linkAddress.isIpv6()) {
+                                } else if (!isIPv4 && linkAddress.isIpv6()) {
                                     return String.valueOf(linkAddress.isIpv6());
                                 }
                             }
@@ -1073,10 +1073,10 @@ public class NetworkUtils {
                             for (LinkAddress linkAddress : linkAddressList) {
                                 InetAddress inetAddress = linkAddress.getAddress();
                                 if (isIPv4 && linkAddress.isIpv4()
-                                        && (! inetAddress.isLoopbackAddress())) {
+                                        && (!inetAddress.isLoopbackAddress())) {
                                     return String.valueOf(linkAddress.isIpv4());
-                                } else if ((! isIPv4) && linkAddress.isIPv6()
-                                        && (! inetAddress.isLoopbackAddress())) {
+                                } else if ((!isIPv4) && linkAddress.isIPv6()
+                                        && (!inetAddress.isLoopbackAddress())) {
                                     return String.valueOf(linkAddress.isIpv6());
                                 }
                             }
@@ -1103,7 +1103,7 @@ public class NetworkUtils {
                             List<LinkAddress> linkAddressList = lp.getLinkAddresses();
                             for (LinkAddress linkAddress : linkAddressList) {
                                 InetAddress inetAddress = linkAddress.getAddress();
-                                if (linkAddress.isIpv4() && (! inetAddress.isLoopbackAddress())) {
+                                if (linkAddress.isIpv4() && (!inetAddress.isLoopbackAddress())) {
                                     String maskAddress =
                                             calcMaskByPrefixLength(
                                                     linkAddress.getNetworkPrefixLength());
@@ -1134,7 +1134,7 @@ public class NetworkUtils {
                             List<LinkAddress> linkAddressList = lp.getLinkAddresses();
                             for (LinkAddress linkAddress : linkAddressList) {
                                 InetAddress inetAddress = linkAddress.getAddress();
-                                if (linkAddress.isIpv4() && (! inetAddress.isLoopbackAddress())) {
+                                if (linkAddress.isIpv4() && (!inetAddress.isLoopbackAddress())) {
                                     String maskAddress =
                                             calcMaskByPrefixLength(
                                                     linkAddress.getNetworkPrefixLength());

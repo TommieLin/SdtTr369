@@ -35,11 +35,11 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
     @Override
     public void buildList(Context context) {
         WifiManager mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        if (! NetworkUtils.isWifiEnabled(mWifiManager)) {
+        if (!NetworkUtils.isWifiEnabled(mWifiManager)) {
             Log.e(TAG, "Wifi disable.");
             return;
         }
-        if (! mWifiManager.startScan()) {
+        if (!mWifiManager.startScan()) {
             Log.e(TAG, "Wifi scan failed.");
             return;
         }
@@ -95,7 +95,7 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
 
                 // 当前有网络连接,构建 当前连接的 WIFI ScanedWifiInfo结构体
                 if (wifiInfo != null && wifiInfo.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID
-                        && ! TextUtils.isEmpty(wifiInfo.getBSSID())) {
+                        && !TextUtils.isEmpty(wifiInfo.getBSSID())) {
                     for (ScanResult scan : results) {
                         if (TextUtils.equals(wifiInfo.getBSSID(), scan.BSSID)) {
                             info = new ScanedWifiInfo(wm, scan);
@@ -119,7 +119,7 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
                 add(info);
             }
         }
-        if (! isEmpty()) {
+        if (!isEmpty()) {
             mList.sort(ScanedWifiInfo::compareTo);
         }
     }
@@ -157,9 +157,9 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
                 filteredScanResultList.add(scanResult);
                 continue;
             }
-            if ((scanResult.capabilities.contains(WIFI_SECURITY_SUITE_B_192) && ! isSuiteBSupported)
-                    || (scanResult.capabilities.contains(WIFI_SECURITY_SAE) && ! isSaeSupported)
-                    || (scanResult.capabilities.contains(WIFI_SECURITY_OWE) && ! isOweSupported)) {
+            if ((scanResult.capabilities.contains(WIFI_SECURITY_SUITE_B_192) && !isSuiteBSupported)
+                    || (scanResult.capabilities.contains(WIFI_SECURITY_SAE) && !isSaeSupported)
+                    || (scanResult.capabilities.contains(WIFI_SECURITY_OWE) && !isOweSupported)) {
                 continue;
             }
             filteredScanResultList.add(scanResult);

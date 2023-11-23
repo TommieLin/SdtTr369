@@ -97,7 +97,7 @@ public class DisplayCapabilityManager {
         Iterator<String> sysHdmiModeIterator = systemControlModeList.iterator();
         while (sysHdmiModeIterator.hasNext()) {
             String hdmiModeTmp = filterHdmiModes(sysHdmiModeIterator.next());
-            if (! hdmiModeTmp.isEmpty() && ! isContainsInFW(hdmiModeTmp)) {
+            if (!hdmiModeTmp.isEmpty() && !isContainsInFW(hdmiModeTmp)) {
                 sysHdmiModeIterator.remove();
             }
         }
@@ -107,7 +107,7 @@ public class DisplayCapabilityManager {
     private String filterHdmiModes(String filterHdmiMode) {
         Log.d(TAG, "filterHdmiMode: " + filterHdmiMode);
         try {
-            if (! OutputModeManager.getInstance(mContext).getFrameRateOffset().contains("1")
+            if (!OutputModeManager.getInstance(mContext).getFrameRateOffset().contains("1")
                     || filterHdmiMode == null) {
                 return filterHdmiMode;
             }
@@ -154,7 +154,7 @@ public class DisplayCapabilityManager {
             boolean refreshRate = (Float.floatToIntBits(mode2.getRefreshRate())
                     == Float.floatToIntBits(mode.getRefreshRate()));
             if ((isCvbsMode() && refreshRate)
-                    || (! isCvbsMode()
+                    || (!isCvbsMode()
                     && (mode2.matches(
                     mode.getPhysicalWidth(),
                     mode.getPhysicalHeight(),
@@ -180,7 +180,7 @@ public class DisplayCapabilityManager {
 
     public void setResolutionAndRefreshRateByMode(final String mode) {
         try {
-            if (! DISPLAY_MODE_FALSE.equals(SystemControlManager.getInstance().getBootenv(ENV_IS_BEST_MODE, DISPLAY_MODE_TRUE))) {
+            if (!DISPLAY_MODE_FALSE.equals(SystemControlManager.getInstance().getBootenv(ENV_IS_BEST_MODE, DISPLAY_MODE_TRUE))) {
                 SystemControlManager.getInstance().setBootenv(ENV_IS_BEST_MODE, DISPLAY_MODE_FALSE);
             }
             setUserPreferredDisplayMode(mode);

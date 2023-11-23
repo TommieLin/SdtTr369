@@ -74,6 +74,7 @@ public class Event {
     private static final String IP_PING = "IPPing";
     private static final String TRACE_ROUTE = "TraceRoute";
     private static final String DOWNLOAD_DIAGNOSTICS = "DownloadDiagnostics";
+    private static final String SHORT_MESSAGE = "ShortMessage";
     private static final String SCREENSHOT_TYPE = "X Skyworth Screenshot File";
     private static final String VIDEO_TYPE = "X Skyworth Video File";
     private static final String APP_ICON_TYPE = "X Skyworth App Icon File";
@@ -82,6 +83,7 @@ public class Event {
     private static final String ACTION_BOOT_EXTERNAL_SYS = "com.skw.ota.update.ExternalSysUpdate";
     private static final String ACTION_BOOT_EXTERNAL_APP = "com.skw.ota.update.ExternalAppUpdate";
     private static final String OTA_NEW_PARAMS = "newParams";
+    private static final String OTA_PKG_NAME = "packageName";
 
     private static final String SPLIT = "###";
     private static final int INDEX_COMMAND = 0;
@@ -140,8 +142,18 @@ public class Event {
                     Log.e(TAG, "DOWNLOAD_DIAGNOSTICS event execution failed, " + e.getMessage());
                 }
                 break;
+            case SHORT_MESSAGE:
+                Log.d(TAG, " ######## Outis ### SHORT_MESSAGE String: " + value);
+                String[] values = value.split(SPLIT, 2);
+                if (values.length <= INDEX_PARAM_1) {
+                    Log.e(TAG, "Parameter error in SHORT_MESSAGE Event, values.len: " + values.length);
+                    break;
+                }
+                ShortMessageUtils.handleShortMessage(values[INDEX_PARAM_1]);
+                break;
             default:
                 Log.d(TAG, "Not Implemented, skyworth.tr369.event: " + value);
+                break;
         }
 
         return true;
@@ -201,7 +213,7 @@ public class Event {
                 long startRx = TrafficStats.getTotalRxBytes();
                 long endTime = System.currentTimeMillis();
 
-                while ((readLength = inputStream.read(bytes)) != - 1) {
+                while ((readLength = inputStream.read(bytes)) != -1) {
                     cureeLength += readLength;
                     endTime = System.currentTimeMillis();
                     if (cureeLength < maxLen) {
@@ -239,7 +251,7 @@ public class Event {
     }
 
     private String[] split(String value) {
-        if (TextUtils.isEmpty(value)) return null;
+        if (value == null || TextUtils.isEmpty(value)) return null;
         return value.split(SPLIT);
     }
 
@@ -263,9 +275,11 @@ public class Event {
             if (upgradeUrl.contains(".zip")) {
                 intent.setAction(ACTION_BOOT_EXTERNAL_SYS);
                 intent.putExtra(OTA_NEW_PARAMS, upgradeUrl);
+                intent.putExtra(OTA_PKG_NAME, GlobalContext.getContext().getPackageName());
             } else if (upgradeUrl.contains(".apk")) {
                 intent.setAction(ACTION_BOOT_EXTERNAL_APP);
                 intent.putExtra(OTA_NEW_PARAMS, upgradeUrl);
+                intent.putExtra(OTA_PKG_NAME, GlobalContext.getContext().getPackageName());
             }
             GlobalContext.getContext().sendBroadcast(intent);
         }
@@ -309,7 +323,7 @@ public class Event {
                         int len = 0;
                         float count = 0;
                         long contentLength = Objects.requireNonNull(response.body()).contentLength();
-                        while ((len = inputStream.read(buffer)) != - 1) {
+                        while ((len = inputStream.read(buffer)) != -1) {
                             count += len;
                             fos.write(buffer, 0, len);
                             float l = (float) (count * 100 / contentLength * 1.0);
@@ -359,7 +373,7 @@ public class Event {
             con.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
-                    return hostname.equals(DbManager.getDBParam("Device.ManagementServer.URL").split(":")[1].replace("//", ""));
+                    return hostname.equals(DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Hostname"));
                 }
             });
             con.setConnectTimeout(50000);
@@ -389,9 +403,9 @@ public class Event {
                 int bufferSize = 1024;
                 byte[] buffer = new byte[bufferSize];
 
-                int length = - 1;
+                int length = -1;
                 // 从文件读取数据至缓冲区
-                while ((length = fStream.read(buffer)) != - 1) {
+                while ((length = fStream.read(buffer)) != -1) {
                     // 将资料写入DataOutputStream中 对于有中文的文件需要使用GBK编码格式
                     // ds.write(new String(buffer, 0, length).getBytes("GBK"));
                     ds.write(buffer, 0, length);
@@ -403,14 +417,8 @@ public class Event {
 
             if (con.getResponseCode() == 200) {
                 Log.i(TAG, "uploadLogFileByHttps: File uploaded successfully! File path: " + filePath);
-//                Intent intent = new Intent();
-//                intent.setAction("com.skw.diagnose.UploadSuccess");
-//                intent.setPackage(ParsePackageName.getPackageName(intent));
-//                intent.putExtra("status", 0);
-//                intent.putExtra("reason", "upload success");
-//                GlobalContext.getContext().sendBroadcast(intent);
                 // 上传成功，只删除分段保存的那些文件
-                if (! filePath.contains(RAW_LOG_FILE)) {
+                if (!filePath.contains(RAW_LOG_FILE)) {
                     File file = new File(filePath);
                     if (file.exists()) {
                         Log.d(TAG, "uploadLogFileByHttps: wait to delete file: " + filePath);
@@ -459,9 +467,9 @@ public class Event {
                 int bufferSize = 1024;
                 byte[] buffer = new byte[bufferSize];
 
-                int length = - 1;
+                int length = -1;
                 // 从文件读取数据至缓冲区
-                while ((length = fStream.read(buffer)) != - 1) {
+                while ((length = fStream.read(buffer)) != -1) {
                     // 将资料写入DataOutputStream中
                     //ds.write(new String(buffer,0,length).getBytes("GBK"));
                     ds.write(buffer, 0, length);
@@ -473,14 +481,8 @@ public class Event {
 
             if (con.getResponseCode() == 200) {
                 Log.i(TAG, "uploadLogFileByHttp: File uploaded successfully! File path: " + filePath);
-//                Intent intent = new Intent();
-//                intent.setAction("com.skw.diagnose.UploadSuccess");
-//                intent.setPackage(ParsePackageName.getPackageName(intent));
-//                intent.putExtra("status", 0);
-//                intent.putExtra("reason", "upload success");
-//                GlobalContext.getContext().sendBroadcast(intent);
                 // 上传成功，只删除分段保存的那些文件
-                if (! filePath.contains(RAW_LOG_FILE)) {
+                if (!filePath.contains(RAW_LOG_FILE)) {
                     File file = new File(filePath);
                     if (file.exists()) {
                         Log.d(TAG, "uploadLogFileByHttp: wait to delete file: " + filePath);
@@ -505,7 +507,7 @@ public class Event {
         String uploadUrl = params[INDEX_PARAM_4];
         switch (fileType) {
             case SCREENSHOT_TYPE:
-                if (! Device.isScreenOn()) {
+                if (!Device.isScreenOn()) {
                     Log.e(TAG, "The screen is not in use and there is no need to take a screenshot.");
                     break;
                 }
@@ -529,7 +531,7 @@ public class Event {
     }
 
     private void handleVideoFile(String uploadUrl, String delaySeconds) {
-        if (! Device.isScreenOn()) {
+        if (!Device.isScreenOn()) {
             Log.e(TAG, "The screen is not in use and there is no need to perform screen recording.");
             return;
         }
@@ -577,7 +579,7 @@ public class Event {
             return;
         }
         File folder = new File(LOG_SOURCE_DIR_PATH);
-        if (! folder.exists() || ! folder.isDirectory()) {
+        if (!folder.exists() || !folder.isDirectory()) {
             Log.e(TAG, "Execution error: The folder for storing logs was not found.");
             return;
         }
@@ -674,7 +676,7 @@ public class Event {
     public void saveIcon(Drawable icon, String appName) {
         String dataPath = GlobalContext.getContext().getFilesDir() + "/";
         File file = new File(dataPath + appName + ".png");
-        if (! file.exists()) {
+        if (!file.exists()) {
             try {
                 file.createNewFile();
                 Bitmap bitmap = drawableToBitmap(icon);
@@ -781,9 +783,9 @@ public class Event {
             float min_ms = Float.parseFloat(times[0]);
             float avg_ms = Float.parseFloat(times[1]);
             float max_ms = Float.parseFloat(times[2]);
-            int min_us = (int)(min_ms * 1000);
-            int avg_us = (int)(avg_ms * 1000);
-            int max_us = (int)(max_ms * 1000);
+            int min_us = (int) (min_ms * 1000);
+            int avg_us = (int) (avg_ms * 1000);
+            int max_us = (int) (max_ms * 1000);
             Log.d(TAG, "tr369_ping parsePingResult min_ms: " + min_ms
                     + ", avg_ms: " + avg_ms
                     + ", max_ms: " + max_ms
@@ -791,9 +793,9 @@ public class Event {
                     + ", avg_us: " + avg_us
                     + ", max_us: " + max_us);
 
-            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTime", String.valueOf((int)avg_ms));
-            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTime", String.valueOf((int)min_ms));
-            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTime", String.valueOf((int)max_ms));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTime", String.valueOf((int) avg_ms));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTime", String.valueOf((int) min_ms));
+            DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTime", String.valueOf((int) max_ms));
             DbManager.setDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTimeDetailed", String.valueOf(avg_us));
             DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTimeDetailed", String.valueOf(min_us));
             DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed", String.valueOf(max_us));

@@ -8,7 +8,8 @@ public class AmlProcessStatusX {
     private static final String TAG = "AmlProcessStatusX";
     private static AmlProcessStatusX mAmlProcessStatusX;
 
-    AmlProcessStatusX() {}
+    AmlProcessStatusX() {
+    }
 
     public static AmlProcessStatusX getInstance() {
         if (null == mAmlProcessStatusX) {
@@ -19,9 +20,9 @@ public class AmlProcessStatusX {
 
     /**
      * 需要权限 allow system_control proc_stat:file { open read }
-     *
+     * <p>
      * (user、nice、system、idle、iowait、irq、softirq、stealstolen、guest)的9元组
-     *
+     * <p>
      * cpu  143024 41996 347947 4830201 15644 0 1658 0 0 0
      * cpu0 38179 10260 87076 1167751 3533 0 1572 0 0 0
      * cpu1 36448 10557 88600 1227830 4656 0 25 0 0 0

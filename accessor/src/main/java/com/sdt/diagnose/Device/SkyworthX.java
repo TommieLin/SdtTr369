@@ -34,14 +34,14 @@ import com.sdt.diagnose.Device.X_Skyworth.LogManager;
 import com.sdt.diagnose.Device.X_Skyworth.SkyworthXManager;
 import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
 import com.sdt.diagnose.DiagnoseServiceManager;
-import com.sdt.diagnose.common.ApplicationUtil;
-import com.sdt.diagnose.common.DeviceInfoUtil;
+import com.sdt.diagnose.common.ApplicationUtils;
+import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.DreamBackend;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetWorkSpeedUtils;
 import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.SPUtils;
-import com.sdt.diagnose.common.TimeFormatUtil;
+import com.sdt.diagnose.common.TimeFormatUtils;
 import com.sdt.diagnose.common.XshellClient;
 import com.sdt.diagnose.common.bean.NotificationBean;
 import com.sdt.diagnose.common.bean.SpeedTestBean;
@@ -65,37 +65,37 @@ public class SkyworthX {
 
     @Tr369Get("Device.X_Skyworth.DeviceName")
     public String SK_TR369_GetDeviceName(String path) {
-        return DeviceInfoUtil.getDeviceName(GlobalContext.getContext()); // about - Device Name
+        return DeviceInfoUtils.getDeviceName(GlobalContext.getContext()); // about - Device Name
     }
 
     @Tr369Get("Device.X_Skyworth.OperatorName")
     public String SK_TR369_GetOperatorName(String path) {
-        return DeviceInfoUtil.getOperatorName();
+        return DeviceInfoUtils.getOperatorName();
     }
 
     @Tr369Get("Device.X_Skyworth.BluetoothMac")
     public String SK_TR369_GetBluetoothMac(String path) {
-        return DeviceInfoUtil.getBluetoothMac(GlobalContext.getContext()); // about - Status - Bluetooth mac
+        return DeviceInfoUtils.getBluetoothMac(GlobalContext.getContext()); // about - Status - Bluetooth mac
     }
 
     @Tr369Get("Device.X_Skyworth.AndroidVersion")
     public String SK_TR369_GetAndroidVersion(String path) {
-        return DeviceInfoUtil.getDeviceFirmwareVersion(); // about - Version
+        return DeviceInfoUtils.getDeviceFirmwareVersion(); // about - Version
     }
 
     @Tr369Get("Device.X_Skyworth.AndroidTVOS")
     public String SK_TR369_GetAndroidTVOS(String path) {
-        return DeviceInfoUtil.getBuildInfo(); // about - build
+        return DeviceInfoUtils.getBuildInfo(); // about - build
     }
 
     @Tr369Get("Device.X_Skyworth.PatchLevel")
     public String SK_TR369_GetPatchLevel(String path) {
-        return DeviceInfoUtil.getAndroidSecurityPatchLevel(); // about - Android security patch level
+        return DeviceInfoUtils.getAndroidSecurityPatchLevel(); // about - Android security patch level
     }
 
     @Tr369Get("Device.X_Skyworth.ScreenSaver")
     public String SK_TR369_GetScreenSaver(String path) {
-        return DeviceInfoUtil.getScreenSaver(GlobalContext.getContext()); // about - screensaver
+        return DeviceInfoUtils.getScreenSaver(GlobalContext.getContext()); // about - screensaver
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageFree")
@@ -161,7 +161,7 @@ public class SkyworthX {
         try {
             if (Boolean.parseBoolean(value) || Integer.parseInt(value) == 1) {
                 return SkyworthXManager.getInstance().mute();
-            } else if ((! Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
+            } else if ((!Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
                 return SkyworthXManager.getInstance().unmute();
             }
         } catch (Exception e) {
@@ -173,7 +173,7 @@ public class SkyworthX {
     @Tr369Set("Device.X_Skyworth.Volume")
     public boolean SK_TR369_SetVolume(String path, String volume) {
         Log.d(TAG, "setVolume volume: " + volume);
-        int index = - 1;
+        int index = -1;
         index = Integer.parseInt(volume);
         Log.d(TAG, "setVolume value: " + index);
         AudioManager audioManager =
@@ -263,12 +263,12 @@ public class SkyworthX {
 
     @Tr369Set("Device.X_Skyworth.UninstallApp")
     public boolean SK_TR369_UninstallApp(String path, String value) {
-        return ApplicationUtil.uninstall(value);
+        return ApplicationUtils.uninstall(value);
     }
 
     @Tr369Set("Device.X_Skyworth.UninstallApps")
     public boolean SK_TR369_UninstallApps(String path, String value) {
-        return ApplicationUtil.uninstallApps(value);
+        return ApplicationUtils.uninstallApps(value);
     }
 
     private static int count = 0;
@@ -360,12 +360,12 @@ public class SkyworthX {
                                 SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_WIDTH_SP_KEY),
                                 SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_HEIGHT_SP_KEY)));
                 params.put(GlobalContext.getContext().getString(R.string.dev_name),
-                        DeviceInfoUtil.getSerialNumber());
+                        DeviceInfoUtils.getSerialNumber());
                 RemoteControlAPI.start(GlobalContext.getContext(), params);
                 SPUtils.getInstance(GlobalContext.getContext()).put(path, "1");
                 return true;
             }
-        } else if (! Boolean.getBoolean(val) || Integer.parseInt(val) == 0) {
+        } else if (!Boolean.getBoolean(val) || Integer.parseInt(val) == 0) {
             RemoteControlAPI.stop(GlobalContext.getContext());
         }
         SPUtils.getInstance(GlobalContext.getContext()).put(path, "0");
@@ -405,12 +405,12 @@ public class SkyworthX {
 
     @Tr369Get("Device.X_Skyworth.System.Setting.Use24HourFormat")
     public String SK_TR369_GetTimeFormat(String path) {
-        return TimeFormatUtil.is24Hour(GlobalContext.getContext()) ? "1" : "0";
+        return TimeFormatUtils.is24Hour(GlobalContext.getContext()) ? "1" : "0";
     }
 
     @Tr369Set("Device.X_Skyworth.System.Setting.Use24HourFormat")
     public boolean SK_TR369_SetTimeFormat(String path, String val) {
-        TimeFormatUtil.set24HourAndTimeUpdated(GlobalContext.getContext(), "1".equals(val));
+        TimeFormatUtils.set24HourAndTimeUpdated(GlobalContext.getContext(), "1".equals(val));
         return true;
     }
 
@@ -423,8 +423,8 @@ public class SkyworthX {
         } else if (path.contains("TransactionId")) {
             SpeedTestBean.getInstance().setTransactionId(value);
             if (SpeedTestBean.getInstance().getEnable().equals("1")
-                    && ! TextUtils.isEmpty(SpeedTestBean.getInstance().getUrl())
-                    && ! TextUtils.isEmpty(SpeedTestBean.getInstance().getTransactionId())) {
+                    && !TextUtils.isEmpty(SpeedTestBean.getInstance().getUrl())
+                    && !TextUtils.isEmpty(SpeedTestBean.getInstance().getTransactionId())) {
                 Log.d(TAG, "Wait to call bindSpeedTestService function");
                 DiagnoseServiceManager.getInstance().bindSpeedTestService();
             }
@@ -450,7 +450,7 @@ public class SkyworthX {
     public Boolean SK_TR369_SetRemoteSSHParams(String path, String value) {
         if (path.contains("Enable")) {
             if ("1".equals(value)) {
-                String serviceUrl = String.format("%s?userId=%s", remoteSshUrl, DeviceInfoUtil.getSerialNumber());
+                String serviceUrl = String.format("%s?userId=%s", remoteSshUrl, DeviceInfoUtils.getSerialNumber());
                 XshellClient.start(serviceUrl);
             } else if ("0".equals(value)) {
                 XshellClient.stop();
@@ -584,10 +584,10 @@ public class SkyworthX {
                 GlobalContext.getContext().startActivity(
                         new Intent().setComponent(dreamInfo.settingsComponentName));
             }
-            if (! mBackend.isEnabled()) {
+            if (!mBackend.isEnabled()) {
                 mBackend.setEnabled(true);
             }
-            if (! Objects.equals(mBackend.getActiveDream(), dreamInfo.componentName)) {
+            if (!Objects.equals(mBackend.getActiveDream(), dreamInfo.componentName)) {
                 mBackend.setActiveDream(dreamInfo.componentName);
             }
         } else {
@@ -652,7 +652,7 @@ public class SkyworthX {
         if (path.contains("Url")) {
             StandbyBean.getInstance().setUpdateUrl(value);
             Context context = GlobalContext.getContext();
-            DeviceInfoUtil.updateStandbyStatus(context);
+            DeviceInfoUtils.updateStandbyStatus(context);
         } else if (path.contains("Enable")) {
             StandbyBean.getInstance().setEnable(value);
         }

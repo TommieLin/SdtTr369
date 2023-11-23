@@ -5,7 +5,7 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.text.format.DateFormat;
 
-public class TimeFormatUtil {
+public class TimeFormatUtils {
     private static final String HOURS_12 = "12";
     private static final String HOURS_24 = "24";
 

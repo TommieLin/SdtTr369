@@ -51,8 +51,8 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
-public class DeviceInfoUtil {
-    private static final String TAG = "DeviceInfoUtil";
+public class DeviceInfoUtils {
+    private static final String TAG = "DeviceInfoUtils";
     private static final String CONFIG_FILE_PATH_DEFAULT = "/vendor/etc/skyconfig/config.properties";
     private static final String CONFIG_DEVICE_OPERATOR = "tms_operator_name";
 
@@ -67,14 +67,14 @@ public class DeviceInfoUtil {
         String operatorName = "platform";
 
         try {
-            int pos = - 1;
+            int pos = -1;
             is = Files.newInputStream(Paths.get(CONFIG_FILE_PATH_DEFAULT));
             reader = new BufferedReader(new InputStreamReader(is));
             line = reader.readLine();
             while (line != null) {
                 pos = line.indexOf(CONFIG_DEVICE_OPERATOR);
                 if (pos >= 0) {
-                    Log.d(TAG, "DeviceInfoUtil Read configuration file data: " + line);
+                    Log.d(TAG, "DeviceInfoUtils Read configuration file data: " + line);
                     break;
                 }
                 line = reader.readLine();
@@ -84,10 +84,10 @@ public class DeviceInfoUtil {
 
             if (pos >= 0) {
                 operatorName = line.substring(pos + CONFIG_DEVICE_OPERATOR.length() + 1);
-                Log.d(TAG, "DeviceInfoUtil operatorName: " + operatorName);
+                Log.d(TAG, "DeviceInfoUtils operatorName: " + operatorName);
             }
         } catch (Exception e) {
-            Log.e(TAG, "DeviceInfoUtil getOperatorName Exception error: " + e.getMessage());
+            Log.e(TAG, "DeviceInfoUtils getOperatorName Exception error: " + e.getMessage());
         }
 
         return operatorName;
@@ -143,7 +143,7 @@ public class DeviceInfoUtil {
 
     static String getSecurityPatch() {
         String patch = Build.VERSION.SECURITY_PATCH;
-        if (! "".equals(patch)) {
+        if (!"".equals(patch)) {
             try {
                 SimpleDateFormat template = new SimpleDateFormat("yyyy-MM-dd");
                 Date patchDate = template.parse(patch);
@@ -194,7 +194,7 @@ public class DeviceInfoUtil {
         String result = "unavailable";
         if (bluetooth != null) {
             String address = bluetooth.isEnabled() ? bluetooth.getAddress() : "";
-            if (! TextUtils.isEmpty(address)) {
+            if (!TextUtils.isEmpty(address)) {
                 // Convert the address to lowercase for consistency with the wifi MAC address.
                 result = address.toLowerCase();
             }
@@ -276,7 +276,7 @@ public class DeviceInfoUtil {
         final String gmtPattern = tzFormatter.getGMTPattern();
         final int placeholderIndex = gmtPattern.indexOf("{0}");
         final String gmtPatternPrefix, gmtPatternSuffix;
-        if (placeholderIndex == - 1) {
+        if (placeholderIndex == -1) {
             // Bad pattern. Replace with defaults.
             gmtPatternPrefix = "GMT";
             gmtPatternSuffix = "";
@@ -285,7 +285,7 @@ public class DeviceInfoUtil {
             gmtPatternSuffix = gmtPattern.substring(placeholderIndex + 3); // After the "{0}".
         }
 
-        if (! gmtPatternPrefix.isEmpty()) {
+        if (!gmtPatternPrefix.isEmpty()) {
             appendWithTtsSpan(builder, gmtPatternPrefix,
                     new TtsSpan.TextBuilder(gmtPatternPrefix).build());
         }
@@ -294,7 +294,7 @@ public class DeviceInfoUtil {
         final boolean negative = offsetMillis < 0;
         final TimeZoneFormat.GMTOffsetPatternType patternType;
         if (negative) {
-            offsetMillis = - offsetMillis;
+            offsetMillis = -offsetMillis;
             patternType = TimeZoneFormat.GMTOffsetPatternType.NEGATIVE_HM;
         } else {
             patternType = TimeZoneFormat.GMTOffsetPatternType.POSITIVE_HM;
@@ -335,7 +335,7 @@ public class DeviceInfoUtil {
             }
         }
 
-        if (! gmtPatternSuffix.isEmpty()) {
+        if (!gmtPatternSuffix.isEmpty()) {
             appendWithTtsSpan(builder, gmtPatternSuffix,
                     new TtsSpan.TextBuilder(gmtPatternSuffix).build());
         }
@@ -400,7 +400,7 @@ public class DeviceInfoUtil {
             String languageTag = localeInfoList.get(i).getLocale().toLanguageTag();
             languageTags.add(languageTag);
         }
-        if (! languageTags.contains(language)) {
+        if (!languageTags.contains(language)) {
             return false;
         }
         try {

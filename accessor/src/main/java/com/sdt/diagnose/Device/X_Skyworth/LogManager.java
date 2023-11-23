@@ -181,7 +181,7 @@ public class LogManager {
             is = p.getInputStream();
             int len = 0;
             byte[] buf = new byte[1024];
-            while (isRead() && (- 1 != (len = is.read(buf)))) {
+            while (isRead() && (-1 != (len = is.read(buf)))) {
                 sb.append(new String(buf, 0, len));
                 if (condition.get()) {
                     handler.sendEmptyMessageDelayed(1, Interval2Ms());

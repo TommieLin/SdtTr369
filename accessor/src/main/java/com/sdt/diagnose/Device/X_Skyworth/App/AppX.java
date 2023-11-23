@@ -20,11 +20,11 @@ import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.AppPermissionControl;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.model.AppPermissionGroup;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.model.Permission;
-import com.sdt.diagnose.common.ApplicationUtil;
+import com.sdt.diagnose.common.ApplicationUtils;
 import com.sdt.diagnose.common.AppsManager;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.AppInfo;
 import com.sdt.diagnose.database.DbManager;
 
@@ -70,7 +70,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     public static void updateAppList() {
         if (mAppsManager != null) {
-            if (! mAppsManager.isEmpty()) {
+            if (!mAppsManager.isEmpty()) {
                 DbManager.delMultiObject("Device.X_Skyworth.App");
                 mAppsManager.clear();
             }
@@ -81,8 +81,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         Log.d(TAG, " ============ Outis === Get the number of App List: " + size);
         if (size > 0) {
             DbManager.addMultiObject("Device.X_Skyworth.App", size);
-            for (int i = 0; i < size; i++)
-            {
+            for (int i = 0; i < size; i++) {
                 AppInfo appInfo = mAppsManager.getList().get(i);
                 addPermission(appInfo, String.valueOf(i + 1));
             }
@@ -95,7 +94,7 @@ public class AppX implements IProtocolArray<AppInfo> {
     }
 
     private String handleAppPath(String path) {
-        return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
+        return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     @Override
@@ -241,10 +240,10 @@ public class AppX implements IProtocolArray<AppInfo> {
                                     .get(Integer.parseInt(thirdParam) - 1)
                                     .areRuntimePermissionsGranted() + "";
                         case "CanModify":
-                            return (! Objects.requireNonNull(appPermissionGroup.get(paramsArr[0]))
+                            return (!Objects.requireNonNull(appPermissionGroup.get(paramsArr[0]))
                                     .get(Integer.parseInt(thirdParam) - 1)
                                     .isSystemFixed()
-                                    && ! Objects.requireNonNull(
+                                    && !Objects.requireNonNull(
                                             appPermissionGroup.get(paramsArr[0]))
                                     .get(Integer.parseInt(thirdParam) - 1)
                                     .isPolicyFixed()) + "";
@@ -271,9 +270,9 @@ public class AppX implements IProtocolArray<AppInfo> {
 
         if (path.endsWith(".BlockStatus")) {
             if (TextUtils.equals(value, "0")) {
-                return ApplicationUtil.ableApplication(pkg, false);
+                return ApplicationUtils.ableApplication(pkg, false);
             } else if (TextUtils.equals(value, "1")) {
-                return ApplicationUtil.ableApplication(pkg, true);
+                return ApplicationUtils.ableApplication(pkg, true);
             }
         } else if (path.endsWith(".Running")) {
             if (DbManager.getDBParam("Device.X_Skyworth.Lock.Enable").equals("1")) {
@@ -284,16 +283,16 @@ public class AppX implements IProtocolArray<AppInfo> {
                         || TextUtils.equals(pkg, "com.sdt.android.tr369")
                         || TextUtils.equals(pkg, "com.sdt.diagnose"))
                     return true;
-                return ApplicationUtil.forceStopApp(pkg);
+                return ApplicationUtils.forceStopApp(pkg);
             } else if (TextUtils.equals(value, "1")) {
-                return ApplicationUtil.openApp(pkg);
+                return ApplicationUtils.openApp(pkg);
             }
         } else if (path.endsWith(".ClearData")) {
             if (TextUtils.equals(value, "1")) {
                 if (pkg.contains("tr069") || pkg.contains("tr369") || pkg.contains("diagnose")) {
                     return true;
                 }
-                return ApplicationUtil.clearData(pkg);
+                return ApplicationUtils.clearData(pkg);
             }
         } else if (path.contains("Permissions")) {
             if (path.endsWith("Granted")) {
@@ -319,7 +318,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     private ArrayList<String> getBlockListPkgNames() {
         String listFromDBParam = DbManager.getDBParam("Device.X_Skyworth.BlockListPkgNames");
-        return (ArrayList<String>) ApplicationUtil.parseStringList(listFromDBParam);
+        return (ArrayList<String>) ApplicationUtils.parseStringList(listFromDBParam);
     }
 
     private void setBlockListPkgNames(ArrayList<String> list) {
@@ -347,7 +346,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 continue;
             final String pkgName = pkgInfo.packageName;
             // 过滤掉不可以被open的应用
-            if (! ApplicationUtil.canOpen(pm, pkgName))
+            if (!ApplicationUtils.canOpen(pm, pkgName))
                 continue;
             // 过滤掉已被挂起的应用
             if (blockListPkgNames.contains(pkgName))
@@ -362,7 +361,7 @@ public class AppX implements IProtocolArray<AppInfo> {
     public boolean SK_TR369_SetAppBatchBlock(String path, String value) {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
-        List<String> packageNames = ApplicationUtil.parseStringList(value);
+        List<String> packageNames = ApplicationUtils.parseStringList(value);
         Log.d(TAG, "Wait to suspend application: " + packageNames);
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
@@ -383,7 +382,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         }
 
         for (String packageName : packageNames) {
-            if (! blockListPkgNames.contains(packageName)) {
+            if (!blockListPkgNames.contains(packageName)) {
                 // 此处判断新挂起的应用是否已经在黑名单全局变量中，如果不在则新加到全局变量中
                 blockListPkgNames.add(packageName);
             }
@@ -397,7 +396,7 @@ public class AppX implements IProtocolArray<AppInfo> {
     public boolean SK_TR369_SetAppBatchUnBlock(String path, String value) {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
-        List<String> packageNames = ApplicationUtil.parseStringList(value);
+        List<String> packageNames = ApplicationUtils.parseStringList(value);
         Log.d(TAG, "Wait to cancel pending application: " + packageNames);
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
@@ -425,7 +424,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     private void clearAppBlackList() {
         int numBlacklist = SystemProperties.getInt("persist.sys.tr069.blacklist.number", 0);
-        for (int i = 1; i <= numBlacklist; ++ i) {
+        for (int i = 1; i <= numBlacklist; ++i) {
             SystemProperties.set("persist.sys.tr069.blacklist.part" + i, "");
         }
         SystemProperties.set("persist.sys.tr069.blacklist.number", "0");
@@ -433,7 +432,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     private void clearAppWhiteList() {
         int numWhitelist = SystemProperties.getInt("persist.sys.tr069.whitelist.number", 0);
-        for (int i = 1; i <= numWhitelist; ++ i) {
+        for (int i = 1; i <= numWhitelist; ++i) {
             SystemProperties.set("persist.sys.tr069.whitelist.part" + i, "");
         }
         SystemProperties.set("persist.sys.tr069.whitelist.number", "0");
@@ -453,10 +452,10 @@ public class AppX implements IProtocolArray<AppInfo> {
     public String SK_TR369_GetAppBlackList(String path) {
         int numBlacklist = SystemProperties.getInt("persist.sys.tr069.blacklist.number", 0);
         ArrayList<String> blacklist = new ArrayList<>();
-        for (int i = 1; i <= numBlacklist; ++ i) {
+        for (int i = 1; i <= numBlacklist; ++i) {
             String array = SystemProperties.get("persist.sys.tr069.blacklist.part" + i, "");
 
-            List<String> packageNames = ApplicationUtil.parseStringList(array);
+            List<String> packageNames = ApplicationUtils.parseStringList(array);
             blacklist.addAll(packageNames);
         }
         return new Gson().toJson(blacklist);
@@ -467,7 +466,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppWhiteList();
         clearAppBlackList();
 
-        List<String> packageNames = ApplicationUtil.parseStringList(value);
+        List<String> packageNames = ApplicationUtils.parseStringList(value);
         Log.i(TAG, "Waiting for blacklist to be set: " + packageNames);
         if (packageNames.isEmpty()) {
             return true;
@@ -485,7 +484,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 }
                 blacklist.add(packageName);
             }
-            if (! blacklist.isEmpty()) {
+            if (!blacklist.isEmpty()) {
                 numBlacklist++;
                 setBlackListData(numBlacklist, new Gson().toJson(blacklist));
             }
@@ -501,8 +500,8 @@ public class AppX implements IProtocolArray<AppInfo> {
             final String pkgName = pkgInfo.packageName;
             if (packageNames.contains(pkgName)) {
                 final ApplicationInfo info = pkgInfo.applicationInfo;
-                if (! info.isSystemApp()) {
-                    ApplicationUtil.uninstall(pkgName);
+                if (!info.isSystemApp()) {
+                    ApplicationUtils.uninstall(pkgName);
                     Log.d(TAG, "Uninstallation process completed.");
                 } else {
                     Log.i(TAG, "This application is a system app and cannot be uninstalled.");
@@ -517,10 +516,10 @@ public class AppX implements IProtocolArray<AppInfo> {
     public String SK_TR369_GetAppWhiteList(String path) {
         int numWhitelist = SystemProperties.getInt("persist.sys.tr069.whitelist.number", 0);
         ArrayList<String> whitelist = new ArrayList<>();
-        for (int i = 1; i <= numWhitelist; ++ i) {
+        for (int i = 1; i <= numWhitelist; ++i) {
             String array = SystemProperties.get("persist.sys.tr069.whitelist.part" + i, "");
 
-            List<String> packageNames = ApplicationUtil.parseStringList(array);
+            List<String> packageNames = ApplicationUtils.parseStringList(array);
             whitelist.addAll(packageNames);
         }
         return new Gson().toJson(whitelist);
@@ -531,7 +530,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppBlackList();
         clearAppWhiteList();
 
-        List<String> packageNames = ApplicationUtil.parseStringList(value);
+        List<String> packageNames = ApplicationUtils.parseStringList(value);
         Log.i(TAG, "Waiting for whitelist to be set: " + packageNames);
         if (packageNames.isEmpty()) {
             return true;
@@ -548,7 +547,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 }
                 whitelist.add(packageName);
             }
-            if (! whitelist.isEmpty()) {
+            if (!whitelist.isEmpty()) {
                 numWhitelist++;
                 setWhiteListData(numWhitelist, new Gson().toJson(whitelist));
             }
@@ -565,7 +564,7 @@ public class AppX implements IProtocolArray<AppInfo> {
      */
     private AppInfo getAppByPath(String path) {
         AppInfo appInfo = null;
-        String[] params = ProtocolPathUtl.parse(REFIX, path);
+        String[] params = ProtocolPathUtils.parse(REFIX, path);
         if (params == null || params.length < 1) {
             //Todo report error.
             return null;

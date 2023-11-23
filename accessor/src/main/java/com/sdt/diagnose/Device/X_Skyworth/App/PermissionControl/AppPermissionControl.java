@@ -39,7 +39,7 @@ public class AppPermissionControl {
 
     public static boolean isSupportOperatePermissions(Context context, String appPackageName, String permissionGroupName) {
         AppPermissionGroup group = createAppPermissionGroup(context, appPackageName, permissionGroupName);
-        return group != null && ! group.isSystemFixed() && ! group.isPolicyFixed();
+        return group != null && !group.isSystemFixed() && !group.isPolicyFixed();
     }
 
 

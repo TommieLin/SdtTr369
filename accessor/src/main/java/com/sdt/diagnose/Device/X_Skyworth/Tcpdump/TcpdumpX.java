@@ -49,7 +49,7 @@ public class TcpdumpX {
                 tcpdumpBean.setPort(value);
                 break;
             case "Duration":
-                if (! TextUtils.isEmpty(value)) {
+                if (!TextUtils.isEmpty(value)) {
                     tcpdumpBean.setDuration(value);
                 } else {  //如果前端没有设置抓包时长，默认抓包30S
                     tcpdumpBean.setDuration(String.valueOf(MAX_TCPDUMP_DURATION));
@@ -78,7 +78,7 @@ public class TcpdumpX {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (! file.exists()) {
+                if (!file.exists()) {
                     Log.e(TAG, "The pcap file already exist.");
                     stopTcpdump();
                     return;
@@ -123,26 +123,26 @@ public class TcpdumpX {
 
     public void generateArgs() {
         StringBuilder stringBuilder = new StringBuilder();
-        if (! TextUtils.isEmpty(tcpdumpBean.getNetType())) {
+        if (!TextUtils.isEmpty(tcpdumpBean.getNetType())) {
             stringBuilder.append(tcpdumpBean.getNetType());
         }
-        if (! TextUtils.isEmpty(tcpdumpBean.getPort())) {
+        if (!TextUtils.isEmpty(tcpdumpBean.getPort())) {
             stringBuilder.append(" port ").append(tcpdumpBean.getPort());
         }
-        if (! TextUtils.isEmpty(tcpdumpBean.getIp())) {
-            if (! TextUtils.isEmpty(stringBuilder.toString())) {
+        if (!TextUtils.isEmpty(tcpdumpBean.getIp())) {
+            if (!TextUtils.isEmpty(stringBuilder.toString())) {
                 stringBuilder.append(" and");
             }
             stringBuilder.append(" dst ").append(tcpdumpBean.getIp());
         }
-        if (! TextUtils.isEmpty(stringBuilder.toString())) {
+        if (!TextUtils.isEmpty(stringBuilder.toString())) {
             Log.e(TAG, "The parameter cannot be empty.");
             SystemProperties.set("persist.sys.skyworth.tcpdump.args", stringBuilder.toString());
         }
     }
 
     public void checkStart() {
-        if (tcpdumpBean.getEnable().equals("1") && ! TextUtils.isEmpty(tcpdumpBean.getUrl())) {
+        if (tcpdumpBean.getEnable().equals("1") && !TextUtils.isEmpty(tcpdumpBean.getUrl())) {
             generateArgs();
             startTcpdump();
         }

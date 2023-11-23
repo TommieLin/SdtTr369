@@ -9,6 +9,7 @@ import com.sdt.android.tr369.SdtTr369Service;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
     private final static String TAG = "BootCompletedReceiver";
+
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();

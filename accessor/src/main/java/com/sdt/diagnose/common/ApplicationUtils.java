@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class ApplicationUtil {
-    private static final String TAG = "ApplicationUtil";
+public class ApplicationUtils {
+    private static final String TAG = "ApplicationUtils";
 
     public static boolean uninstall(String pkg) {
         HandlerThread handlerThread = new HandlerThread("AppUtilThread", Process.THREAD_PRIORITY_BACKGROUND);
@@ -65,7 +65,7 @@ public class ApplicationUtil {
                 PackageInfo pkgInfo = packlist.get(i);
                 final String pkgName = pkgInfo.packageName;
                 if (packageNames.contains(pkgName)) {
-                    if (! pkgName.contains("sdt")) {
+                    if (!pkgName.contains("sdt")) {
                         uninstall(pkgName);
                         Log.d(TAG, "Uninstallation process completed.");
                     } else {
@@ -161,7 +161,7 @@ public class ApplicationUtil {
             Log.e(TAG, "getPackageInfo error, " + e.getMessage());
             return false;
         }
-        return ! (homePackages.contains(pkg) || isSystemPackage(context.getResources(), pm, packageInfo));
+        return !(homePackages.contains(pkg) || isSystemPackage(context.getResources(), pm, packageInfo));
     }
 
     public static boolean isDisable(PackageManager pm, String pkg) {

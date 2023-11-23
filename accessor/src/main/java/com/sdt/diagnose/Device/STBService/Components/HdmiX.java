@@ -120,7 +120,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.ResolutionMode")
     public String SK_TR369_GetHdmiResolutionMode(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         boolean isBest = false;
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -144,7 +144,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.Name")
     public String SK_TR369_GetHdmiName(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         String name = "";
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -168,7 +168,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.ResolutionValue")
     public String SK_TR369_GetHdmiResolutionValue(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         String mode = "";
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -192,7 +192,7 @@ public class HdmiX {
 
     @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.ResolutionValue")
     public Boolean SK_TR369_SetHdmiResolutionValue(String path, String value) {
-        if (! isHDMIPlugged()) return false;
+        if (!isHDMIPlugged()) return false;
 
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
         if (mStbModelType == ModelX.Type.Amlogic) {
@@ -203,7 +203,7 @@ public class HdmiX {
             try {
                 if (null != mCmsExtraServiceManager) {
                     String supportList = mCmsExtraServiceManager.getHdmiSupportResolution();
-                    if (! supportList.contains(value)) {
+                    if (!supportList.contains(value)) {
                         Log.e(TAG, "This resolution is not supported!");
                         return false;
                     }
@@ -222,7 +222,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.SupportedResolutions")
     public String SK_TR369_GetHdmiDisplayDevSupportedResolutions(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         String supportList = "";
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -258,7 +258,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.Name")
     public String SK_TR369_GetHdmiDisplayDevName(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         String name = "";
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -282,7 +282,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.EEDID")
     public String SK_TR369_GetHdmiDisplayDevEEDID(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         String edid = "";
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -306,7 +306,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.PreferredResolution")
     public String SK_TR369_GetHdmiDisplayDevPreferredResolution(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         String mode = "";
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -330,7 +330,7 @@ public class HdmiX {
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.CECSupport")
     public String SK_TR369_GetHdmiDisplayDevCECSupport(String path) {
-        if (! isHDMIPlugged()) return "";
+        if (!isHDMIPlugged()) return "";
 
         boolean isSupport = false;
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();

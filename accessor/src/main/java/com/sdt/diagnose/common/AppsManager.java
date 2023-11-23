@@ -11,7 +11,6 @@ import android.os.UserHandle;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import com.sdt.diagnose.common.AbstractCachedArray;
 import com.sdt.diagnose.common.bean.AppInfo;
 
 import java.io.IOException;
@@ -41,14 +40,14 @@ public class AppsManager extends AbstractCachedArray<AppInfo> {
                 Log.d(TAG, "PackageInfo is null.");
                 continue;
             }
-            boolean disable = ApplicationUtil.isDisable(pm, info.packageName);
+            boolean disable = ApplicationUtils.isDisable(pm, info.packageName);
             // 过滤掉无Activity的 Package
             if (disable && (pkgInfo.activities == null || pkgInfo.activities.length < 1)) {
                 continue;
             }
             final String pkgName = pkgInfo.packageName;
             // 过滤掉不可以被open的应用
-            if (disable && ! ApplicationUtil.canOpen(pm, pkgName)) {
+            if (disable && !ApplicationUtils.canOpen(pm, pkgName)) {
                 continue;
             }
 
@@ -100,7 +99,7 @@ public class AppsManager extends AbstractCachedArray<AppInfo> {
             // |dataSize| is a superset of |cacheSize|.
             return ps.codeSize + ps.dataSize - ps.cacheSize;
         }
-        return - 2;
+        return -2;
     }
 
     private String getSizeStr(Context context, long size) {

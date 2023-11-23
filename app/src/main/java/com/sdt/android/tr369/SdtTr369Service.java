@@ -23,7 +23,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Receiver.BluetoothMonitorReceiver;
+import com.sdt.android.tr369.Receiver.ExternalAppUpgradeReceiver;
 import com.sdt.android.tr369.Receiver.PackageReceiver;
+import com.sdt.android.tr369.Receiver.ShutdownReceiver;
 import com.sdt.android.tr369.Receiver.StandbyModeReceiver;
 import com.sdt.android.tr369.Utils.FileUtil;
 import com.sdt.diagnose.Device.LanX;
@@ -50,6 +52,8 @@ public class SdtTr369Service extends Service {
     private PackageReceiver mPackageReceiver = null;
     private BluetoothMonitorReceiver mBluetoothMonitorReceiver = null;
     private StandbyModeReceiver mStandbyModeReceiver = null;
+    private ShutdownReceiver mShutdownReceiver = null;
+    private ExternalAppUpgradeReceiver mExternalAppUpgradeReceiver = null;
     private HandlerThread mHandlerThread = null;
     private Handler mHandler = null;
     public static final int MSG_START_TR369 = 3300;
@@ -115,6 +119,8 @@ public class SdtTr369Service extends Service {
         registerPackageReceiver();
         registerBluetoothMonitorReceiver();
         registerStandbyReceiver();
+        registerShutdownReceiver();
+        registerExternalAppUpdateReceiver();
 
         // 开机同步后台logcat状态
         LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
@@ -130,6 +136,10 @@ public class SdtTr369Service extends Service {
         if (SystemProperties.get("persist.sys.tr069.lock", "0").equals("1")) {
             SkyworthX skyworthX = new SkyworthX();
             skyworthX.SK_TR369_SetLockEnable(null, "1");
+        }
+        // 重新上传APP安装结果
+        if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {
+            ExternalAppUpgradeReceiver.retryRequestUpdateStatus();
         }
         // 初始化FTI停留时间监控程序
         new FTIMonitor();
@@ -183,6 +193,26 @@ public class SdtTr369Service extends Service {
         registerReceiver(mStandbyModeReceiver, intentFilter);
     }
 
+    private void registerShutdownReceiver() {
+        if (mShutdownReceiver == null) {
+            mShutdownReceiver = new ShutdownReceiver();
+        }
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.intent.action.ACTION_SHUTDOWN");
+        registerReceiver(mShutdownReceiver, intentFilter);
+    }
+
+    private void registerExternalAppUpdateReceiver() {
+        if (mExternalAppUpgradeReceiver == null) {
+            mExternalAppUpgradeReceiver = new ExternalAppUpgradeReceiver();
+        }
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.skyworth.diagnose.Broadcast.DownloadStatus");
+        intentFilter.addAction("com.skyworth.diagnose.Broadcast.UpgradeStatus");
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mExternalAppUpgradeReceiver, intentFilter);
+    }
+
     @Override
     public void onDestroy() {
         Log.e(TAG, " ####### Outis ### onDestroy start");
@@ -190,6 +220,8 @@ public class SdtTr369Service extends Service {
         if (mBluetoothMonitorReceiver != null) unregisterReceiver(mBluetoothMonitorReceiver);
         if (mPackageReceiver != null) unregisterReceiver(mPackageReceiver);
         if (mStandbyModeReceiver != null) unregisterReceiver(mStandbyModeReceiver);
+        if (mShutdownReceiver != null) unregisterReceiver(mShutdownReceiver);
+        if (mExternalAppUpgradeReceiver != null) unregisterReceiver(mExternalAppUpgradeReceiver);
 
         if (mHandler != null) {
             mHandler.sendEmptyMessage(MSG_STOP_TR369);
@@ -226,7 +258,7 @@ public class SdtTr369Service extends Service {
         public String openTR369GetAttr(int what, String path) {
             String ret = Tr369PathInvoke.getInstance().getAttribute(what, path);
             if (ret == null) {
-                ret = OpenTR369Native.GetDBParam(path);
+                ret = DbManager.getDBParam(path);
             }
             return ret;
         }
@@ -234,8 +266,8 @@ public class SdtTr369Service extends Service {
         @Override
         public boolean openTR369SetAttr(int what, String path, String value) {
             boolean ret = Tr369PathInvoke.getInstance().setAttribute(what, path, value);
-            if (! ret) {
-                ret = (OpenTR369Native.SetDBParam(path, value) == 0);
+            if (!ret) {
+                ret = (DbManager.setDBParam(path, value) == 0);
             }
             return ret;
         }
@@ -266,10 +298,14 @@ public class SdtTr369Service extends Service {
                 if (ret) {
                     pw.println(formatString(path));
                 } else {
-                    pw.println("dbset execution failed!");
+                    pw.println(cmd + " execution failed!");
                 }
-//            } else if (("dbdel").equalsIgnoreCase(cmd) && args.length > 1) {
-
+            } else if (("dbdel").equalsIgnoreCase(cmd)) {
+                if (DbManager.delMultiObject(path) == 0) {
+                    pw.println(formatString(path + "NumberOfEntries"));
+                } else {
+                    pw.println(cmd + " execution failed!");
+                }
             } else if ("show".equals(cmd)) {
                 // [show] [database|datamodel]
 //                pw.println(DbManager.showData(args[1]));

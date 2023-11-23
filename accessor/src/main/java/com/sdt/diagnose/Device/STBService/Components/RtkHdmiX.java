@@ -123,7 +123,7 @@ public class RtkHdmiX {
             } else {
                 int Fps = (info.mFreqShift == 0) ? info.mFps : info.mFps - 1;
                 if (info.mHeight < 2160) {
-                    if (! info.mProgress) {
+                    if (!info.mProgress) {
                         mode = info.mHeight + "I @ " + Fps + "Hz";
                     } else {
                         mode = info.mHeight + "P @ " + Fps + "Hz";
@@ -165,7 +165,7 @@ public class RtkHdmiX {
             fps = Integer.parseInt(mode.split("@ ")[1].split("Hz")[0]);
         } catch (Exception e) {
             Log.e(TAG, "getTVSystemValueViaString execute failed, " + e.getMessage());
-            return - 1;
+            return -1;
         }
 
         if (fps == 23 || fps == 29 || fps == 59) {
@@ -181,7 +181,7 @@ public class RtkHdmiX {
 
         for (int i = 0; i < sTVSystemInfos.size(); i++) {
             RtkHDMIManager2.TVSystemInfo info = (RtkHDMIManager2.TVSystemInfo) sTVSystemInfos.get(i);
-            if ((! is2160p || info.mWidth == width)
+            if ((!is2160p || info.mWidth == width)
                     && info.mHeight == height
                     && info.mProgress == isProgress
                     && info.mFps == fps
@@ -189,7 +189,7 @@ public class RtkHdmiX {
                 return info.mSettingValue;
             }
         }
-        return - 1;
+        return -1;
     }
 
     /* Realtek API */
@@ -262,7 +262,7 @@ public class RtkHdmiX {
                     RtkHDMIManager2.getRtkHDMIManager(mContext).setOutputFormat2(fmt);
                 } else {
                     Log.d(TAG, "Not using the Rtk API.");
-                    if (! progressive) {
+                    if (!progressive) {
                         RtkHDMIManager2.getRtkHDMIManager(mContext).setupInterlaceFlag();
                     }
                     updateUserPreferredDisplayMode(w, h, fps);
@@ -321,7 +321,7 @@ public class RtkHdmiX {
 
                 } else {
                     Log.d(TAG, "Not using the Rtk API.");
-                    if (! progressive) {
+                    if (!progressive) {
                         RtkHDMIManager2.getRtkHDMIManager(mContext).setupInterlaceFlag();
                     }
                     updateUserPreferredDisplayMode(w, h, fps);
@@ -373,7 +373,7 @@ public class RtkHdmiX {
             } else {
                 int Fps = (info.mFreqShift == 0) ? info.mFps : info.mFps - 1;
                 if (info.mHeight < 2160) {
-                    if (! info.mProgress) {
+                    if (!info.mProgress) {
                         availableTvSystems[i][0] = info.mHeight + "I @ " + Fps + "Hz";
                     } else {
                         availableTvSystems[i][0] = info.mHeight + "P @ " + Fps + "Hz";

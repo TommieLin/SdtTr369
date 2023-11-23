@@ -13,7 +13,6 @@ public class ScreenShot {
     private DisplayMetrics mDisplayMetrics;
 
     public ScreenShot() {
-
     }
 
     public ScreenShot(Context context) {
@@ -47,7 +46,6 @@ public class ScreenShot {
 
     //TODO save to storage or transfer to server?
     private void dealWithBitmap(Bitmap bitmap) {
-
     }
 
 }

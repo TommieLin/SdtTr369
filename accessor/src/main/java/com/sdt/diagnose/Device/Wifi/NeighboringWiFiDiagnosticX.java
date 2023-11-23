@@ -11,7 +11,7 @@ public class NeighboringWiFiDiagnosticX {
 
     @Tr369Get("Device.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries")
     public String SK_TR369_GetResultNumberOfEntries() {
-        int size = - 1;
+        int size = -1;
         List<ScanedWifiInfo> scans = Result.getScanWifiInfos();
         if (scans != null) {
             size = scans.size();

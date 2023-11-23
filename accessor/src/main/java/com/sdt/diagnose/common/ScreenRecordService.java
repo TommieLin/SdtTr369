@@ -154,7 +154,7 @@ public class ScreenRecordService extends Service {
 
         // 判断文件大小是否超出上传上限
         File file = new File(recordFilePath);
-        if (! file.exists() || ! file.isFile()) {
+        if (!file.exists() || !file.isFile()) {
             return;
         }
         long fileSize = file.length();

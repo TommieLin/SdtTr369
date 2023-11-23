@@ -115,7 +115,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             mMessager.printMessage(Diagnostic.Kind.NOTE, "FactoryMap isEmpty");
             return;
         }
-        Tr369MethodFactoryCreater.create(varName,PACKAGE_NAME, className, actionsMap, mFiler);
+        Tr369MethodFactoryCreater.create(varName, PACKAGE_NAME, className, actionsMap, mFiler);
     }
 
 }

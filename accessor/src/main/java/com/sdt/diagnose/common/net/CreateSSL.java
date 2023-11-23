@@ -95,7 +95,7 @@ public class CreateSSL {
     public String getUsefulCertInfo(String certificate) {
         String startingSubstring = "-----BEGIN";
         int startIndex = certificate.indexOf(startingSubstring);
-        if (startIndex != - 1) {
+        if (startIndex != -1) {
             return certificate.substring(startIndex);
         } else {
             return "";

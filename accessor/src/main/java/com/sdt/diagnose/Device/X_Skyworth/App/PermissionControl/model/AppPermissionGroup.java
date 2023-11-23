@@ -258,7 +258,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 
             // Don't allow toggling non-platform permission groups for legacy apps via app ops.
             if (packageInfo.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.LOLLIPOP_MR1
-                    && ! PLATFORM_PACKAGE_NAME.equals(groupInfo.packageName)) {
+                    && !PLATFORM_PACKAGE_NAME.equals(groupInfo.packageName)) {
                 continue;
             }
 
@@ -337,9 +337,9 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 
                 group.getBackgroundPermissions().addPermission(permission);
             } else {
-                if ((! permission.isHardRestricted()
+                if ((!permission.isHardRestricted()
                         || whitelistedRestrictedPermissions.contains(permission.getName()))
-                        && (! permission.isSoftRestricted()
+                        && (!permission.isSoftRestricted()
                         || SoftRestrictedPermissionPolicy.shouldShow(packageInfo, permission))) {
                     group.addPermission(permission);
                 }
@@ -424,7 +424,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
     }
 
     public boolean isGrantingAllowed() {
-        return (! mIsEphemeralApp || mContainsEphemeralPermission)
+        return (!mIsEphemeralApp || mContainsEphemeralPermission)
                 && (mAppSupportsRuntimePermissions || mContainsPreRuntimePermission);
     }
 
@@ -467,7 +467,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
             }
         }
 
-        if (! mDelayChanges) {
+        if (!mDelayChanges) {
             persistChanges(false);
         }
     }
@@ -639,7 +639,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         for (int i = 0; i < permissionCount; i++) {
             Permission permission = mPermissions.valueAt(i);
             if (filterPermissions != null
-                    && ! ArrayUtils.contains(filterPermissions, permission.getName())) {
+                    && !ArrayUtils.contains(filterPermissions, permission.getName())) {
                 continue;
             }
             if (permission.isGrantedIncludingAppOp()) {
@@ -762,11 +762,11 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         // to the permission if the permission is granted to the app.
         for (Permission permission : mPermissions.values()) {
             if (filterPermissions != null
-                    && ! ArrayUtils.contains(filterPermissions, permission.getName())) {
+                    && !ArrayUtils.contains(filterPermissions, permission.getName())) {
                 continue;
             }
 
-            if (! permission.isGrantingAllowed(mIsEphemeralApp, mAppSupportsRuntimePermissions)) {
+            if (!permission.isGrantingAllowed(mIsEphemeralApp, mAppSupportsRuntimePermissions)) {
                 // Skip unallowed permissions.
                 continue;
             }
@@ -781,17 +781,17 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                 }
 
                 // Ensure the permission app op enabled before the permission grant.
-                if (permission.affectsAppOp() && ! permission.isAppOpAllowed()) {
+                if (permission.affectsAppOp() && !permission.isAppOpAllowed()) {
                     permission.setAppOpAllowed(true);
                 }
 
                 // Grant the permission if needed.
-                if (! permission.isGranted()) {
+                if (!permission.isGranted()) {
                     permission.setGranted(true);
                 }
 
                 // Update the permission flags.
-                if (! fixedByTheUser) {
+                if (!fixedByTheUser) {
                     // Now the apps can ask for the permission as the user
                     // no longer has it fixed in a denied state.
                     if (permission.isUserFixed() || permission.isUserSet()) {
@@ -801,14 +801,14 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                 }
             } else {
                 // Legacy apps cannot have a not granted permission but just in case.
-                if (! permission.isGranted()) {
+                if (!permission.isGranted()) {
                     continue;
                 }
 
                 // If the permissions has no corresponding app op, then it is a
                 // third-party one and we do not offer toggling of such permissions.
                 if (permission.affectsAppOp()) {
-                    if (! permission.isAppOpAllowed()) {
+                    if (!permission.isAppOpAllowed()) {
                         permission.setAppOpAllowed(true);
 
                         // Legacy apps do not know that they have to retry access to a
@@ -834,7 +834,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 
             // If we newly grant background access to the fine location, double-guess the user some
             // time later if this was really the right choice.
-            if (! wasGranted && permission.isGrantedIncludingAppOp()) {
+            if (!wasGranted && permission.isGrantedIncludingAppOp()) {
                 if (permission.getName().equals(ACCESS_FINE_LOCATION)) {
                     Permission bgPerm = permission.getBackgroundPermission();
                     if (bgPerm != null) {
@@ -862,7 +862,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
             }
         }
 
-        if (! mDelayChanges) {
+        if (!mDelayChanges) {
             persistChanges(false);
 
             if (killApp) {
@@ -938,7 +938,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         // to the permission if the permission is granted to the app.
         for (Permission permission : mPermissions.values()) {
             if (filterPermissions != null
-                    && ! ArrayUtils.contains(filterPermissions, permission.getName())) {
+                    && !ArrayUtils.contains(filterPermissions, permission.getName())) {
                 continue;
             }
 
@@ -957,12 +957,12 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                 // Update the permission flags.
                 if (fixedByTheUser) {
                     // Take a note that the user fixed the permission.
-                    if (permission.isUserSet() || ! permission.isUserFixed()) {
+                    if (permission.isUserSet() || !permission.isUserFixed()) {
                         permission.setUserSet(false);
                         permission.setUserFixed(true);
                     }
                 } else {
-                    if (! permission.isUserSet() || permission.isUserFixed()) {
+                    if (!permission.isUserSet() || permission.isUserFixed()) {
                         permission.setUserSet(true);
                         permission.setUserFixed(false);
                     }
@@ -973,7 +973,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                 }
             } else {
                 // Legacy apps cannot have a non-granted permission but just in case.
-                if (! permission.isGranted()) {
+                if (!permission.isGranted()) {
                     continue;
                 }
 
@@ -991,14 +991,14 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 
                     // Mark that the permission should not be granted on upgrade
                     // when the app begins supporting runtime permissions.
-                    if (! permission.shouldRevokeOnUpgrade()) {
+                    if (!permission.shouldRevokeOnUpgrade()) {
                         permission.setRevokeOnUpgrade(true);
                     }
                 }
             }
         }
 
-        if (! mDelayChanges) {
+        if (!mDelayChanges) {
             persistChanges(false);
 
             if (killApp) {
@@ -1023,7 +1023,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
             }
         }
 
-        if (! mDelayChanges) {
+        if (!mDelayChanges) {
             persistChanges(false);
         }
     }
@@ -1040,7 +1040,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
             permission.setUserFixed(isUsedFixed);
         }
 
-        if (! mDelayChanges) {
+        if (!mDelayChanges) {
             persistChanges(false);
         }
     }
@@ -1155,7 +1155,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || ! (o instanceof AppPermissionGroup)) {
+        if (o == null || !(o instanceof AppPermissionGroup)) {
             return false;
         }
 
@@ -1178,7 +1178,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         if (mBackgroundPermissions != null) {
             builder.append(", <has background permissions>}");
         }
-        if (! mPermissions.isEmpty()) {
+        if (!mPermissions.isEmpty()) {
             builder.append(", <has permissions>}");
         } else {
             builder.append('}');
@@ -1191,7 +1191,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         if (permission.isEphemeral()) {
             mContainsEphemeralPermission = true;
         }
-        if (! permission.isRuntimeOnly()) {
+        if (!permission.isRuntimeOnly()) {
             mContainsPreRuntimePermission = true;
         }
     }
@@ -1212,12 +1212,12 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         for (int i = 0; i < numPermissions; i++) {
             Permission permission = mPermissions.valueAt(i);
 
-            if (! permission.isSystemFixed()) {
+            if (!permission.isSystemFixed()) {
                 if (permission.isGranted()) {
                     mPackageManager.grantRuntimePermission(mPackageInfo.packageName,
                             permission.getName(), mUserHandle);
                 } else {
-                    boolean isCurrentlyGranted = mContext.checkPermission(permission.getName(), - 1,
+                    boolean isCurrentlyGranted = mContext.checkPermission(permission.getName(), -1,
                             uid) == PERMISSION_GRANTED;
 
                     if (isCurrentlyGranted) {
@@ -1245,7 +1245,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                     flags, mUserHandle);
 
             if (permission.affectsAppOp()) {
-                if (! permission.isSystemFixed()) {
+                if (!permission.isSystemFixed()) {
                     // Enabling/Disabling an app op may put the app in a situation in which it has
                     // a handle to state it shouldn't have, so we have to kill the app. This matches
                     // the revoke runtime permission behavior.
@@ -1302,7 +1302,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
             for (int newPermNum = 0; newPermNum < numNewPerms; newPermNum++) {
                 String newPerm = newPerms.get(newPermNum);
 
-                if (! hasPermission(newPerm)) {
+                if (!hasPermission(newPerm)) {
                     continue;
                 }
 

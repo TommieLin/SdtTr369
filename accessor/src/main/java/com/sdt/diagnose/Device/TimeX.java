@@ -5,7 +5,7 @@ import android.provider.Settings;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
-import com.sdt.diagnose.common.DeviceInfoUtil;
+import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.database.DbManager;
 
@@ -19,7 +19,7 @@ public class TimeX {
     @Tr369Get("Device.Time.Status")
     public String SK_TR369_GetTimeStatus(String path) {
         String timeStatus = "Error";
-        int value = DeviceInfoUtil.getAutoDateTimeType(GlobalContext.getContext());
+        int value = DeviceInfoUtils.getAutoDateTimeType(GlobalContext.getContext());
         if (value > 0) {
             return "Synchronized";
         } else {
@@ -38,12 +38,12 @@ public class TimeX {
 
     @Tr369Get("Device.Time.CurrentLocalTime")
     public String SK_TR369_GetCurrentLocalTime(String path) {
-        return DeviceInfoUtil.getTime();
+        return DeviceInfoUtils.getTime();
     }
 
     @Tr369Get("Device.Time.LocalTimeZone")
     public String SK_TR369_GetTimeZone() {
-        return DeviceInfoUtil.getTimeZone(GlobalContext.getContext());// about - Date & time - set time zone
+        return DeviceInfoUtils.getTimeZone(GlobalContext.getContext());// about - Date & time - set time zone
     }
 
     @Tr369Set("Device.Time.LocalTimeZone")

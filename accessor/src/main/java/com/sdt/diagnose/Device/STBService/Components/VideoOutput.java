@@ -46,7 +46,7 @@ public class VideoOutput {
             String rxHdcpVer = SystemControlManager.getInstance().readSysFs(RX_HDCP_VER_PATH);
             String txHdcpMode = SystemControlManager.getInstance().readSysFs(TX_HDCP_MODE_PATH);
 
-            if (! rxHdcpVer.isEmpty() && ! txHdcpMode.isEmpty()) {
+            if (!rxHdcpVer.isEmpty() && !txHdcpMode.isEmpty()) {
                 if (rxHdcpVer.contains("14")
                         && txHdcpMode.contains("14")) {
 //                        && authenticated.contains("1")) {
@@ -96,7 +96,7 @@ public class VideoOutput {
             String rxHdcpVer = SystemControlManager.getInstance().readSysFs(RX_HDCP_VER_PATH);
             String txHdcpMode = SystemControlManager.getInstance().readSysFs(TX_HDCP_MODE_PATH);
 
-            if (! rxHdcpVer.isEmpty() && ! txHdcpMode.isEmpty()) {
+            if (!rxHdcpVer.isEmpty() && !txHdcpMode.isEmpty()) {
                 if (rxHdcpVer.contains("14")
                         && txHdcpMode.contains("14")) {
 //                        && authenticated.contains("1")) {

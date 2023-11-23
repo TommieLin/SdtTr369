@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.ScanWifiInfosManager;
 import com.sdt.diagnose.common.bean.ScanedWifiInfo;
 
@@ -41,7 +41,7 @@ public class Result implements IProtocolArray<ScanedWifiInfo> {
     }
 
     private String handleNeighboringWiFiPath(String path) {
-        return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
+        return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     public static List<ScanedWifiInfo> getScanWifiInfos() {

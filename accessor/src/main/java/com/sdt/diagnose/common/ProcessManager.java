@@ -7,7 +7,6 @@ import android.util.Log;
 
 import com.sdt.diagnose.common.bean.ProcessInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessManager extends AbstractCachedArray<ProcessInfo> {
@@ -23,7 +22,7 @@ public class ProcessManager extends AbstractCachedArray<ProcessInfo> {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         if (am != null) {
             procInfoList = am.getRunningAppProcesses();
-            if (! procInfoList.isEmpty()) {
+            if (!procInfoList.isEmpty()) {
                 Log.d(TAG, "buildList: procInfoList size = " + procInfoList.size());
                 for (int i = 0; i < procInfoList.size(); i++) {
                     ProcessInfo process = new ProcessInfo(procInfoList.get(i));

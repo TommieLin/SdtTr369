@@ -123,7 +123,7 @@ public class XshellClient {
                 int len = 0;
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024];
-                while (!Thread.interrupted() && (len = ptyProcessInputStream.read(bytes)) != - 1) {
+                while (!Thread.interrupted() && (len = ptyProcessInputStream.read(bytes)) != -1) {
                     baos.write(bytes, 0, len);
                     mSocket.emit(Socket.EVENT_MESSAGE, AESUtil.encrypt(baos.toByteArray()));
                     baos = new ByteArrayOutputStream();

@@ -67,7 +67,7 @@ public class AVPlayersManager {
             mList.clear();
         }
         for (ResolveInfo resolveInfo : temp) {
-            if (! include(mList, resolveInfo)) {
+            if (!include(mList, resolveInfo)) {
                 mList.add(resolveInfo);
             }
         }
@@ -75,7 +75,7 @@ public class AVPlayersManager {
         temp.clear();
         temp = mPm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolveInfo : temp) {
-            if (! include(mList, resolveInfo)) {
+            if (!include(mList, resolveInfo)) {
                 mList.add(resolveInfo);
             }
         }

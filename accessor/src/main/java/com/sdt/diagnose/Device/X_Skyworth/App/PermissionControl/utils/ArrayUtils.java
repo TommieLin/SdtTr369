@@ -43,7 +43,7 @@ public final class ArrayUtils {
      * @return true if the value is present in the array
      */
     public static <T> boolean contains(T[] array, T value) {
-        return indexOf(array, value) != - 1;
+        return indexOf(array, value) != -1;
     }
 
     /**
@@ -51,11 +51,11 @@ public final class ArrayUtils {
      * not found.
      */
     public static <T> int indexOf(T[] array, T value) {
-        if (array == null) return - 1;
+        if (array == null) return -1;
         for (int i = 0; i < array.length; i++) {
             if (Objects.equals(array[i], value)) return i;
         }
-        return - 1;
+        return -1;
     }
 
     public static String[] appendString(String[] cur, String val) {

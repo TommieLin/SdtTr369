@@ -236,7 +236,7 @@ public class TraceRoute {
                     TraceRouteContainer trace;
                     String ip = parseIpFromPing(pingResult);
                     Log.d(TAG, "ExecutePingAsyncTask pingResult From: " + ip);
-                    if (pingResult.contains(UNREACHABLE_PING) && ! pingResult.contains(
+                    if (pingResult.contains(UNREACHABLE_PING) && !pingResult.contains(
                             EXCEED_PING)) {
                         // Create the TracerouteContainer object when ping
                         // failed
@@ -245,7 +245,7 @@ public class TraceRoute {
                         // Create the TracerouteContainer object when succeed
                         if (ttl == maxTtl) {
                             String time = parseTimeFromPing(pingResult);
-                            if (! TextUtils.isEmpty(time)) {
+                            if (!TextUtils.isEmpty(time)) {
                                 elapsedTime = Float.parseFloat(time);
                             }
                         }
@@ -254,7 +254,7 @@ public class TraceRoute {
 
                     // Get the host name from ip (unix ping do not support
                     // hostname resolving)
-                    if (! trace.getIp().contains("***")) {
+                    if (!trace.getIp().contains("***")) {
                         try {
                             InetAddress inetAddr = InetAddress.getByName(trace.getIp());
                             String hostname = inetAddr.getHostName();
@@ -352,7 +352,7 @@ public class TraceRoute {
          * Treat the previous ping (launches a ttl+1 if it is not the final ip, refresh the list on view etc...)
          */
         protected void continueExecTraceroute() {
-            if (! isCancelled) {
+            if (!isCancelled) {
                 if (ttl < maxTtl) {
                     if (latestTrace != null && latestTrace.getIp().equals(ipToPing)) {
                         ttl = maxTtl;

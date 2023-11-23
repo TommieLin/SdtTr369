@@ -135,7 +135,7 @@ public final class Permission {
      * @return {@code true} if the permission (and the app-op) is granted.
      */
     public boolean isGrantedIncludingAppOp() {
-        return mGranted && (! affectsAppOp() || isAppOpAllowed()) && ! isReviewRequired();
+        return mGranted && (!affectsAppOp() || isAppOpAllowed()) && !isReviewRequired();
     }
 
     public boolean isReviewRequired() {
@@ -143,7 +143,7 @@ public final class Permission {
     }
 
     public void unsetReviewRequired() {
-        mFlags &= ~ PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
+        mFlags &= ~PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
     }
 
     public void setGranted(boolean mGranted) {
@@ -162,7 +162,7 @@ public final class Permission {
         if (userFixed) {
             mFlags |= PackageManager.FLAG_PERMISSION_USER_FIXED;
         } else {
-            mFlags &= ~ PackageManager.FLAG_PERMISSION_USER_FIXED;
+            mFlags &= ~PackageManager.FLAG_PERMISSION_USER_FIXED;
         }
     }
 
@@ -244,7 +244,7 @@ public final class Permission {
         if (userSet) {
             mFlags |= PackageManager.FLAG_PERMISSION_USER_SET;
         } else {
-            mFlags &= ~ PackageManager.FLAG_PERMISSION_USER_SET;
+            mFlags &= ~PackageManager.FLAG_PERMISSION_USER_SET;
         }
     }
 
@@ -252,7 +252,7 @@ public final class Permission {
         if (policyFixed) {
             mFlags |= PackageManager.FLAG_PERMISSION_POLICY_FIXED;
         } else {
-            mFlags &= ~ PackageManager.FLAG_PERMISSION_POLICY_FIXED;
+            mFlags &= ~PackageManager.FLAG_PERMISSION_POLICY_FIXED;
         }
     }
 
@@ -264,7 +264,7 @@ public final class Permission {
         if (revokeOnUpgrade) {
             mFlags |= PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
         } else {
-            mFlags &= ~ PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+            mFlags &= ~PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
         }
     }
 
@@ -281,8 +281,8 @@ public final class Permission {
     }
 
     public boolean isGrantingAllowed(boolean isEphemeralApp, boolean supportsRuntimePermissions) {
-        return (! isEphemeralApp || isEphemeral())
-                && (supportsRuntimePermissions || ! isRuntimeOnly());
+        return (!isEphemeralApp || isEphemeral())
+                && (supportsRuntimePermissions || !isRuntimeOnly());
     }
 }
 

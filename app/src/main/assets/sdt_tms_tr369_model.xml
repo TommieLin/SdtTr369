@@ -209,11 +209,6 @@
         </schema>
 
         <schema name="WiFi" type="object">
-            <schema name="ResetCounter" type="unsignedInt" />
-            <schema name="RadioNumberOfEntries" constraint="6" default="1" type="string" />
-            <schema name="SSIDNumberOfEntries" constraint="6" default="1" type="string" />
-            <schema name="AccessPointNumberOfEntries" constraint="6" default="0" type="string" />
-            <schema name="EndPointNumberOfEntries" constraint="6" default="1" type="string" />
             <schema name="RadioNumberOfEntries" table="Device.WiFi.Radio.{i}" type="multipleNumber" />
             <schema name="Radio.{i}" type="multipleObject">
                 <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
@@ -458,6 +453,12 @@
         </schema>
 
         <schema name="X_Skyworth" type="object">
+            <schema name="ManagementServer" type="object">
+                <schema name="Url" getter="diagnose" setter="diagnose" type="string" />
+                <schema name="Hostname" getter="diagnose" setter="diagnose" type="string" />
+                <schema name="Port" getter="diagnose" setter="diagnose" type="string" />
+            </schema>
+
             <schema name="DreamInfo" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="CurrentDreamInfo" getter="diagnose" type="string" />
             <schema name="DreamTime" getter="diagnose" setter="diagnose" type="string" write="W" />
@@ -652,6 +653,15 @@
             <schema name="IsSleep" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="SoundSwitch" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="Sound" getter="diagnose" setter="diagnose" type="string" write="W" />
+
+            <schema name="UpgradeResponse" type="object">
+                <schema name="Msg" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="Status" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="PlanId" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="deviceId" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="OperatorCode" getter="diagnose" setter="diagnose" type="string" write="W" />
+            </schema>
+
         </schema>
 
     </schema>

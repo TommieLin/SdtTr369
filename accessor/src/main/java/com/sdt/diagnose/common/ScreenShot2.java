@@ -50,7 +50,7 @@ public class ScreenShot2 {
 
     private boolean takeScreenshot() {
         File fileDir = new File(fileParentDirPath);
-        if (! fileDir.exists() && ! fileDir.mkdirs()) {
+        if (!fileDir.exists() && !fileDir.mkdirs()) {
             Log.e(TAG, "Can't create file path.");
             return false;
         }

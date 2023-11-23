@@ -38,7 +38,7 @@ public class InterfaceX {
                 mWifiManager.setWifiEnabled(false);
             }
         } else if (("true").equalsIgnoreCase(value)) {
-            if (! status) {
+            if (!status) {
                 mWifiManager.setWifiEnabled(true);
             }
         }
@@ -172,7 +172,7 @@ public class InterfaceX {
         List<LinkAddress> linkAddressList = lp.getLinkAddresses();
         for (LinkAddress linkAddress : linkAddressList) {
             InetAddress inetAddress = linkAddress.getAddress();
-            if (linkAddress.isIpv4() && (! inetAddress.isLoopbackAddress())) {
+            if (linkAddress.isIpv4() && (!inetAddress.isLoopbackAddress())) {
                 return String.valueOf(linkAddress.isIpv4());
             }
         }
@@ -185,7 +185,7 @@ public class InterfaceX {
         List<LinkAddress> linkAddressList = lp.getLinkAddresses();
         for (LinkAddress linkAddress : linkAddressList) {
             InetAddress inetAddress = linkAddress.getAddress();
-            if (linkAddress.isIpv6() && (! inetAddress.isLoopbackAddress())) {
+            if (linkAddress.isIpv6() && (!inetAddress.isLoopbackAddress())) {
                 return String.valueOf(linkAddress.isIpv6());
             }
         }

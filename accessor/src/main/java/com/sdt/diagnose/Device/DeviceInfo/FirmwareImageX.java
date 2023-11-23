@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 
 import java.util.ArrayList;
 
@@ -18,10 +18,10 @@ public class FirmwareImageX {
 
     @Tr369Get("Device.DeviceInfo.FirmwareImage.")
     public String SK_TR369_GetFirmwareImageInfo(String path) {
-        if (! isSlot()) {
+        if (!isSlot()) {
             return "--";
         }
-        String[] params = ProtocolPathUtl.parse(REFIX, path);
+        String[] params = ProtocolPathUtils.parse(REFIX, path);
         if (params == null || params.length < 1) {
             return null;
         }
@@ -95,7 +95,7 @@ public class FirmwareImageX {
 
     private boolean isSlot() {
         String active = SystemProperties.get("ro.boot.slot_suffix", "");
-        return ! TextUtils.isEmpty(active);
+        return !TextUtils.isEmpty(active);
     }
 
 }

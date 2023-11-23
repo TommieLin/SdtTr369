@@ -13,6 +13,7 @@ import com.sdt.diagnose.common.GlobalContext;
  */
 public class MainActivity extends FragmentActivity {
     private final static String TAG = "MainActivity";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         Log.e(TAG, " ############ Outis ### MainActivity create");

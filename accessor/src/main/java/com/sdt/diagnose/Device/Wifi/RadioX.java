@@ -109,7 +109,7 @@ public class RadioX {
                 mWifiManager.setWifiEnabled(false);
             }
         } else if (("true").equalsIgnoreCase(value)) {
-            if (! status) {
+            if (!status) {
                 mWifiManager.setWifiEnabled(true);
             }
         }

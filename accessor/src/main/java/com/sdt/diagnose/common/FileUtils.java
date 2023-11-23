@@ -19,7 +19,7 @@ public class FileUtils {
 
         try {
             reader = new BufferedReader(new FileReader(filePath));
-            while ((readChar = reader.read()) != - 1) {
+            while ((readChar = reader.read()) != -1) {
                 fileStrBuffer.append((char) readChar);
             }
         } catch (Exception e) {
@@ -33,7 +33,6 @@ public class FileUtils {
                 }
             }
         }
-
         return fileStrBuffer.toString();
     }
 

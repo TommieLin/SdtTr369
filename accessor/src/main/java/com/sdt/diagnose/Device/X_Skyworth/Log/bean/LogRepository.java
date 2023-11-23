@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import com.sdt.diagnose.Device.X_Skyworth.Log.utils.StorageUtils;
 import com.sdt.diagnose.Device.X_Skyworth.Log.utils.SystemUtils;
 import com.sdt.diagnose.command.Event;
-import com.sdt.diagnose.common.DeviceInfoUtil;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.database.DbManager;
 
@@ -61,7 +60,6 @@ public class LogRepository {
     private final int MAX_LOG_RETENTION_DAYS = 3;   // 日志文件最大保存天数
 
     private LogRepository() {
-        setAutoUploadUrl();
         setAutoUploadStatus();
         setPeriodicMillisTime();
         mThread = new HandlerThread("LogRepositoryThread", Process.THREAD_PRIORITY_BACKGROUND);
@@ -161,32 +159,14 @@ public class LogRepository {
         mUploadUrl = url;
     }
 
-    private void setAutoUploadUrl() {
-        mUploadUrl = DbManager.getDBParam("Device.X_Skyworth.Logcat.AutoUpload.Url");
-        if (mUploadUrl.isEmpty()) {
-            String serialNumber = DeviceInfoUtil.getSerialNumber();
-            String[] split = DbManager.getDBParam("Device.ManagementServer.URL").split("/");
-            if (split.length >= 3) {
-                mUploadUrl = split[0] + "//" + split[2] + URL_UPLOAD_LOG_FILE + serialNumber;
-            } else {
-                Log.e(TAG, "The URL of the upload log file is illegal");
-            }
-        }
-    }
-
     public String getAutoUploadUrl() {
         return mUploadUrl;
     }
 
     private void autoUploadLogFile() {
         if (mUploadUrl == null || mUploadUrl.isEmpty()) {
-            // 重新初始化URL一次
-            Log.e(TAG, "The uploaded URL is empty, and reinitialization is in progress.");
-            setAutoUploadUrl();
-            if (mUploadUrl == null || mUploadUrl.isEmpty()) {
-                Log.e(TAG, "The upload URL in the database is empty.");
-                return;
-            }
+            Log.e(TAG, "The upload URL in the database is empty.");
+            return;
         }
 
         File folder = new File("/data/tcpdump/");

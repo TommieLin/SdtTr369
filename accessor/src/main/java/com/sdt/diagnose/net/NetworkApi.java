@@ -178,13 +178,6 @@ public class NetworkApi {
      ***************************************************************/
     public String[] getEthernetMaxBitRate() {
         String[] arr = new String[1];
-//        int LinkData = - 1;
-//        LinkData = HwNative.getWiredLinkData("eth0");
-//        if (LinkData > 0) {
-//            arr[0] = HwNative.getWiredMaxBitRate("eth0");
-//        } else {
-//            arr[0] = "-1";
-//        }
         Log.i(TAG, "getEthernetMaxBitRate: " + arr[0]);
         return arr;
     }
@@ -214,14 +207,14 @@ public class NetworkApi {
      * readOnly ?
      ***************************************************************/
     public String getWiFiSsid(Context context) {
-        if (! NetworkUtils.isWifiConnected(context)) return null;
+        if (!NetworkUtils.isWifiConnected(context)) return null;
         String ssid = "";
         WifiManager mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         WifiInfo mWifiInfo = mWifiManager.getConnectionInfo();
         if (null != mWifiInfo) {
             ssid = mWifiInfo.getSSID();
         }
-        if (! TextUtils.isEmpty(ssid)) {
+        if (!TextUtils.isEmpty(ssid)) {
             Log.i(TAG, "getWiFiSsid: " + ssid);
             if (ssid.contains("<")) {
                 ssid = ssid.replace("<", "");
@@ -375,7 +368,7 @@ public class NetworkApi {
      *    -2 mean not support
      ***************************************************************/
     public int getWiFiEndPointNumberOfEntries() {
-        int entries = - 2;
+        int entries = -2;
         Log.i(TAG, "getWiFiEndPointNumberOfEntries: " + entries + "((not support))");
         return entries;
     }
@@ -510,12 +503,12 @@ public class NetworkApi {
     public int getWiFiRadioChannel(Context context, int index) {
         WifiManager mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (null == mWifiManager) {
-            return - 1;
+            return -1;
         }
 
         WifiInfo mWifiInfo = mWifiManager.getConnectionInfo();
         if (null == mWifiInfo) {
-            return - 1;
+            return -1;
         }
         int Frequency = mWifiInfo.getFrequency();
         String Channels = getChannelByFrequency(Frequency);
@@ -856,7 +849,7 @@ public class NetworkApi {
                 boolean AES = false;
                 boolean TKIP = false;
 
-                if (result.level < - 75) continue;
+                if (result.level < -75) continue;
 
                 DeviceWiFiScanResult mScanResult = new DeviceWiFiScanResult();
                 mScanResult.BSSID = result.BSSID;
@@ -1053,7 +1046,7 @@ public class NetworkApi {
         if (null == mWifiManager) {
             return false;
         }
-        if (! DiagnosticsState.equals("Requested")) {
+        if (!DiagnosticsState.equals("Requested")) {
             return false;
         }
         return mWifiManager.startScan();
@@ -1069,12 +1062,12 @@ public class NetworkApi {
         public int mRxErrors;
 
         public DeviceWiFiRadioStats() {
-            mBytesSent = - 1;
-            mBytesReceived = - 1;
-            mPacketSend = - 1;
-            mPacketReceived = - 1;
-            mErrorReceived = - 1;
-            mRxErrors = - 1;
+            mBytesSent = -1;
+            mBytesReceived = -1;
+            mPacketSend = -1;
+            mPacketReceived = -1;
+            mErrorReceived = -1;
+            mRxErrors = -1;
         }
 
         @Override
@@ -1163,7 +1156,7 @@ public class NetworkApi {
                 return wifiInfo.getRssi();
             }
         }
-        return - 100;
+        return -100;
     }
 
     private DeviceWiFiRadioStats getRadioStats(String param, int index) {

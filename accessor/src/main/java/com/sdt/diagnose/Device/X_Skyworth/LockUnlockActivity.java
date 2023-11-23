@@ -87,7 +87,7 @@ public class LockUnlockActivity extends Activity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 Intent intent = new Intent().setComponent(
                                         new ComponentName("com.android.tv.settings",
-                                        "com.android.tv.settings.connectivity.NetworkActivity"));
+                                                "com.android.tv.settings.connectivity.NetworkActivity"));
                                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                                         | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 GlobalContext.getContext().startActivity(intent);

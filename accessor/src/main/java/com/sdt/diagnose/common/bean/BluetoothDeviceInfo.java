@@ -21,11 +21,11 @@ import java.util.UUID;
 
 public class BluetoothDeviceInfo {
     private static final String TAG = "BluetoothDeviceInfo";
-    private String mName;
-    private String mMac;
+    private final String mName;
+    private final String mMac;
     private String mType;
-    private boolean mBound = true; // 默认是已绑定状态
-    private boolean isConnected;
+    private final boolean mBound = true; // 默认是已绑定状态
+    private final boolean isConnected;
     private int mBatteryLevel;     // 剩余电量
     private String mRcuVersion;    // Sky 蓝牙遥控器固件版本号
 
@@ -106,7 +106,7 @@ public class BluetoothDeviceInfo {
         this.parseType(mBluetoothDevice);
 
         int battery = device.getBatteryLevel(); // -1 :表示不支持读电量
-        if (battery != - 1) {
+        if (battery != -1) {
             setBatteryLevel(battery);
         }
 
@@ -116,7 +116,7 @@ public class BluetoothDeviceInfo {
     private void parseType(BluetoothDevice device) {
         final BluetoothClass bluetoothClass = device.getBluetoothClass();
         Log.d(TAG, "BluetoothDeviceInfo: bluetoothClass=" + bluetoothClass);
-        int devClass = - 1;
+        int devClass = -1;
         if (bluetoothClass != null) {
             devClass = bluetoothClass.getDeviceClass();
         }
@@ -263,7 +263,7 @@ public class BluetoothDeviceInfo {
                 setBatteryLevel(batteryLevel);
             }
 
-            if (! isWriteThread) {
+            if (!isWriteThread) {
                 writeCharacteristic(CHARACTER_VENDOR_OUT_NAME, readRCUVersion());
             }
         }
@@ -277,7 +277,7 @@ public class BluetoothDeviceInfo {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             Log.d(TAG, "onCharacteristicChanged :" + Thread.currentThread().getId());
             super.onCharacteristicChanged(gatt, characteristic);
-            if (! characteristic.getUuid().toString().equals("00002a4d-0000-1000-8000-00805f9b34fb")) {
+            if (!characteristic.getUuid().toString().equals("00002a4d-0000-1000-8000-00805f9b34fb")) {
                 Log.d(TAG, "on not care CharacteristicChanged ");
                 return;
             }

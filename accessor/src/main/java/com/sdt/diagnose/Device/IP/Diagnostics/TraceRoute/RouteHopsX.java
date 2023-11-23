@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.IProtocolArray;
-import com.sdt.diagnose.common.ProtocolPathUtl;
+import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.traceroute.TraceRouteContainer;
 import com.sdt.diagnose.traceroute.TraceRouteManager;
 
@@ -25,7 +25,7 @@ public class RouteHopsX implements IProtocolArray<TraceRouteContainer> {
 
     private String handleAppPath(String path) {
         Log.d(TAG, "handleAppPath: " + path);
-        return ProtocolPathUtl.getInfoFromArray(REFIX, path, this);
+        return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     @Override

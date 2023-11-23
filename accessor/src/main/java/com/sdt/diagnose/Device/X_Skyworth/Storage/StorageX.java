@@ -20,7 +20,7 @@ import androidx.annotation.NonNull;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
-import com.sdt.diagnose.common.ApplicationUtil;
+import com.sdt.diagnose.common.ApplicationUtils;
 import com.sdt.diagnose.common.GlobalContext;
 
 import java.io.IOException;
@@ -285,7 +285,7 @@ public class StorageX {
         if (value == null || value.isEmpty()) return false;
 
         try {
-            List<String> packageNames = ApplicationUtil.parseStringList(value);
+            List<String> packageNames = ApplicationUtils.parseStringList(value);
             Log.d(TAG, "Waiting to handle apps: " + packageNames);
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
@@ -294,7 +294,7 @@ public class StorageX {
                 final String pkgName = info.packageName;
                 if (packageNames.contains(pkgName)) {
                     Log.d(TAG, "Waiting to clear app data: " + pkgName);
-                    ApplicationUtil.clearData(pkgName);
+                    ApplicationUtils.clearData(pkgName);
                 }
             }
         } catch (Exception e) {
@@ -310,7 +310,7 @@ public class StorageX {
         if (value == null || value.isEmpty()) return false;
 
         try {
-            List<String> packageNames = ApplicationUtil.parseStringList(value);
+            List<String> packageNames = ApplicationUtils.parseStringList(value);
             Log.d(TAG, "Waiting to handle apps: " + packageNames);
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
