@@ -12,22 +12,19 @@ public class SsidX {
     private static final String TAG = "SsidX";
 
     @Tr369Get("Device.WiFi.SSID.1.Enable")
-    public String SK_TR369_GetSsidEnable(String path) {
-        Log.d(TAG, "GetSsidEnable path: " + path);
+    public String SK_TR369_GetSsidEnable() {
         boolean ret = NetworkApiManager.getInstance().getNetworkApi().getWiFiSSIDEnable(GlobalContext.getContext(), 0);
         return String.valueOf(ret);
     }
 
     @Tr369Get("Device.WiFi.SSID.1.Status")
-    public String SK_TR369_GetSsidStatus(String path) {
-        Log.d(TAG, "GetSsidStatus path: " + path);
+    public String SK_TR369_GetSsidStatus() {
         return NetworkUtils.getWiFiRadioStatus(GlobalContext.getContext());
     }
 
     @Tr369Get("Device.WiFi.SSID.1.Name")
-    public String SK_TR369_GetSsidName(String path) {
-        Log.d(TAG, "GetSsidName path: " + path);
-        return SK_TR369_GetSsidSSID(path);
+    public String SK_TR369_GetSsidName() {
+        return SK_TR369_GetSsidSSID();
     }
 
     @Tr369Get("Device.WiFi.SSID.1.BSSID")
@@ -37,14 +34,12 @@ public class SsidX {
     }
 
     @Tr369Get("Device.WiFi.SSID.1.SSID")
-    public String SK_TR369_GetSsidSSID(String path) {
-        Log.d(TAG, "GetSsidSSID path: " + path);
+    public String SK_TR369_GetSsidSSID() {
         return NetworkApiManager.getInstance().getNetworkApi().getWiFiSsid(GlobalContext.getContext());
     }
 
     @Tr369Get("Device.WiFi.SSID.1.MACAddress")
-    public String SK_TR369_GetSsidMACAddress(String path) {
-        Log.d(TAG, "GetSsidMACAddress path: " + path);
+    public String SK_TR369_GetSsidMACAddress() {
         return NetworkApiManager.getInstance().getNetworkApi().getWiFiSSIDMACAddress(GlobalContext.getContext(), 0);
     }
 

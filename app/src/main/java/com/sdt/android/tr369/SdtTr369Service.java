@@ -27,9 +27,10 @@ import com.sdt.android.tr369.Receiver.ExternalAppUpgradeReceiver;
 import com.sdt.android.tr369.Receiver.PackageReceiver;
 import com.sdt.android.tr369.Receiver.ShutdownReceiver;
 import com.sdt.android.tr369.Receiver.StandbyModeReceiver;
-import com.sdt.android.tr369.Utils.FileUtil;
 import com.sdt.diagnose.Device.LanX;
 import com.sdt.diagnose.Device.SkyworthX;
+import com.sdt.diagnose.Device.X_Skyworth.App.AppX;
+import com.sdt.diagnose.Device.X_Skyworth.Bluetooth.BluetoothDeviceX;
 import com.sdt.diagnose.Device.X_Skyworth.FTIMonitor;
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogCmd;
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogRepository;
@@ -56,17 +57,19 @@ public class SdtTr369Service extends Service {
     private ExternalAppUpgradeReceiver mExternalAppUpgradeReceiver = null;
     private HandlerThread mHandlerThread = null;
     private Handler mHandler = null;
-    public static final int MSG_START_TR369 = 3300;
-    public static final int MSG_STOP_TR369 = 3301;
+    public static final int MSG_START_TR369_SERVICE = 3300;
+    public static final int MSG_STOP_TR369_SERVICE = 3301;
 
-    public void handleTr369Message(@NonNull Message msg) {
+    public void handleServiceMessage(@NonNull Message msg) {
         switch (msg.what) {
-            case MSG_START_TR369:
-                Log.e(TAG, " ####### Outis ### handleTr369Message MSG_START_TR369");
-                startTR369();
+            case MSG_START_TR369_SERVICE:
+                mHandler.removeMessages(MSG_START_TR369_SERVICE);
+                Log.e(TAG, " ####### Outis ### handleServiceMessage MSG_START_TR369_SERVICE");
+                startTr369Service();
                 break;
-            case MSG_STOP_TR369:
-                Log.e(TAG, " ####### Outis ### handleTr369Message MSG_STOP_TR369");
+            case MSG_STOP_TR369_SERVICE:
+                mHandler.removeMessages(MSG_STOP_TR369_SERVICE);
+                Log.e(TAG, " ####### Outis ### handleServiceMessage MSG_STOP_TR369_SERVICE");
                 break;
             default:
                 break;
@@ -103,7 +106,7 @@ public class SdtTr369Service extends Service {
 
     private void initTr369Service() {
         Log.e(TAG, " ####### Outis ### initTr369Service start");
-        mHandlerThread = new HandlerThread("tr369_worker");
+        mHandlerThread = new HandlerThread("tr369_server");
         // 先启动，再初始化handler
         mHandlerThread.start();
         if (mHandler == null) {
@@ -111,47 +114,19 @@ public class SdtTr369Service extends Service {
                 @Override
                 public void handleMessage(@NonNull Message msg) {
                     super.handleMessage(msg);
-                    handleTr369Message(msg);
+                    handleServiceMessage(msg);
                 }
             };
         }
+        // 设置回调函数
+        OpenTR369Native.SetListener(mListener);
+        // 注册监听器以启动TR369协议
         registerSdtTr369Receiver();
-        registerPackageReceiver();
-        registerBluetoothMonitorReceiver();
-        registerStandbyReceiver();
-        registerShutdownReceiver();
-        registerExternalAppUpdateReceiver();
-
-        // 开机同步后台logcat状态
-        LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
-        // 初始化tcpdump参数
-        SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
-        SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
-        // 在启动时，检测抓包文件是否存在，如果存在就删除文件
-        File file = new File("/data/tcpdump/test1.pcap");
-        if (file.exists()) {
-            file.delete();
-        }
-        // 开机同步STB Lock状态
-        if (SystemProperties.get("persist.sys.tr069.lock", "0").equals("1")) {
-            SkyworthX skyworthX = new SkyworthX();
-            skyworthX.SK_TR369_SetLockEnable(null, "1");
-        }
-        // 重新上传APP安装结果
-        if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {
-            ExternalAppUpgradeReceiver.retryRequestUpdateStatus();
-        }
-        // 初始化FTI停留时间监控程序
-        new FTIMonitor();
-        // 初始化系统数据采集程序
-        new SystemDataStat(this);
-        // 初始化LanX用于检测静态IP是否能访问互联网
-        new LanX();
     }
 
     private void registerSdtTr369Receiver() {
         Log.e(TAG, " ####### Outis ### registerSdtTr369Receiver start");
-        mSdtTr369Receiver = new SdtTr369Receiver(mHandler);
+        mSdtTr369Receiver = new SdtTr369Receiver(getApplicationContext());
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -159,6 +134,7 @@ public class SdtTr369Service extends Service {
     }
 
     private void registerPackageReceiver() {
+        Log.e(TAG, " ####### Outis ### registerPackageReceiver start");
         mPackageReceiver = new PackageReceiver();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -170,6 +146,7 @@ public class SdtTr369Service extends Service {
     }
 
     private void registerBluetoothMonitorReceiver() {
+        Log.e(TAG, " ####### Outis ### registerBluetoothMonitorReceiver start");
         if (mBluetoothMonitorReceiver == null) {
             mBluetoothMonitorReceiver = new BluetoothMonitorReceiver();
         }
@@ -224,7 +201,7 @@ public class SdtTr369Service extends Service {
         if (mExternalAppUpgradeReceiver != null) unregisterReceiver(mExternalAppUpgradeReceiver);
 
         if (mHandler != null) {
-            mHandler.sendEmptyMessage(MSG_STOP_TR369);
+            mHandler.sendEmptyMessage(MSG_STOP_TR369_SERVICE);
             mHandler = null;
         }
         if (mHandlerThread != null) {
@@ -234,23 +211,44 @@ public class SdtTr369Service extends Service {
         super.onDestroy();
     }
 
-    private void startTR369() {
+    private void startTr369Service() {
+        // 注册监听器
+        registerPackageReceiver();
+        registerBluetoothMonitorReceiver();
+        registerStandbyReceiver();
+        registerShutdownReceiver();
+        registerExternalAppUpdateReceiver();
 
-        OpenTR369Native.SetListener(mListener);
+        // 开机同步后台logcat状态
+        LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
+        // 初始化tcpdump参数
+        SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
+        SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
+        // 在启动时，检测抓包文件是否存在，如果存在就删除文件
+        File file = new File("/data/tcpdump/test1.pcap");
+        if (file.exists()) {
+            file.delete();
+        }
+        // 开机同步STB Lock状态
+        if (DbManager.getDBParam("Device.X_Skyworth.Lock.Enable").equals("1")) {
+            SkyworthX skyworthX = new SkyworthX();
+            skyworthX.SK_TR369_SetLockEnable(null, "1");
+        }
+        // 重新上传APP安装结果
+        if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {
+            ExternalAppUpgradeReceiver.retryRequestUpdateStatus();
+        }
+        // 初始化FTI停留时间监控程序
+        new FTIMonitor();
+        // 初始化系统数据采集程序
+        new SystemDataStat(this);
+        // 初始化LanX用于检测静态IP是否能访问互联网
+        new LanX();
 
-        FileUtil.copyTr369AssetsToFile(getApplicationContext());
-        String defaultFilePath = getApplicationContext().getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_DEFAULT;
-        Log.e(TAG, " ############ Outis ### startTR369 defaultFilePath: " + defaultFilePath);
-
-        int ret = OpenTR369Native.SetInitFilePath(defaultFilePath);
-        Log.e(TAG, " ############ Outis ### startTR369 SetInitFilePath ret: " + ret);
-
-        String modelFile = getApplicationContext().getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_XML;
-        ret = OpenTR369Native.OpenTR369Init(modelFile);
-        Log.e(TAG, " ############ Outis ### startTR369 ret: " + ret);
-
-        String test_str = OpenTR369Native.stringFromJNI();
-        Log.e(TAG, " ############ Outis ### startTR369 test_str: " + test_str);
+        // 更新协议中储存的APP列表
+        AppX.updateAppList();
+        // 更新协议中储存的蓝牙列表
+        BluetoothDeviceX.updateBluetoothList();
     }
 
     private final OpenTR369Native.IOpenTr369Listener mListener = new OpenTR369Native.IOpenTr369Listener() {
@@ -270,6 +268,11 @@ public class SdtTr369Service extends Service {
                 ret = (DbManager.setDBParam(path, value) == 0);
             }
             return ret;
+        }
+
+        @Override
+        public void openTR369Start() {
+            mHandler.sendEmptyMessage(MSG_START_TR369_SERVICE);
         }
     };
 

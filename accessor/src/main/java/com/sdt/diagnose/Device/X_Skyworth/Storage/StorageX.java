@@ -203,7 +203,7 @@ public class StorageX {
     }
 
     @Tr369Get("Device.X_Skyworth.Storage.Info")
-    public String SK_TR369_GetStorageInfo(String path) {
+    public String SK_TR369_GetStorageInfo() {
         MeasurementDetails details = measureExactStorage();
         Log.d(TAG, "Get storage details: " + details);
 
@@ -238,7 +238,7 @@ public class StorageX {
     }
 
     @Tr369Get("Device.X_Skyworth.Storage.AppsInfo")
-    public String SK_TR369_GetStorageAppsInfo(String path) {
+    public String SK_TR369_GetStorageAppsInfo() {
         final List<HashMap<String, String>> appsInfo = new ArrayList<>();
         final PackageManager pm = GlobalContext.getContext().getPackageManager();
         final StorageStatsManager ssm = GlobalContext.getContext().getSystemService(StorageStatsManager.class);

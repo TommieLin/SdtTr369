@@ -655,6 +655,7 @@
             <schema name="Sound" getter="diagnose" setter="diagnose" type="string" write="W" />
 
             <schema name="UpgradeResponse" type="object">
+                <schema name="Enable" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Msg" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Status" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="PlanId" getter="diagnose" setter="diagnose" type="string" write="W" />

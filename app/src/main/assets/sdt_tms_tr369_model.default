@@ -80,9 +80,19 @@ Internal.Reboot.Cause "LocalFactoryReset"
 ### Add by Skyworth
 Device.DeviceInfo.ManufacturerOUI "309176"
 
+## Launcher短消息功能需要订阅的主题
 Device.MQTT.Client.1.Subscription.1.Alias "mqtt-shortmsg"
 Device.MQTT.Client.1.Subscription.1.Enable "true"
 ## 根据每台设备独特的EndpointID动态初始化该节点值
 # Device.MQTT.Client.1.Subscription.1.Topic "sdtcpe/agent/shortmsg/${EndpointID}"
 Device.MQTT.Client.1.Subscription.1.QoS "2"
+
+## 新盒子锁的状态
+Device.X_Skyworth.Lock.Enable "0"
+
+## 平台软件默认不开启logcat后台持续保存日志功能，按项目需求打开或关闭
+Device.X_Skyworth.Logcat.Background.Enable "0"
+## 平台软件默认不开启logcat自动上传日志功能，按项目需求打开
+Device.X_Skyworth.Logcat.AutoUpload.Enable "0"
+
 

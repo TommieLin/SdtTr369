@@ -61,7 +61,7 @@ public class TraceRoute {
     private TraceRouteContainer latestTrace;
     ExecutePingAsyncTask pingAsyncTask = null;
     private ExecutorService mExecutorService = null;
-    private static final int MSG_TIME_OUT = 600;
+    private static final int MSG_TIME_OUT = 3309;
     private CountDownLatch lock;
 
     private boolean await(long timeout) {

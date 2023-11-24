@@ -29,6 +29,7 @@ const struct {
                 .type="(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;"},
         {.name="OpenTR369CallbackSetAttr",
                 .type="(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I"},
+        {.name="OpenTR369CallbackStart", .type="()V"},
 };
 static jmethodID sJavaFunction[ARRAY_SIZE(sFuncScript)];
 
@@ -36,6 +37,7 @@ static jmethodID sJavaFunction[ARRAY_SIZE(sFuncScript)];
 #define funcSet sJavaFunction[1]
 #define funcGetAttr sJavaFunction[2]
 #define funcSetAttr sJavaFunction[3]
+#define funcStart sJavaFunction[4]
 
 #ifdef __cplusplus
 extern "C" {
@@ -170,6 +172,19 @@ int SK_TR369_Callback_SetAttr(const char *path, const char *method, const char *
     return ret;
 }
 
+void SK_TR369_Callback_Start() {
+    TX_ERR("==>: %s", __FUNCTION__);
+    do {
+        bool needsDetach;
+        JNIEnv *env = getJNIEnv(&needsDetach);
+        CHECK_BREAK(env != nullptr);
+        env->CallStaticVoidMethod(mClass, funcStart);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        if (needsDetach) detachJNI();
+    } while (false);
+    TX_ERR("<==: %s", __FUNCTION__);
+}
+
 static void SK_TR369_JniConfig(JNIEnv *env) {
     jclass clazz;
     env->GetJavaVM(&mJavaVm);
@@ -208,10 +223,9 @@ Java_com_sdt_opentr369_OpenTR369Native_OpenTR369Init(JNIEnv *env, jclass clazz,
     SK_TR369_JniConfig(env);
     static skJniCallback_t jniCallFuncion = {
             .SK_TR369_Callback_Get = SK_TR369_Callback_Get,
-            .SK_TR369_Callback_Set = SK_TR369_Callback_Set};
+            .SK_TR369_Callback_Set = SK_TR369_Callback_Set,
+            .SK_TR369_Callback_Start = SK_TR369_Callback_Start};
     skSetJniCallback(&jniCallFuncion);
-
-//    SK_TR369_Register_Setter_Getter(SK_TR369_Callback_SetAttr, SK_TR369_Callback_GetAttr);
 
     const char *const filePath = env->GetStringUTFChars(path, nullptr);
     int ret = SK_TR369_Start(filePath);
@@ -493,7 +507,7 @@ Java_com_sdt_opentr369_OpenTR369Native_GetNetInterfaceStatus(JNIEnv *env, jclass
 extern "C"
 JNIEXPORT jint JNICALL
 Java_com_sdt_opentr369_OpenTR369Native_AddMultiObject(JNIEnv *env, jclass clazz, jstring path,
-                                                   jint num) {
+                                                      jint num) {
     // TODO: implement AddInstance()
     const char *param = env->GetStringUTFChars(path, nullptr);
     int ret = SK_TR369_AddMultiObject(param, num);

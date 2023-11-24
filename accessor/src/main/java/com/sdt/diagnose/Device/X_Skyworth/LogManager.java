@@ -41,6 +41,8 @@ public class LogManager {
     String[] cmds = new String[]{"logcat"};
     public static LogThread mLogThread;
 
+    private static final int MSG_START_REALTIME_LOG = 3307;
+
     public void init() {
         handlerThread = new HandlerThread("setFlag");
         handlerThread.start();
@@ -48,7 +50,8 @@ public class LogManager {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == 1) {
+                if (msg.what == MSG_START_REALTIME_LOG) {
+                    handler.removeMessages(MSG_START_REALTIME_LOG);
                     condition.set(true);
                 }
             }
@@ -184,7 +187,7 @@ public class LogManager {
             while (isRead() && (-1 != (len = is.read(buf)))) {
                 sb.append(new String(buf, 0, len));
                 if (condition.get()) {
-                    handler.sendEmptyMessageDelayed(1, Interval2Ms());
+                    handler.sendEmptyMessageDelayed(MSG_START_REALTIME_LOG, Interval2Ms());
                     condition.set(false);
                     //这里进行log上传
                     threadPoolExecutor.execute(

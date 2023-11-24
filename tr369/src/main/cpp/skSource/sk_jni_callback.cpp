@@ -49,6 +49,10 @@ int SK_TR369_API_GetProperty(const char *name, char *value, int size, const char
     return ret;
 }
 
+void SK_TR369_API_StartServer() {
+    if (pFunc != nullptr) pFunc->SK_TR369_Callback_Start();
+}
+
 #ifdef __cplusplus
 }
 #endif

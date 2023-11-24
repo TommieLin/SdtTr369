@@ -50,7 +50,7 @@ public class ShortMessageUtils {
     public static final String TYPE_IMAGE = "03";
     public static final String TYPE_NOTIFY = "04";
     public static final String TYPE_UPDATE = "05";
-    private static final int NOTIFICATION_TR069_ID = 1104;
+    private static final int NOTIFICATION_TR369_ID = 1133;
     private static final String ACTION_START_UPDATE_TASK = "com.skw.ota.update.internal.tr069";
 
     public static void handleShortMessage(String json) {
@@ -121,7 +121,7 @@ public class ShortMessageUtils {
                         .setAutoCancel(true) // Automatically cancel the notification when it's clicked
                         .build();
 
-        manager.notify(NOTIFICATION_TR069_ID, notification);
+        manager.notify(NOTIFICATION_TR369_ID, notification);
     }
 
     public static void responseServer(String id) {

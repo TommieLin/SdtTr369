@@ -85,7 +85,7 @@ public class Tr369PathInvoke {
                         Log.e(TAG, "createMap getDeclaredMethod error, 1: " + e1.getMessage());
                         continue;
                     }
-                    Log.e(TAG, "createMap getDeclaredMethod error, 2: " + e.getMessage());
+                    Log.i(TAG, "createMap getDeclaredMethod error, 2: " + e.getMessage());
                 }
             } else if (type == TYPE_TR369_SET) {
                 try {

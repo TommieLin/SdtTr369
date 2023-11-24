@@ -55,9 +55,11 @@ public class DeviceInfoX {
     }
 
     @Tr369Get("Device.DeviceInfo.BootFirmwareImage")
-    public String SK_TR369_GetBootFirmwareImage(String path) {
+    public String SK_TR369_GetBootFirmwareImage() {
         String active = SystemProperties.get("ro.boot.slot_suffix", "");
-        return active.isEmpty() ? DbManager.getDBParam(path) : active;
+        return active.isEmpty()
+                ? DbManager.getDBParam("Device.DeviceInfo.BootFirmwareImage")
+                : active;
     }
 
     @Tr369Get("Device.DeviceInfo.HardwareVersion")
@@ -83,7 +85,7 @@ public class DeviceInfoX {
     }
 
     @Tr369Get("Device.DeviceInfo.FirstUseDate")
-    public String SK_TR369_GetFirstUseDate(String path) {
+    public String SK_TR369_GetFirstUseDate() {
         String firstUseDate = DbManager.getDBParam("Device.DeviceInfo.FirstUseDate");
         if (TextUtils.isEmpty(firstUseDate)) {
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -92,49 +94,6 @@ public class DeviceInfoX {
             return firstUseDate;
         }
         return firstUseDate;
-    }
-
-    @Tr369Get("Device.DeviceInfo.mac")
-    public String SK_TR369_GetDeviceMac() {
-        String result = NetworkUtils.getEthernetMacAddress();
-        if (TextUtils.isEmpty(result)) {
-            result = NetworkUtils.getWifiMacAddress();
-        }
-        return result;
-    }
-
-    @Tr369Get("Device.DeviceInfo.IPAddress")
-    public String SK_TR369_GetIpAddress(Context context) {
-        String result = "";
-        ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
-        Network net = cm.getActiveNetwork();
-        if (net != null) {
-            Log.d(TAG, "getActiveNetwork: " + net);
-            LinkProperties prop = cm.getLinkProperties(net);
-            if (prop == null) return result;
-            Iterator<InetAddress> iter = prop.getAllAddresses().iterator();
-            // If there are no entries, return null
-            if (!iter.hasNext()) return result;
-            // Concatenate all available addresses, newline separated
-            StringBuilder addresses = new StringBuilder();
-            while (iter.hasNext()) {
-                addresses.append(iter.next().getHostAddress());
-                if (iter.hasNext()) addresses.append("\n");
-            }
-            result = addresses.toString();
-        }
-        return result;
-    }
-
-    @Tr369Get("Device.DeviceInfo.MACAddress")
-    public String SK_TR369_GetMacAddress(Context context) {
-        WifiManager wm = context.getSystemService(WifiManager.class);
-        final String[] macAddresses = wm.getFactoryMacAddresses();
-        String macAddress = null;
-        if (macAddresses != null && macAddresses.length > 0) {
-            macAddress = macAddresses[0];
-        }
-        return (macAddress != null) ? macAddress.toLowerCase() : "";
     }
 
 }

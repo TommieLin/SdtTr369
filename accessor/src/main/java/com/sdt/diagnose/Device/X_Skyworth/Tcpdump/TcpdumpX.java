@@ -10,7 +10,6 @@ import android.util.Log;
 
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.command.Event;
-import com.sdt.diagnose.database.DbManager;
 
 import java.io.File;
 import java.util.Timer;

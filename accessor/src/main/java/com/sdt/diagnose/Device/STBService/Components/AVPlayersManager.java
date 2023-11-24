@@ -29,7 +29,7 @@ public class AVPlayersManager {
         init();
     }
 
-    public String getAVPlayerName1(String path) {
+    public String getAVPlayerName1() {
         if (mList == null || mPm == null) return null;
         if (mList.size() > 1) {
             return mList.get(0).loadLabel(mPm).toString();
@@ -37,7 +37,7 @@ public class AVPlayersManager {
         return null;
     }
 
-    public String getAVPlayerName2(String path) {
+    public String getAVPlayerName2() {
         if (mList == null || mPm == null) return null;
         if (mList.size() > 2) {
             return mList.get(1).loadLabel(mPm).toString();
@@ -45,7 +45,7 @@ public class AVPlayersManager {
         return null;
     }
 
-    public String getAVPlayerName3(String path) {
+    public String getAVPlayerName3() {
         if (mList == null || mPm == null) return null;
         if (mList.size() > 3) {
             return mList.get(2).loadLabel(mPm).toString();

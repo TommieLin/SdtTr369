@@ -67,7 +67,7 @@ public class VideoDecoder {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.Name")
-    public String SK_TR369_GetVdecName(String path) {
+    public String SK_TR369_GetVdecName() {
         String videoDecoderName = "";
         String decoderInfo = FileUtils.readFileToStr(FILE_NODE_VDEC_STATUS);
         if (null != decoderInfo && !decoderInfo.contains("No vdec")) {
@@ -82,7 +82,7 @@ public class VideoDecoder {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.Status")
-    public String SK_TR369_GetVdecStatus(String path) {
+    public String SK_TR369_GetVdecStatus() {
         String videoDecoderStatus = "";
         String decoderInfo = FileUtils.readFileToStr(FILE_NODE_VDEC_STATUS);
         if (null != decoderInfo) {
@@ -96,7 +96,7 @@ public class VideoDecoder {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.MPEG2Part2")
-    public String SK_TR369_GetVdecMpeg2Part2(String path) {
+    public String SK_TR369_GetVdecMpeg2Part2() {
         String profileLevelValue = "";
         int profileLevelIndex = -1;
         int curProfileIndex = getProfileIndex(MPEG2_PART2_PROFILE);
@@ -113,7 +113,7 @@ public class VideoDecoder {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.MPEG4Part2")
-    public String SK_TR369_GetVdecMpeg4Part2(String path) {
+    public String SK_TR369_GetVdecMpeg4Part2() {
         String profileLevelValue = "";
         int profileLevelIndex = -1;
         int curProfileIndex = getProfileIndex(MPEG4_PART2_PROFILE);
@@ -130,7 +130,7 @@ public class VideoDecoder {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.MPEG4Part10")
-    public String SK_TR369_GetVdecMpeg4Part10(String path) {
+    public String SK_TR369_GetVdecMpeg4Part10() {
         String profileLevelValue = "";
         int profileLevelIndex = -1;
         int curProfileIndex = getProfileIndex(MPEG4_PART10_PROFILE);
@@ -147,7 +147,7 @@ public class VideoDecoder {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.ContentAspectRatio")
-    public String SK_TR369_GetVdecAspectRatio(String path) {
+    public String SK_TR369_GetVdecAspectRatio() {
         String aspectRatio = FileUtils.readFileToStr(FILE_NODE_ASPECT_RATIO);
         Log.d(TAG, "GetVdecAspectRatio: " + aspectRatio);
         if (null == aspectRatio || aspectRatio.contains("NA")) {

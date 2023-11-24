@@ -16,6 +16,7 @@ public class OpenTR369Native {
     public interface IOpenTr369Listener {
         String openTR369GetAttr(int what, String path);
         boolean openTR369SetAttr(int what, String path, String value);
+        void openTR369Start();
     }
 
     public static void SetListener(@NonNull IOpenTr369Listener mNotify) {
@@ -79,6 +80,11 @@ public class OpenTR369Native {
         }
         Log.d(TAG, "J OpenTR369CallbackSetAttr " + str);
         return mListener.openTR369SetAttr(0, path, value) ? 0 : -1;
+    }
+
+    public static void OpenTR369CallbackStart() {
+        Log.d(TAG, "J OpenTR369CallbackStart: initial service");
+        mListener.openTR369Start();
     }
 
     public static native String stringFromJNI();

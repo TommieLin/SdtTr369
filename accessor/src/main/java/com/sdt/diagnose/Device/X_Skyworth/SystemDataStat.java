@@ -56,7 +56,7 @@ public class SystemDataStat {
     private static int mPeriodicMillisTime = 0;
     private static final int MAX_CACHE_NUM = 144;   // 最大储存量
     private static int CUR_CACHE_NUM = 0;
-    private static final int MSG_START_SYSTEM_DATA_STAT = 3300;
+    private static final int MSG_START_SYSTEM_DATA_STAT = 3304;
     private static final int DEFAULT_PERIOD_MILLIS_TIME = 600000;   // 默认十分钟统计一次
     private static List<JSONObject> mDataStatListMap;
     private long lastRxTotal = 0;
@@ -70,11 +70,11 @@ public class SystemDataStat {
         mCmsExtraServiceManager = CmsExtraServiceManager.getInstance(mContext);
         setPeriodicMillisTime();
 
-        String rxTraffic = SystemProperties.get("persist.sys.tr369.TotalBytes.RxTraffic", "");
+        String rxTraffic = SystemProperties.get("persist.sys.tr369.total.rx.traffic", "");
         if (rxTraffic.length() != 0 && Integer.parseInt(rxTraffic) >= 0)
             lastRxTotal = Integer.parseInt(rxTraffic);
 
-        String txTraffic = SystemProperties.get("persist.sys.tr369.TotalBytes.TxTraffic", "");
+        String txTraffic = SystemProperties.get("persist.sys.tr369.total.tx.traffic", "");
         if (txTraffic.length() != 0 && Integer.parseInt(txTraffic) >= 0)
             lastTxTotal = Integer.parseInt(txTraffic);
 
@@ -165,7 +165,6 @@ public class SystemDataStat {
             Log.e(TAG, "getMemoryIdleSize error: " + e.getMessage());
             return 0;
         }
-
         Log.d(TAG, "getMemoryAvailSize: " + availMem);
         return availMem;
     }
@@ -181,7 +180,6 @@ public class SystemDataStat {
             Log.e(TAG, "getMemoryTotalSize error: " + e.getMessage());
             return 0;
         }
-
         Log.d(TAG, "getMemoryTotalSize: " + totalMem);
         return totalMem;
     }
@@ -411,11 +409,11 @@ public class SystemDataStat {
 
         // 当前时刻所产生的下载流量
         long nowRxTotal = getRxTotalTraffic();
-        SystemProperties.set("persist.sys.tr369.TotalBytes.RxTraffic", String.valueOf(nowRxTotal));
+        SystemProperties.set("persist.sys.tr369.total.rx.traffic", String.valueOf(nowRxTotal));
 
         // 当前时刻所产生的上传流量
         long nowTxTotal = getTxTotalTraffic();
-        SystemProperties.set("persist.sys.tr369.TotalBytes.TxTraffic", String.valueOf(nowTxTotal));
+        SystemProperties.set("persist.sys.tr369.total.tx.traffic", String.valueOf(nowTxTotal));
 
         // 更新当日的总流量
         DbManager.setDBParam("Device.X_Skyworth.TotalBytes.Today", String.valueOf(nowRxTotal + nowTxTotal));

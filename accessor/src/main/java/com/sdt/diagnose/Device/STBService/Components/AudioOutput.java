@@ -23,8 +23,7 @@ public class AudioOutput {
     public static final int AUDIO_MIXING_DEFAULT = AUDIO_MIXING_ON;
 
     @Tr369Get("Device.Services.STBService.1.Components.AudioOutput.1.AudioLevel")
-    public String SK_TR369_GetAudioOutputLevel(String path) {
-        Log.d(TAG, "GetAudioOutputLevel path = " + path);
+    public String SK_TR369_GetAudioOutputLevel() {
         AudioManager audioManager =
                 (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
         int streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -36,8 +35,7 @@ public class AudioOutput {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.AudioOutput.1.Status")
-    public String SK_TR369_GetAudioOutputStatus(String path) {
-        Log.d(TAG, "GetAudioOutputStatus path = " + path);
+    public String SK_TR369_GetAudioOutputStatus() {
         AudioManager audioManager =
                 (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
         int streamMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -55,7 +53,7 @@ public class AudioOutput {
     }
 
     @Tr369Get("Device.UserInterface.X_TELECOM-COM-AR_AVSettings.AudioMode")
-    public String SK_TR369_GetAudioOutputMode(String path) {
+    public String SK_TR369_GetAudioOutputMode() {
         return String.valueOf(
                 Settings.Global.getInt(
                         GlobalContext.getContext().getContentResolver(),
@@ -64,8 +62,7 @@ public class AudioOutput {
     }
 
     @Tr369Get("Device.UserInterface.X_TELECOM-COM-AR_AVSettings.AudioAuto")
-    public String SK_TR369_GetAudioOutputAuto(String path) {
-        Log.d(TAG, "GetAudioOutputAuto path = " + path);
+    public String SK_TR369_GetAudioOutputAuto() {
         AudioManager audioManager =
                 (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
         Map<Integer, Boolean> reportedSurroundFormats = audioManager.getReportedSurroundFormats();

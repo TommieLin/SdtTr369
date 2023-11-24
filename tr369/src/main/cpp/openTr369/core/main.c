@@ -69,6 +69,7 @@
 #include "nu_macaddr.h"
 
 #include "vendor_api.h"
+#include "sk_jni_callback.h"
 
 #ifdef ENABLE_WEBSOCKETS
 #include "wsclient.h"
@@ -483,7 +484,7 @@ int SK_TR369_Start(const char *const model_path)
     DM_EXEC_Main(NULL);
     return USP_ERR_OK;
 
-    exit:
+exit:
     // If the code gets here, an error occurred
     USP_LOG_Error("USP Agent aborted unexpectedly");
     return err;
@@ -585,6 +586,9 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     }
     USP_LOG_Info(" ######### Outis @@@ DEVICE_MQTT_StartAllClients return");
 #endif
+
+    USP_LOG_Info(" @@@@@@@@@ Outis @@@ SK_TR369_API_StartServer");
+    SK_TR369_API_StartServer();
 
     return USP_ERR_OK;
 }

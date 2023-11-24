@@ -27,7 +27,7 @@ public class VideoOutput {
     private ModelX.Type mStbModelType = null;
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoOutput.1.HDCP.Status")
-    public String SK_TR369_GetVideoOutputHDCPStatus(String path) {
+    public String SK_TR369_GetVideoOutputHDCPStatus() {
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
         if (mStbModelType == ModelX.Type.Amlogic) {
             // Amlogic平台
@@ -77,7 +77,7 @@ public class VideoOutput {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.VideoOutput.1.HDCP.Type")
-    public String SK_TR369_GetVideoOutputHDCPType(String path) {
+    public String SK_TR369_GetVideoOutputHDCPType() {
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
         if (mStbModelType == ModelX.Type.Amlogic) {
             // Amlogic平台

@@ -20,7 +20,7 @@ public class LanX {
     private static final String TAG = "LanX";
     private final Handler mHandler;
     private final HandlerThread mThread;
-    private final int MSG_CHECK_INTERNET_CONNECTION = 3303;
+    private final int MSG_CHECK_INTERNET_CONNECTION = 3305;
 
     public static class Lan {
         public static String AddressType;

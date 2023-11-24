@@ -58,26 +58,6 @@
 #include "dm_trans.h"
 
 
-/*********************************************************************//**
-**
-** SK_TR369_Register_Setter_Getter
-**
-**
-**
-**
-** \param
-**
-** \return  None
-**
-**************************************************************************/
-//SK_TR369_Setter sk_tr369_jni_setter = NULL;
-//SK_TR369_Getter sk_tr369_jni_getter = NULL;
-//void SK_TR369_Register_Setter_Getter(SK_TR369_Setter setter, SK_TR369_Getter getter)
-//{
-//    sk_tr369_jni_setter = setter;
-//    sk_tr369_jni_getter = getter;
-//}
-
 // Skyworth Customized Content
 typedef struct
 {
@@ -418,7 +398,6 @@ int SK_TR369_ParseModelFile(void)
 // Array of valid input arguments
 static char *upload_file_input_args[] =
 {
-    "CommandKey",
     "FileType",
     "DelaySeconds",
     "Url",
@@ -433,7 +412,6 @@ static char *upgrade_file_input_args[] =
 
 static char *download_file_input_args[] =
 {
-    "CommandKey",
     "FileType",
     "Url",
 };
@@ -451,19 +429,17 @@ int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *inp
     char param[1024] = {0};
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile start");
     // Input variables
-    char *input_command_key, *input_file_type, *input_delay_seconds, *input_url;
+    char *input_file_type, *input_delay_seconds, *input_url;
 
     // Extract the input arguments using KV_VECTOR_ functions
-    input_command_key = USP_ARG_Get(input_args, "CommandKey", "");
     input_file_type = USP_ARG_Get(input_args, "FileType", "");
     input_delay_seconds = USP_ARG_Get(input_args, "DelaySeconds", "");
     input_url = USP_ARG_Get(input_args, "Url", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile CommandKey: %s, FileType: %s, DelaySeconds: %s, Url: %s",
-            input_command_key, input_file_type, input_delay_seconds, input_url);
+    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile FileType: %s, DelaySeconds: %s, Url: %s",
+            input_file_type, input_delay_seconds, input_url);
 
-    if (strcmp(input_command_key, "") == 0
-            || strcmp(input_file_type, "") == 0
+    if (strcmp(input_file_type, "") == 0
             || strcmp(input_delay_seconds, "") == 0
             || strcmp(input_url, "") == 0)
     {
@@ -474,8 +450,6 @@ int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *inp
     }
 
     strcpy(param, "UploadFile###");
-    strcat(param, input_command_key);
-    strcat(param, "###");
     strcat(param, input_file_type);
     strcat(param, "###");
     strcat(param, input_delay_seconds);
@@ -510,8 +484,8 @@ int SK_TR369_Start_UpgradeFile(dm_req_t *req, char *command_key, kv_vector_t *in
                  input_target_file, input_file_size, input_url);
 
     if (strcmp(input_target_file, "") == 0
-        || strcmp(input_file_size, "") == 0
-        || strcmp(input_url, "") == 0)
+            || strcmp(input_file_size, "") == 0
+            || strcmp(input_url, "") == 0)
     {
         // if it doesn't, return invalid value
         USP_ERR_SetMessage("%s: Invalid value - The parameters for upgrading files are empty.", __FUNCTION__);
@@ -542,19 +516,17 @@ int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *i
     char param[1024] = {0};
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadFile start");
     // Input variables
-    char *input_command_key, *input_file_type, *input_url;
+    char *input_file_type, *input_url;
 
     // Extract the input arguments using KV_VECTOR_ functions
-    input_command_key = USP_ARG_Get(input_args, "CommandKey", "");
     input_file_type = USP_ARG_Get(input_args, "FileType", "");
     input_url = USP_ARG_Get(input_args, "Url", "");
 
     USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile CommandKey: %s, FileType: %s, Url: %s",
-                 input_command_key, input_file_type, input_url);
+            input_file_type, input_url);
 
-    if (strcmp(input_command_key, "") == 0
-        || strcmp(input_file_type, "") == 0
-        || strcmp(input_url, "") == 0)
+    if (strcmp(input_file_type, "") == 0
+            || strcmp(input_url, "") == 0)
     {
         // if it doesn't, return invalid value
         USP_ERR_SetMessage("%s: Invalid value - The parameters for downloading files are empty.", __FUNCTION__);
@@ -570,8 +542,6 @@ int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *i
 //    }
 
     strcpy(param, "DownloadFile###");
-    strcat(param, input_command_key);
-    strcat(param, "###");
     strcat(param, input_url);
     strcat(param, "###");
     strcat(param, input_file_type);
@@ -1219,7 +1189,6 @@ int SK_TR369_GetDBParam(const char *param, char *value)
     if (err != USP_ERR_OK)
     {
         USP_LOG_Error("Parameter %s exists in the schema, but does not exist in the database", param);
-        err = DATA_MODEL_GetParameterValue(param, value, MAX_DM_VALUE_LEN, 0);
         return err;
     }
 

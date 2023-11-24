@@ -286,7 +286,7 @@ public class Event {
     }
 
     private void downloadFile(String[] params) {
-        if (params.length <= INDEX_PARAM_3) {
+        if (params.length <= INDEX_PARAM_2) {
             Log.e(TAG, "Parameter error in downloadFile() function, params.len: " + params.length);
             return;
         }
@@ -299,7 +299,7 @@ public class Event {
             }
         }));
         Request request = new Request.Builder()
-                .url(params[INDEX_PARAM_2])
+                .url(params[INDEX_PARAM_1])
                 .build();
         Call call = okHttpClientBuilder.build().newCall(request);
         try {
@@ -498,13 +498,13 @@ public class Event {
     }
 
     private void upload(String[] params) {
-        if (params.length <= INDEX_PARAM_4) {
+        if (params.length <= INDEX_PARAM_3) {
             Log.e(TAG, "Parameter error in upload() function, params.len: " + params.length);
             return;
         }
-        String fileType = params[INDEX_PARAM_2];
-        String delaySeconds = params[INDEX_PARAM_3];
-        String uploadUrl = params[INDEX_PARAM_4];
+        String fileType = params[INDEX_PARAM_1];
+        String delaySeconds = params[INDEX_PARAM_2];
+        String uploadUrl = params[INDEX_PARAM_3];
         switch (fileType) {
             case SCREENSHOT_TYPE:
                 if (!Device.isScreenOn()) {

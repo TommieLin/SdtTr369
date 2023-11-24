@@ -64,82 +64,82 @@ public class SkyworthX {
     private static final String TAG = "SkyworthX";
 
     @Tr369Get("Device.X_Skyworth.DeviceName")
-    public String SK_TR369_GetDeviceName(String path) {
+    public String SK_TR369_GetDeviceName() {
         return DeviceInfoUtils.getDeviceName(GlobalContext.getContext()); // about - Device Name
     }
 
     @Tr369Get("Device.X_Skyworth.OperatorName")
-    public String SK_TR369_GetOperatorName(String path) {
+    public String SK_TR369_GetOperatorName() {
         return DeviceInfoUtils.getOperatorName();
     }
 
     @Tr369Get("Device.X_Skyworth.BluetoothMac")
-    public String SK_TR369_GetBluetoothMac(String path) {
+    public String SK_TR369_GetBluetoothMac() {
         return DeviceInfoUtils.getBluetoothMac(GlobalContext.getContext()); // about - Status - Bluetooth mac
     }
 
     @Tr369Get("Device.X_Skyworth.AndroidVersion")
-    public String SK_TR369_GetAndroidVersion(String path) {
+    public String SK_TR369_GetAndroidVersion() {
         return DeviceInfoUtils.getDeviceFirmwareVersion(); // about - Version
     }
 
     @Tr369Get("Device.X_Skyworth.AndroidTVOS")
-    public String SK_TR369_GetAndroidTVOS(String path) {
+    public String SK_TR369_GetAndroidTVOS() {
         return DeviceInfoUtils.getBuildInfo(); // about - build
     }
 
     @Tr369Get("Device.X_Skyworth.PatchLevel")
-    public String SK_TR369_GetPatchLevel(String path) {
+    public String SK_TR369_GetPatchLevel() {
         return DeviceInfoUtils.getAndroidSecurityPatchLevel(); // about - Android security patch level
     }
 
     @Tr369Get("Device.X_Skyworth.ScreenSaver")
-    public String SK_TR369_GetScreenSaver(String path) {
+    public String SK_TR369_GetScreenSaver() {
         return DeviceInfoUtils.getScreenSaver(GlobalContext.getContext()); // about - screensaver
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageFree")
-    public String SK_TR369_GetStorageFree(String path) {
+    public String SK_TR369_GetStorageFree() {
         return SkyworthXManager.getInstance().getInternalDataStorageFree();
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageTotal")
-    public String SK_TR369_GetStorageTotal(String path) {
+    public String SK_TR369_GetStorageTotal() {
         return SkyworthXManager.getInstance().getInternalDataStorageTotal();
     }
 
     @Tr369Get("Device.X_Skyworth.InternalDataStorageUtilisation")
-    public String SK_TR369_GetStorageUtil(String path) {
+    public String SK_TR369_GetStorageUtil() {
         return SkyworthXManager.getInstance().getInternalDataStorageUtilisation();
     }
 
     @Tr369Get("Device.X_Skyworth.MemoryUtilisation")
-    public String SK_TR369_GetMemoryUtil(String path) {
+    public String SK_TR369_GetMemoryUtil() {
         return SkyworthXManager.getInstance().getMemoryUtilisation();
     }
 
     @Tr369Get("Device.X_Skyworth.ActiveNetworkConnection")
-    public String SK_TR369_GetActiveNetworkConnection(String path) {
+    public String SK_TR369_GetActiveNetworkConnection() {
         return NetworkUtils.getActiveNetworkType(GlobalContext.getContext());
     }
 
     @Tr369Get("Device.X_Skyworth.CpuTemperature")
-    public String SK_TR369_GetCPUTemperature(String path) {
+    public String SK_TR369_GetCPUTemperature() {
         return SkyworthXManager.getInstance().getCpuTemperature();
     }
 
     @Tr369Get("Device.X_Skyworth.DownlinkRate")
-    public String SK_TR369_GetDownlinkRate(String path) {
+    public String SK_TR369_GetDownlinkRate() {
         return String.valueOf(NetWorkSpeedUtils.calcDownSpeed());
     }
 
     @Tr369Get("Device.X_Skyworth.UplinkRate")
-    public String SK_TR369_GetUplinkRate(String path) {
+    public String SK_TR369_GetUplinkRate() {
         return String.valueOf(NetWorkSpeedUtils.calcUpSpeed());
     }
 
     @Tr369Get("Device.X_Skyworth.TotalRAMUsageCapacity")
-    public String SK_TR369_GetTotalRAMUsageCapacity(String path) {
+    public String SK_TR369_GetTotalRAMUsageCapacity() {
         ActivityManager manager =
                 (ActivityManager) GlobalContext.getContext().getSystemService(Context.ACTIVITY_SERVICE);
         ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
@@ -149,7 +149,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Mute")
-    public String SK_TR369_GetMuteStatus(String path) {
+    public String SK_TR369_GetMuteStatus() {
         AudioManager audioManager =
                 (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
         boolean result = audioManager.isStreamMute(AudioManager.STREAM_MUSIC);
@@ -184,7 +184,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Volume")
-    public String SK_TR369_GetVolume(String path) {
+    public String SK_TR369_GetVolume() {
         AudioManager audioManager =
                 (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
         int vol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -192,13 +192,13 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Lock.Enable")
-    public String SK_TR369_GetLockEnable(String path) {
+    public String SK_TR369_GetLockEnable() {
         return DbManager.getDBParam("Device.X_Skyworth.Lock.Enable");
     }
 
     @Tr369Set("Device.X_Skyworth.Lock.Enable")
     public boolean SK_TR369_SetLockEnable(String path, String value) {
-        //value: 0->unlock, 1->lock
+        // value: 0->unlock, 1->lock
         DbManager.setDBParam("Device.X_Skyworth.Lock.Enable", value);
         SystemProperties.set("persist.sys.tr069.lock", value);
         boolean isEnable = "1".equals(value);
@@ -231,14 +231,18 @@ public class SkyworthX {
         AppOpsManager appOpsMgr = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         if (appOpsMgr == null)
             return false;
-        int mode = appOpsMgr.checkOpNoThrow("android:system_alert_window", android.os.Process.myUid(), context
-                .getPackageName());
-        return Settings.canDrawOverlays(context) || mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_IGNORED;
+        int mode = appOpsMgr.checkOpNoThrow("android:system_alert_window",
+                android.os.Process.myUid(),
+                context.getPackageName());
+        return Settings.canDrawOverlays(context)
+                || mode == AppOpsManager.MODE_ALLOWED
+                || mode == AppOpsManager.MODE_IGNORED;
     }
 
     @Tr369Get("Device.X_Skyworth.WiFiChannelBand")
-    public String SK_TR369_GetWiFiChannelBand(String path) {
-        WifiManager mWifiManager = (WifiManager) GlobalContext.getContext().getSystemService(Context.WIFI_SERVICE);
+    public String SK_TR369_GetWiFiChannelBand() {
+        WifiManager mWifiManager =
+                (WifiManager) GlobalContext.getContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = mWifiManager.getConnectionInfo(); // 已连接wifi信息
         if (info != null) {
             return String.valueOf(info.getFrequency()); // 单位: MHz
@@ -247,17 +251,17 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.WiFiSecureConnection")
-    public String SK_TR369_GetWiFiSecureConnection(String path) {
+    public String SK_TR369_GetWiFiSecureConnection() {
         return SkyworthXManager.getInstance().getWiFiSecureConnection();
     }
 
     @Tr369Get("Device.X_Skyworth.WifiPHYType")
-    public String SK_TR369_GetWifiPHYType(String path) {
+    public String SK_TR369_GetWifiPHYType() {
         return SkyworthXManager.getInstance().getWifiPHYType();
     }
 
     @Tr369Get("Device.X_Skyworth.WiFiMIMOMode")
-    public String SK_TR369_GetWiFiMIMOMode(String path) {
+    public String SK_TR369_GetWiFiMIMOMode() {
         return SkyworthXManager.getInstance().getWiFiMIMOMode();
     }
 
@@ -404,7 +408,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.System.Setting.Use24HourFormat")
-    public String SK_TR369_GetTimeFormat(String path) {
+    public String SK_TR369_GetTimeFormat() {
         return TimeFormatUtils.is24Hour(GlobalContext.getContext()) ? "1" : "0";
     }
 
@@ -464,7 +468,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.TotalBytes.Today")
-    public String SK_TR369_GetTodayTotalBytes(String path) {
+    public String SK_TR369_GetTodayTotalBytes() {
         NetworkStatsManager networkStatsManager =
                 (NetworkStatsManager) GlobalContext.getContext().getSystemService(NETWORK_STATS_SERVICE);
         try {
@@ -485,12 +489,12 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.TotalBytes.TxTotal")
-    public String SK_TR369_GetTodayTxTraffic(String path) {
+    public String SK_TR369_GetTodayTxTraffic() {
         return String.valueOf(SystemDataStat.getTxTotalTraffic());
     }
 
     @Tr369Get("Device.X_Skyworth.TotalBytes.RxTotal")
-    public String SK_TR369_GetTodayRxTraffic(String path) {
+    public String SK_TR369_GetTodayRxTraffic() {
         return String.valueOf(SystemDataStat.getRxTotalTraffic());
     }
 
@@ -504,12 +508,12 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Reboot.Numbers")
-    public String SK_TR369_GetRebootNumbers(String path) {
+    public String SK_TR369_GetRebootNumbers() {
         return SystemProperties.get("persist.sys.tr369.reboot.numbers", "");
     }
 
     @Tr369Get("Device.X_Skyworth.Array")
-    public String SK_TR369_GetSystemStatArrayParams(String path) {
+    public String SK_TR369_GetSystemStatArrayParams() {
         return SystemDataStat.getSystemDataStatInfo();
     }
 
@@ -520,22 +524,22 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.ArrayRecordInterval")
-    public String SK_TR369_GetSystemStatArrayRecordInterval(String path) {
+    public String SK_TR369_GetSystemStatArrayRecordInterval() {
         return String.valueOf(SystemDataStat.getPeriodicMillisTime());
     }
 
     @Tr369Get("Device.X_Skyworth.ScreenInUse")
-    public String SK_TR369_GetScreenStatus(String path) {
+    public String SK_TR369_GetScreenStatus() {
         return String.valueOf(Boolean.compare(Device.isScreenOn(), false));
     }
 
     @Tr369Get("Device.X_Skyworth.FTI.ResidenceDuration")
-    public String SK_TR369_GetFTIResidenceDuration(String path) {
+    public String SK_TR369_GetFTIResidenceDuration() {
         return SystemProperties.get("persist.sys.tr369.FTI.residence.duration", "");
     }
 
     @Tr369Get("Device.X_Skyworth.MaxScreenRecordFileSize")
-    public String SK_TR369_GetMaxUploadFileSize(String path) {
+    public String SK_TR369_GetMaxUploadFileSize() {
         return DbManager.getDBParam("Device.X_Skyworth.MaxScreenRecordFileSize");
     }
 
@@ -554,7 +558,7 @@ public class SkyworthX {
     public DreamBackend mBackend = new DreamBackend(GlobalContext.getContext());
 
     @Tr369Get("Device.X_Skyworth.DreamInfo")
-    public String SK_TR369_GetDreamInfo(String path) {
+    public String SK_TR369_GetDreamInfo() {
         List<DreamBackend.DreamInfo> infos = mBackend.getDreamInfos();
         mDreamInfos.clear();
         for (final DreamBackend.DreamInfo info : infos) {
@@ -565,7 +569,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.CurrentDreamInfo")
-    public String SK_TR369_GetCurrentDreamInfo(String path) {
+    public String SK_TR369_GetCurrentDreamInfo() {
         for (DreamBackend.DreamInfo info : mDreamInfos.values()) {
             if (info.isActive) {
                 return info.caption.toString();
@@ -610,7 +614,7 @@ public class SkyworthX {
     public static final int DEFAULT_DREAM_TIME_MS = (int) (30 * DateUtils.MINUTE_IN_MILLIS);
 
     @Tr369Get("Device.X_Skyworth.DreamTime")
-    public String SK_TR369_GetDreamTime(String path) {
+    public String SK_TR369_GetDreamTime() {
         return String.valueOf(Settings.System.getInt(
                 GlobalContext.getContext().getContentResolver(),
                 SCREEN_OFF_TIMEOUT,
@@ -618,7 +622,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.StandbyMode")
-    public String SK_TR369_GetStandbyMode(String path) {
+    public String SK_TR369_GetStandbyMode() {
         String value = SystemProperties.get("persist.sys.standby.mode", "");
         if (TextUtils.equals(value, "1")) {
             return "Shutdown";
@@ -662,7 +666,7 @@ public class SkyworthX {
     private static final int DEFAULT_SLEEP_TIME_MS = (int) (20 * DateUtils.MINUTE_IN_MILLIS);
 
     @Tr369Get("Device.X_Skyworth.SleepTime")
-    public String SK_TR369_GetAttentiveSleepTime(String path) {
+    public String SK_TR369_GetAttentiveSleepTime() {
         int time = Settings.Secure.getInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Secure.SLEEP_TIMEOUT, DEFAULT_SLEEP_TIME_MS);
         Log.d(TAG, "Get sleep time: " + time);
@@ -677,7 +681,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.IsSleep")
-    public String SK_TR369_GetIsSleep(String path) {
+    public String SK_TR369_GetIsSleep() {
         PowerManager powerManager =
                 (PowerManager) GlobalContext.getContext().getSystemService(Context.POWER_SERVICE);
         return String.valueOf(powerManager.isInteractive());
@@ -709,7 +713,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Sound")
-    public String SK_TR369_GetSound(String path) {
+    public String SK_TR369_GetSound() {
         return sound.get(Settings.Global.getInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Global.ENCODED_SURROUND_OUTPUT, Settings.Global.ENCODED_SURROUND_OUTPUT_AUTO));
     }
@@ -728,13 +732,13 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.SoundSwitch")
-    public String SK_TR369_GetSoundEffectsEnabled(String path) {
+    public String SK_TR369_GetSoundEffectsEnabled() {
         return String.valueOf(Settings.System.getInt(GlobalContext.getContext().getContentResolver(),
                 Settings.System.SOUND_EFFECTS_ENABLED, 1) != 0);
     }
 
     @Tr369Get("Device.X_Skyworth.Logcat.FileList")
-    public String SK_TR369_GetUploadLogList(String path) {
+    public String SK_TR369_GetUploadLogList() {
         return LogRepository.getLogRepository().getLogList();
     }
 
@@ -744,7 +748,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Logcat.AutoUpload.Enable")
-    public String SK_TR369_GetAutoUploadSwitchStatus(String path) {
+    public String SK_TR369_GetAutoUploadSwitchStatus() {
         return LogRepository.getLogRepository().getAutoUploadStatus() ? "1" : "0";
     }
 
@@ -756,7 +760,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Logcat.AutoUpload.Interval")
-    public String SK_TR369_GetAutoUploadInterval(String path) {
+    public String SK_TR369_GetAutoUploadInterval() {
         return String.valueOf(LogRepository.getLogRepository().getPeriodicMillisTime());
     }
 
@@ -767,7 +771,7 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Logcat.AutoUpload.Url")
-    public String SK_TR369_GetAutoUploadUrl(String path) {
+    public String SK_TR369_GetAutoUploadUrl() {
         return LogRepository.getLogRepository().getAutoUploadUrl();
     }
 
@@ -779,7 +783,7 @@ public class SkyworthX {
 
     @Tr369Set("Device.X_Skyworth.Logcat.Background.Enable")
     public boolean SK_TR369_SetLogcatEnable(String path, String value) {
-        SystemProperties.set("persist.sys.tr369.logcat.background.enable", value);
+        DbManager.setDBParam("Device.X_Skyworth.Logcat.Background.Enable", value);
         boolean isEnable = "1".equals(value) || "true".equals(value);
         if (isEnable) {
             LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
@@ -790,8 +794,8 @@ public class SkyworthX {
     }
 
     @Tr369Get("Device.X_Skyworth.Logcat.Background.Enable")
-    public String SK_TR369_GetLogcatEnable(String path) {
-        return SystemProperties.get("persist.sys.tr369.logcat.background.enable", "0");
+    public String SK_TR369_GetLogcatEnable() {
+        return DbManager.getDBParam("Device.X_Skyworth.Logcat.Background.Enable");
     }
 
     @Tr369Set("Device.X_Skyworth.Notification.")

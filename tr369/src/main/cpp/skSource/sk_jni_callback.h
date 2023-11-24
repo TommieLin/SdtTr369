@@ -18,6 +18,7 @@ extern "C" {
 typedef struct {
     int (*SK_TR369_Callback_Get) (const int what, char *dst, int size, const char *str1, const char *str2);
     int (*SK_TR369_Callback_Set) (const int what, const char *str1, const char *str2, const char *str3);
+    void (*SK_TR369_Callback_Start) ();
 } skJniCallback_t;
 
 void skSetJniCallback(skJniCallback_t *);
@@ -28,6 +29,7 @@ extern int SK_TR369_API_GetParams(const char *name, char *value, int size);
 extern int SK_TR369_API_SetParams(const char *name, const char *value);
 extern int SK_TR369_API_GetDatabaseStr(const char *name, const char *param, char *value, int size);
 extern int SK_TR369_API_SendEvent(const char *value);
+extern void SK_TR369_API_StartServer();
 
 #ifdef __cplusplus
 }

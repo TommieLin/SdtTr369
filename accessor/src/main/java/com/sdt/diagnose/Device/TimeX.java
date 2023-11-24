@@ -17,7 +17,7 @@ public class TimeX {
     private static final int ERROR = 5;
 
     @Tr369Get("Device.Time.Status")
-    public String SK_TR369_GetTimeStatus(String path) {
+    public String SK_TR369_GetTimeStatus() {
         String timeStatus = "Error";
         int value = DeviceInfoUtils.getAutoDateTimeType(GlobalContext.getContext());
         if (value > 0) {
@@ -37,7 +37,7 @@ public class TimeX {
     }
 
     @Tr369Get("Device.Time.CurrentLocalTime")
-    public String SK_TR369_GetCurrentLocalTime(String path) {
+    public String SK_TR369_GetCurrentLocalTime() {
         return DeviceInfoUtils.getTime();
     }
 

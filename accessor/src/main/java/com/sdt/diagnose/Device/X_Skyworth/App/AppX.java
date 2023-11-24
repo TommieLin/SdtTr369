@@ -279,9 +279,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 return false;
             }
             if (TextUtils.equals(value, "0")) {
-                if (TextUtils.equals(pkg, "com.sdt.android.tr069")
-                        || TextUtils.equals(pkg, "com.sdt.android.tr369")
-                        || TextUtils.equals(pkg, "com.sdt.diagnose"))
+                if (pkg.contains("tr069") || pkg.contains("diagnose") || pkg.contains("tr369"))
                     return true;
                 return ApplicationUtils.forceStopApp(pkg);
             } else if (TextUtils.equals(value, "1")) {

@@ -13,23 +13,23 @@ import com.sdt.diagnose.common.NetworkUtils;
 public class LinkX {
 
     @Tr369Get("Device.Ethernet.Link.1.Enable")
-    public String SK_TR369_GetEthEnable(String path) {
+    public String SK_TR369_GetEthEnable() {
         boolean ret = NetworkUtils.isEthernetConnected(GlobalContext.getContext());
         return Boolean.toString(ret);
     }
 
     @Tr369Get("Device.Ethernet.Link.1.Status")
-    public String SK_TR369_GetEthStatus(String path) {
+    public String SK_TR369_GetEthStatus() {
         return NetworkUtils.getEthernetInterfaceStatus(GlobalContext.getContext());
     }
 
     @Tr369Get("Device.Ethernet.Link.1.Name")
-    public String SK_TR369_GetEthName(String path) {
+    public String SK_TR369_GetEthName() {
         return "eth0";
     }
 
     @Tr369Get("Device.Ethernet.Link.1.MACAddress")
-    public String SK_TR369_GetEthMACAddress(String path) {
+    public String SK_TR369_GetEthMACAddress() {
         return NetworkUtils.getEthernetMacAddress();
     }
 

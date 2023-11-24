@@ -52,7 +52,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     private static Timer mTimer;
     private static TimerTask mTask;
     private static int mRetryCount = 0;
-    private static final int MSG_REQUEST_RETRY = 0;
+    private static final int MSG_REQUEST_RETRY = 3308;
     private static boolean isRequestSuccess = false;
 
     @Override

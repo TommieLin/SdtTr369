@@ -22,8 +22,7 @@ public class HdmiX {
     private ModelX.Type mStbModelType = null;
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMINumberOfEntries")
-    public String SK_TR369_GetHdmiNumberEntries(String path) {
-        Log.d(TAG, "GetHdmiNumberEntries path = " + path);
+    public String SK_TR369_GetHdmiNumberEntries() {
         return String.valueOf(HDMI_NUMBER_ENTRIES);
     }
 
@@ -57,7 +56,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.Enable")
-    public String SK_TR369_GetHdmiEnable(String path) {
+    public String SK_TR369_GetHdmiEnable() {
         String status = Boolean.toString(false);
 
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -114,12 +113,12 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.Status")
-    public String SK_TR369_GetHdmiStatus(String path) {
+    public String SK_TR369_GetHdmiStatus() {
         return isHDMIPlugged() ? "Plugged" : "Unplugged";
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.ResolutionMode")
-    public String SK_TR369_GetHdmiResolutionMode(String path) {
+    public String SK_TR369_GetHdmiResolutionMode() {
         if (!isHDMIPlugged()) return "";
 
         boolean isBest = false;
@@ -143,7 +142,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.Name")
-    public String SK_TR369_GetHdmiName(String path) {
+    public String SK_TR369_GetHdmiName() {
         if (!isHDMIPlugged()) return "";
 
         String name = "";
@@ -167,7 +166,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.ResolutionValue")
-    public String SK_TR369_GetHdmiResolutionValue(String path) {
+    public String SK_TR369_GetHdmiResolutionValue() {
         if (!isHDMIPlugged()) return "";
 
         String mode = "";
@@ -221,7 +220,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.SupportedResolutions")
-    public String SK_TR369_GetHdmiDisplayDevSupportedResolutions(String path) {
+    public String SK_TR369_GetHdmiDisplayDevSupportedResolutions() {
         if (!isHDMIPlugged()) return "";
 
         String supportList = "";
@@ -252,12 +251,12 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.Status")
-    public String SK_TR369_GetHdmiDisplayDevStatus(String path) {
+    public String SK_TR369_GetHdmiDisplayDevStatus() {
         return isHDMIPlugged() ? "Present" : "None";
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.Name")
-    public String SK_TR369_GetHdmiDisplayDevName(String path) {
+    public String SK_TR369_GetHdmiDisplayDevName() {
         if (!isHDMIPlugged()) return "";
 
         String name = "";
@@ -281,7 +280,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.EEDID")
-    public String SK_TR369_GetHdmiDisplayDevEEDID(String path) {
+    public String SK_TR369_GetHdmiDisplayDevEEDID() {
         if (!isHDMIPlugged()) return "";
 
         String edid = "";
@@ -305,7 +304,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.PreferredResolution")
-    public String SK_TR369_GetHdmiDisplayDevPreferredResolution(String path) {
+    public String SK_TR369_GetHdmiDisplayDevPreferredResolution() {
         if (!isHDMIPlugged()) return "";
 
         String mode = "";
@@ -329,7 +328,7 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.CECSupport")
-    public String SK_TR369_GetHdmiDisplayDevCECSupport(String path) {
+    public String SK_TR369_GetHdmiDisplayDevCECSupport() {
         if (!isHDMIPlugged()) return "";
 
         boolean isSupport = false;
@@ -353,22 +352,19 @@ public class HdmiX {
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.HDMI3DPresent")
-    public String SK_TR369_GetHdmiDisplayHDMI3DPresent(String path) {
-        Log.d(TAG, "GetHdmiDisplayHDMI3DPresent path = " + path);
+    public String SK_TR369_GetHdmiDisplayHDMI3DPresent() {
         //TODO amlogic 不支持
         return Boolean.FALSE.toString();
     }
 
     //    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.VideoLatency")
-    public String SK_TR369_GetHdmiDisplayDevVideoLatency(String path) {
-        Log.d(TAG, "GetHdmiDisplayDevVideoLatency path = " + path);
+    public String SK_TR369_GetHdmiDisplayDevVideoLatency() {
         //TODO amlogic 不支持
         return Boolean.FALSE.toString();
     }
 
     //    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.AutoLipSyncSupport")
-    public String SK_TR369_GetHdmiDisplayDevAutoLipSyncSupport(String path) {
-        Log.d(TAG, "GetHdmiDisplayDevAutoLipSyncSupport path = " + path);
+    public String SK_TR369_GetHdmiDisplayDevAutoLipSyncSupport() {
         //TODO amlogic 不支持
         return Boolean.FALSE.toString();
     }

@@ -194,7 +194,8 @@ public class AppInfo {
 
     private boolean canStop(Context context) {
         if (packageInfo.applicationInfo.packageName.contains("tr069")
-                || packageInfo.applicationInfo.packageName.contains("diagnose"))
+                || packageInfo.applicationInfo.packageName.contains("diagnose")
+                || packageInfo.applicationInfo.packageName.contains("tr369"))
             return false;
         DevicePolicyManager dpm =
                 (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);

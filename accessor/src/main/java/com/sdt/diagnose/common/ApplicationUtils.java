@@ -29,11 +29,17 @@ import java.util.List;
 
 public class ApplicationUtils {
     private static final String TAG = "ApplicationUtils";
+    private static HandlerThread mHandlerThread = null;
+    private static Handler mHandler = null;
 
     public static boolean uninstall(String pkg) {
-        HandlerThread handlerThread = new HandlerThread("AppUtilThread", Process.THREAD_PRIORITY_BACKGROUND);
-        handlerThread.start();
-        Handler handler = new Handler(handlerThread.getLooper());
+        if (mHandlerThread == null) {
+            mHandlerThread = new HandlerThread("AppUtilsThread", Process.THREAD_PRIORITY_BACKGROUND);
+        }
+        mHandlerThread.start();
+        if (mHandler == null) {
+            mHandler = new Handler(mHandlerThread.getLooper());
+        }
 
         Context context = GlobalContext.getContext();
         Intent intent = new Intent();
@@ -42,7 +48,7 @@ public class ApplicationUtils {
         PackageInstaller mPackageInstaller = context.getPackageManager().getPackageInstaller();
         // 卸载APK
         mPackageInstaller.uninstall(pkg, sender.getIntentSender());
-        handler.postDelayed(new Runnable() {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 HttpsUtils.uploadNotificationStatus(true);
@@ -280,7 +286,6 @@ public class ApplicationUtils {
         Log.d(TAG, "runs.size(): " + runs.size());
         for (ActivityManager.RunningAppProcessInfo run : runs) {
             name = run.processName;
-            Log.d(TAG, "name.contains(packageName): " + name.contains(packageName));
             for (String pkg : run.pkgList) {
                 if (pkg.contains(packageName)) {
                     return true;

@@ -41,7 +41,7 @@ public class Hdmi {
     }
 
     @Tr369Get("Device.Services.STBService.1.Capabilities.HDMI.SupportedResolutions")
-    public String SK_TR369_GetCapHdmiSupportResolution(String path) {
+    public String SK_TR369_GetCapHdmiSupportResolution() {
         if (!isHDMIPlugged()) return "";
 
         String supportList = "";
@@ -72,7 +72,7 @@ public class Hdmi {
     }
 
     @Tr369Get("Device.Services.STBService.1.Capabilities.HDMI.CECSupport")
-    public String SK_TR369_GetCapHdmiCecSupport(String path) {
+    public String SK_TR369_GetCapHdmiCecSupport() {
         if (!isHDMIPlugged()) return "";
 
         boolean isSupport = false;

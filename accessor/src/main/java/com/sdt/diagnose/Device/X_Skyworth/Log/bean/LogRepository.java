@@ -51,12 +51,11 @@ public class LogRepository {
     private static volatile LogRepository sLogRepository;
     private final Handler mHandler;
     private final HandlerThread mThread;
-    private final int MSG_START_SPLIT_LOG_FILE = 3301;
+    private final int MSG_START_SPLIT_LOG_FILE = 3306;
     private int mPeriodicMillisTime = 0;
     private final int DEFAULT_PERIOD_MILLIS_TIME = 1800000;   // 默认三十分钟统计一次
     private boolean isAllowAutoUpload = false;
     private String mUploadUrl = null;
-    private final String URL_UPLOAD_LOG_FILE = "/file/upload/";
     private final int MAX_LOG_RETENTION_DAYS = 3;   // 日志文件最大保存天数
 
     private LogRepository() {
@@ -377,7 +376,7 @@ public class LogRepository {
      * @param param:param
      */
     public void startCommand(LogCmd cmd, String param) {
-        String enable = SystemProperties.get("persist.sys.tr369.logcat.background.enable", "0");
+        String enable = DbManager.getDBParam("Device.X_Skyworth.Logcat.Background.Enable");
         if (!("1".equals(enable) || "true".equals(enable))) {
             Log.i(TAG, "logcat background task is prohibited from being executed.");
             return;
