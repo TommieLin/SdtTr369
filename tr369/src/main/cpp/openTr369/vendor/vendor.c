@@ -1009,7 +1009,7 @@ int SK_TR369_SetDefaultMultiObject()
 #define CONFIG_FILE_PATH_DEFAULT            "/vendor/etc/skyconfig/config.properties"
 #define CONFIG_TMS_URL                      "tms_url"
 #define CONFIG_TMS_TR369_PORT               "tms_tr369_port"
-#define MAX_LINE_LENGTH                     100
+#define MAX_LINE_LENGTH                     128
 
 void trim(char *str)
 {
@@ -1047,6 +1047,15 @@ int SK_TR369_SetDefaultServerUrl()
     FILE *input_file;
     int err = USP_ERR_OK;
     char *config_url = NULL;
+
+    // 检查数据库中是否已经存在数据
+    char buf[MAX_LINE_LENGTH] = {0};
+    SK_TR369_GetDBParam("Device.X_Skyworth.ManagementServer.Url", buf);
+    if (buf[0] != '\0')
+    {
+        USP_LOG_Debug("%s: There is no need to set URL(%s) defaults anymore.", __FUNCTION__, buf);
+        return err;
+    }
 
     input_file = fopen(CONFIG_FILE_PATH_DEFAULT, "r");
     if (input_file == NULL)
