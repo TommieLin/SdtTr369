@@ -6,10 +6,10 @@ import android.os.HandlerThread;
 import android.os.StatFs;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.command.Event;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.File;
 import java.util.Timer;
@@ -31,7 +31,7 @@ public class TcpdumpX {
 
     @Tr369Set("Device.X_Skyworth.Tcpdump.")
     public boolean SK_TR369_SetTcpdumpParams(String path, String value) {
-        Log.i(TAG, "path: " + path + ", value: " + value);
+        LogUtils.i(TAG, "SetTcpdumpParams path: " + path + ", value: " + value);
         String[] split = path.split("\\.");
         switch (split[split.length - 1]) {
             case "Enable":
@@ -39,6 +39,7 @@ public class TcpdumpX {
                 break;
             case "Url":
                 tcpdumpBean.setUrl(value);
+                // 开始Tcpdump功能
                 checkStart();
                 break;
             case "Ip":
@@ -68,7 +69,7 @@ public class TcpdumpX {
     HandlerThread handlerThread;
 
     public void startTcpdump() {
-        Log.i(TAG, "startTcpdump called.");
+        LogUtils.i(TAG, "startTcpdump called.");
         SystemProperties.set("persist.sys.skyworth.tcpdump", "1");
         File file = new File("/data/tcpdump/test1.pcap");
         handlerThread = new HandlerThread("tcpdump");
@@ -78,14 +79,14 @@ public class TcpdumpX {
             @Override
             public void run() {
                 if (!file.exists()) {
-                    Log.e(TAG, "The pcap file already exist.");
+                    LogUtils.e(TAG, "The pcap file already exist.");
                     stopTcpdump();
                     return;
                 }
                 long fileSize = getFileSize();
                 while (true) {
                     if (file.length() >= fileSize * 1024 * 1024L) {
-                        Log.e(TAG, "startTcpdump getFileSize: " + tcpdumpBean.getFileSize());
+                        LogUtils.e(TAG, "startTcpdump getFileSize: " + tcpdumpBean.getFileSize());
                         stopTcpdump();
                         Event.uploadLogFile(tcpdumpBean.getUrl(), file.getAbsolutePath(), 1);
                         timer.cancel();
@@ -99,13 +100,13 @@ public class TcpdumpX {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                Log.i(TAG, "startTcpdump Tcpdump Timer");
+                LogUtils.i(TAG, "startTcpdump Tcpdump Timer.");
                 stopTcpdump();
                 handler.removeCallbacksAndMessages(null);
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
-                    Log.e(TAG, "Timer operation error, " + e.getMessage());
+                    LogUtils.e(TAG, "Timer operation error, " + e.getMessage());
                 }
                 Event.uploadLogFile(tcpdumpBean.getUrl(), file.getAbsolutePath(), 1);
             }
@@ -113,14 +114,13 @@ public class TcpdumpX {
     }
 
     public void stopTcpdump() {
-        Log.i(TAG, "stopTcpdump called.");
+        LogUtils.i(TAG, "stopTcpdump called.");
         SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
         SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
         handlerThread.quit();
     }
 
-
-    public void generateArgs() {
+    public boolean generateArgs() {
         StringBuilder stringBuilder = new StringBuilder();
         if (!TextUtils.isEmpty(tcpdumpBean.getNetType())) {
             stringBuilder.append(tcpdumpBean.getNetType());
@@ -135,15 +135,20 @@ public class TcpdumpX {
             stringBuilder.append(" dst ").append(tcpdumpBean.getIp());
         }
         if (!TextUtils.isEmpty(stringBuilder.toString())) {
-            Log.e(TAG, "The parameter cannot be empty.");
             SystemProperties.set("persist.sys.skyworth.tcpdump.args", stringBuilder.toString());
+            LogUtils.d(TAG, "Set tcpdump args: " + stringBuilder);
+            return true;
+        } else {
+            LogUtils.e(TAG, "Error: The parameter cannot be empty.");
+            SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
+            SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
         }
+        return false;
     }
 
     public void checkStart() {
         if (tcpdumpBean.getEnable().equals("1") && !TextUtils.isEmpty(tcpdumpBean.getUrl())) {
-            generateArgs();
-            startTcpdump();
+            if (generateArgs()) startTcpdump();
         }
     }
 
@@ -172,7 +177,7 @@ public class TcpdumpX {
         StatFs stat = new StatFs(file.getPath());
         long blockSize = stat.getBlockSizeLong();
         long availableBlocks = stat.getAvailableBlocksLong();
-        Log.d(TAG, "getFreeRom result : " + (blockSize * availableBlocks / 1000000));
+        LogUtils.d(TAG, "getFreeRom result: " + (blockSize * availableBlocks / 1000000));
         return blockSize * availableBlocks / 1000000;//单位MB
     }
 }

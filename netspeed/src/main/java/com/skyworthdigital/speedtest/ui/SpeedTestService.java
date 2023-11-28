@@ -28,7 +28,7 @@ import java.util.Locale;
  * @Version 1.0
  */
 public class SpeedTestService extends Service {
-    private static final String TAG = "SpeedTestService";
+    private static final String TAG = "TR369 SpeedTestService";
     ArrayList<TestPoint> availableServers;
     public Callback mCallback;
     public ReadyCallback mReadyCallback;

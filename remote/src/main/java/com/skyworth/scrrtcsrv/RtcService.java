@@ -18,7 +18,6 @@ import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnection;
 import org.webrtc.SessionDescription;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
@@ -27,11 +26,11 @@ import java.util.regex.Pattern;
 import androidx.annotation.Nullable;
 
 public class RtcService extends Service {
-    private static final String TAG = "RtcService";
+    private static final String TAG = "TR369 RtcService";
     private static final Pattern PATTERN_TURN = Pattern.compile(
-        "^turn:(.+):(.+)@(.+)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern  PATTERN_SIZE = Pattern.compile(
-        "^([0-9]+)x([0-9]+)$");
+            "^turn:(.+):(.+)@(.+)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SIZE = Pattern.compile(
+            "^([0-9]+)x([0-9]+)$");
 
     private SocketIOClient mSocket;
     private RtcClient mRtcClient;
@@ -48,7 +47,7 @@ public class RtcService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //支持多次启动，后面启动的Service将停止前面启动的Service
-        if(mDevice != null || mRtcClient != null || mController != null){
+        if (mDevice != null || mRtcClient != null || mController != null) {
             destroy();
         }
 
@@ -61,17 +60,17 @@ public class RtcService extends Service {
         int video_height = 360;
 
         mDeviceName = bundle.getString(getString(R.string.dev_name));
-        Log.d(TAG, "device name:" + mDeviceName);
-        Log.d(TAG, "video fps:" + video_fps);
+        Log.d(TAG, "device name: " + mDeviceName);
+        Log.d(TAG, "video fps: " + video_fps);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             final String channelId = "ScreenCapture1";
             NotificationChannel channel = new NotificationChannel(
-                channelId, "Foreground notification", NotificationManager.IMPORTANCE_HIGH);
+                    channelId, "Foreground notification", NotificationManager.IMPORTANCE_HIGH);
             NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
             manager.createNotificationChannel(channel);
             Notification notification = new Notification.Builder(
-                getApplicationContext(), channelId).build();
+                    getApplicationContext(), channelId).build();
 
             startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
         }
@@ -83,12 +82,12 @@ public class RtcService extends Service {
                 try {
                     video_width = Integer.parseInt(matcher.group(1));
                     video_height = Integer.parseInt(matcher.group(2));
-                    Log.d(TAG, "got video size:" + video_width + "x" + video_height);
+                    Log.d(TAG, "got video size: " + video_width + "x" + video_height);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {
-                Log.e(TAG, "invalid video size:" + video_size);
+                Log.e(TAG, "invalid video size: " + video_size);
             }
         }
 
@@ -97,7 +96,7 @@ public class RtcService extends Service {
         mDevice = new Device(options);
         mDevice.setMaxSize(Math.max(video_width, video_height));
         Size videoSize = mDevice.getScreenInfo().getVideoSize();
-        Log.d(TAG, "real video size:" + videoSize.getWidth() + "x" + videoSize.getHeight());
+        Log.d(TAG, "real video size: " + videoSize.getWidth() + "x" + videoSize.getHeight());
 
         try {
 
@@ -109,38 +108,38 @@ public class RtcService extends Service {
                         Matcher matcher = PATTERN_TURN.matcher(item);
                         if (matcher.matches()) {
                             iceServers.add(PeerConnection.IceServer
-                                .builder(matcher.group(3))
-                                .setUsername(matcher.group(1))
-                                .setPassword(matcher.group(2))
-                                .createIceServer());
+                                    .builder(matcher.group(3))
+                                    .setUsername(matcher.group(1))
+                                    .setPassword(matcher.group(2))
+                                    .createIceServer());
                         } else {
-                            Log.e(TAG, "invalid turn uri:" + item);
+                            Log.e(TAG, "invalid turn uri: " + item);
                         }
                     } else {
                         iceServers.add(PeerConnection.IceServer
-                            .builder(item)
-                            .createIceServer());
+                                .builder(item)
+                                .createIceServer());
                     }
                 });
             }
             iceServers.add(PeerConnection.IceServer
-                .builder("stun:stun.l.google.com:19302")
-                .createIceServer());
+                    .builder("stun:stun.l.google.com:19302")
+                    .createIceServer());
 
             mRtcClient = new RtcClient();
             mRtcClient.init(this, intent,
-                RtcClient.MediaOptions.builder()
-                    .setVideoSize(videoSize)
-                    .setFrameRate(video_fps)
-                    .createMediaOptions(),
-                iceServers, mPeerObserver);
+                    RtcClient.MediaOptions.builder()
+                            .setVideoSize(videoSize)
+                            .setFrameRate(video_fps)
+                            .createMediaOptions(),
+                    iceServers, mPeerObserver);
 
             mSocket = new SocketIOClient(url, mSocketCallback);
             Log.d(TAG, "socketio connecting to " + url);
             mSocket.connect();
 
             mController = new Controller(mDevice,
-                options.getClipboardAutosync(), options.getPowerOn());
+                    options.getClipboardAutosync(), options.getPowerOn());
             mController.start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -156,7 +155,7 @@ public class RtcService extends Service {
         super.onDestroy();
     }
 
-    private void destroy(){
+    private void destroy() {
         if (mRtcClient != null) {
             mRtcClient.destroy();
             mRtcClient = null;
@@ -204,7 +203,7 @@ public class RtcService extends Service {
 
         @Override
         public void onStart() {
-            Log.d(TAG, "peer connected.........");
+            Log.d(TAG, "peer connected...");
         }
 
         @Override
@@ -249,9 +248,9 @@ public class RtcService extends Service {
         @Override
         public void onCandidate(String peerId, JSONObject payload) {
             mRtcClient.addCandidate(peerId,
-                payload.optString("id"),
-                payload.optInt("lable"),
-                payload.optString("candidate"));
+                    payload.optString("id"),
+                    payload.optInt("lable"),
+                    payload.optString("candidate"));
         }
 
         @Override

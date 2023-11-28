@@ -1,7 +1,6 @@
 package com.sdt.diagnose.Device.STBService.Capabilities;
 
 import android.os.Build;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.Device.Platform.ModelX;
@@ -9,6 +8,7 @@ import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.Device.STBService.Components.AmlHdmiX;
 import com.sdt.diagnose.Device.STBService.Components.DisplayCapabilityManager;
 import com.sdt.diagnose.Device.STBService.Components.RtkHdmiX;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.extra.CmsExtraServiceManager;
 
 import java.util.List;
@@ -31,10 +31,10 @@ public class Hdmi {
                 if (null != mCmsExtraServiceManager) {
                     isPlugged = mCmsExtraServiceManager.isHdmiPlugged();
                 } else {
-                    Log.e(TAG, "isHDMIPlugged: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "isHDMIPlugged: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "isHDMIPlugged: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "isHDMIPlugged: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return isPlugged;
@@ -62,10 +62,10 @@ public class Hdmi {
                 if (null != mCmsExtraServiceManager) {
                     supportList = mCmsExtraServiceManager.getHdmiSupportResolution();
                 } else {
-                    Log.e(TAG, "getCapHdmiSupportResolution: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getCapHdmiSupportResolution: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getCapHdmiSupportResolution: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCapHdmiSupportResolution: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return supportList;
@@ -86,10 +86,10 @@ public class Hdmi {
                 if (null != mCmsExtraServiceManager) {
                     isSupport = mCmsExtraServiceManager.isHdmiCecSupport();
                 } else {
-                    Log.e(TAG, "getCapHdmiCecSupport: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getCapHdmiCecSupport: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getCapHdmiCecSupport: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCapHdmiCecSupport: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return Boolean.toString(isSupport);

@@ -14,11 +14,10 @@ import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
 public class SocketIOClient {
-    private static final String TAG = "SocketIOClient";
-
-    private Socket mSocket;
-    private Callback mCallback;
-    private MessageHandler mMessageHandler = new MessageHandler();
+    private static final String TAG = "TR369 SocketIOClient";
+    private final Socket mSocket;
+    private final Callback mCallback;
+    private final MessageHandler mMessageHandler = new MessageHandler();
 
     public SocketIOClient(String url, Callback cb) throws URISyntaxException {
         mSocket = IO.socket(url);
@@ -44,7 +43,7 @@ public class SocketIOClient {
         message.put("type", type);
         message.put("payload", payload);
         mSocket.emit("message", message);
-        Log.d(TAG, "socketio send " + type + " to " + to + " payload:" + payload);
+        Log.d(TAG, "socketio send " + type + " to " + to + ", payload: " + payload);
     }
 
     private interface Command {
@@ -119,7 +118,7 @@ public class SocketIOClient {
                 }
 
                 JSONObject payload = data.optJSONObject("payload");
-                Log.d(TAG, "received " + type + " from " + from + " payload:" + payload);
+                Log.d(TAG, "received " + type + " from " + from + ", payload: " + payload);
                 cmd.execute(from, payload);
             }
         };
@@ -134,7 +133,7 @@ public class SocketIOClient {
         public Emitter.Listener onDisconnected = new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Log.d(TAG, "args: len=" + args.length + " args[0]=" + args[0].toString());
+                Log.d(TAG, "args.length: " + args.length + " args[0]: " + args[0].toString());
                 mCallback.onDisconnected();
             }
         };
@@ -150,12 +149,19 @@ public class SocketIOClient {
 
     public interface Callback {
         void onRegistered(String id);
+
         void onCall(String peerId);
+
         void onOffer(String peerId, JSONObject payload);
+
         void onAnswer(String peerId, JSONObject payload);
+
         void onCandidate(String peerId, JSONObject payload);
+
         void onControl(String peerId, JSONObject payload);
+
         void onDisconnected();
+
         void onError(String reason);
     }
 }

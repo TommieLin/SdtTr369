@@ -20,14 +20,14 @@ import java.util.ArrayList;
 
 
 public class SpeedTest {
-    private static final String TAG = "SpeedTest";
+    private static final String TAG = "TR369 SpeedTest";
     private ArrayList<TestPoint> servers = new ArrayList<>();
     private TestPoint selectedServer = null;
     private SpeedTestConfig config = new SpeedTestConfig();
     private TelemetryConfig telemetryConfig = new TelemetryConfig();
     //0=configs, 1=test points, 2=server selection, 3=ready, 4=testing, 5=finished
     private int state = 0;
-    private Object mutex = new Object();
+    private final Object mutex = new Object();
     private String originalExtra = "";
 
     public SpeedTest() {

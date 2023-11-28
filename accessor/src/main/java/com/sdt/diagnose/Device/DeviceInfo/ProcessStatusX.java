@@ -1,11 +1,10 @@
 package com.sdt.diagnose.Device.DeviceInfo;
 
-import android.util.Log;
-
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.Device.Platform.ModelX;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.ProcessInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.extra.CmsExtraServiceManager;
 
 import java.util.List;
@@ -28,10 +27,10 @@ public class ProcessStatusX {
                 if (null != mCmsExtraServiceManager) {
                     rate = mCmsExtraServiceManager.getCpuUsage();
                 } else {
-                    Log.e(TAG, "getCPUUsage - CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getCPUUsage: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getCPUUsage - CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCPUUsage: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return String.valueOf((int) rate);
@@ -43,7 +42,7 @@ public class ProcessStatusX {
         List<ProcessInfo> mProcessList = ProcessInfoX.getProcessInfo();
         if (mProcessList != null) {
             processNum = mProcessList.size();
-            Log.d(TAG, "getProcessNum: " + processNum);
+            LogUtils.d(TAG, "GetProcessNumber: " + processNum);
         }
         return String.valueOf(processNum);
     }

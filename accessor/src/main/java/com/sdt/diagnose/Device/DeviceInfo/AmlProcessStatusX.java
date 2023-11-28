@@ -1,8 +1,7 @@
 package com.sdt.diagnose.Device.DeviceInfo;
 
-import android.util.Log;
-
 import com.droidlogic.app.SystemControlManager;
+import com.sdt.diagnose.common.log.LogUtils;
 
 public class AmlProcessStatusX {
     private static final String TAG = "AmlProcessStatusX";
@@ -56,9 +55,9 @@ public class AmlProcessStatusX {
 
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                Log.e(TAG, "getCpuUsageByAml - thread sleep error, " + e.getMessage());
+                LogUtils.e(TAG, "getCpuUsageByAml: thread sleep error, " + e.getMessage());
             } catch (NoClassDefFoundError e) {
-                Log.e(TAG, "getCpuUsageByAml - SystemControlManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCpuUsageByAml: SystemControlManager call failed, " + e.getMessage());
                 return 0;
             }
         }
@@ -79,7 +78,7 @@ public class AmlProcessStatusX {
         String summary = String.format(
                 "%d%%cpu %d%%user %d%%nice %d%%sys %d%%idle %d%%iow %d%%irq %d%%sirq %d%%host",
                 datas[0], datas[1], datas[2], datas[3], datas[4], datas[5], datas[6], datas[7], datas[8]);
-        Log.d(TAG, "getCpuUsageByAml - Get usage: " + summary);
+        LogUtils.d(TAG, "getCpuUsageByAml: Get usage: " + summary);
 
         double cpuUsage = 100.0 * (datas[0] - datas[4]) / datas[0];
         if (cpuUsage < 1.0) {
@@ -89,7 +88,7 @@ public class AmlProcessStatusX {
         }
         String result = String.format("Total=%d, Idle=%d, Used=%d, Percent=%f%%", datas[0], datas[4],
                 datas[0] - datas[4], cpuUsage);
-        Log.d(TAG, "getCpuUsageByAml - result: " + result);
+        LogUtils.d(TAG, "getCpuUsageByAml: result: " + result);
         return cpuUsage;
     }
 

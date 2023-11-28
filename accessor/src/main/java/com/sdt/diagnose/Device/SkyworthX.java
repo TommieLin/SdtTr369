@@ -22,7 +22,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.sdt.accessor.R;
 import com.sdt.annotations.Tr369Get;
@@ -46,6 +45,7 @@ import com.sdt.diagnose.common.XshellClient;
 import com.sdt.diagnose.common.bean.NotificationBean;
 import com.sdt.diagnose.common.bean.SpeedTestBean;
 import com.sdt.diagnose.common.bean.StandbyBean;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 import com.skyworth.scrrtcsrv.Device;
 import com.skyworth.scrrtcsrv.RemoteControlAPI;
@@ -165,17 +165,17 @@ public class SkyworthX {
                 return SkyworthXManager.getInstance().unmute();
             }
         } catch (Exception e) {
-            Log.e(TAG, "setMuteStatus: parse value error, " + e.getMessage());
+            LogUtils.e(TAG, "setMuteStatus: parse value error, " + e.getMessage());
         }
         return false;
     }
 
     @Tr369Set("Device.X_Skyworth.Volume")
     public boolean SK_TR369_SetVolume(String path, String volume) {
-        Log.d(TAG, "setVolume volume: " + volume);
+        LogUtils.d(TAG, "setVolume volume: " + volume);
         int index = -1;
         index = Integer.parseInt(volume);
-        Log.d(TAG, "setVolume value: " + index);
+        LogUtils.d(TAG, "setVolume value: " + index);
         AudioManager audioManager =
                 (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
         int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI;
@@ -305,7 +305,7 @@ public class SkyworthX {
                 case "TransactionId":
                     LogManager.getInstance().setTransactionId(value);
                     count += 2;
-                    Log.e(TAG, "TransactionId count: " + count);
+                    LogUtils.e(TAG, "TransactionId count: " + count);
                     break;
             }
         }
@@ -429,7 +429,7 @@ public class SkyworthX {
             if (SpeedTestBean.getInstance().getEnable().equals("1")
                     && !TextUtils.isEmpty(SpeedTestBean.getInstance().getUrl())
                     && !TextUtils.isEmpty(SpeedTestBean.getInstance().getTransactionId())) {
-                Log.d(TAG, "Wait to call bindSpeedTestService function");
+                LogUtils.d(TAG, "Wait to call bindSpeedTestService function");
                 DiagnoseServiceManager.getInstance().bindSpeedTestService();
             }
         }
@@ -483,7 +483,7 @@ public class SkyworthX {
             long ethernetUsage = (ethernet == null) ? 0 : ethernet.getRxBytes() + ethernet.getTxBytes();
             return String.valueOf((wifiUsage + ethernetUsage) / (1024 * 1024));
         } catch (Exception e) {
-            Log.e(TAG, "GetTodayTotalBytes error, " + e.getMessage());
+            LogUtils.e(TAG, "GetTodayTotalBytes error, " + e.getMessage());
             return null;
         }
     }
@@ -584,7 +584,7 @@ public class SkyworthX {
         final DreamBackend.DreamInfo dreamInfo = mDreamInfos.get(caption);
         if (dreamInfo != null) {
             if (dreamInfo.settingsComponentName != null) {
-                Log.e(TAG, "settingsComponentName: " + dreamInfo.settingsComponentName);
+                LogUtils.e(TAG, "settingsComponentName: " + dreamInfo.settingsComponentName);
                 GlobalContext.getContext().startActivity(
                         new Intent().setComponent(dreamInfo.settingsComponentName));
             }
@@ -669,13 +669,13 @@ public class SkyworthX {
     public String SK_TR369_GetAttentiveSleepTime() {
         int time = Settings.Secure.getInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Secure.SLEEP_TIMEOUT, DEFAULT_SLEEP_TIME_MS);
-        Log.d(TAG, "Get sleep time: " + time);
+        LogUtils.d(TAG, "Get sleep time: " + time);
         return String.valueOf(time);
     }
 
     @Tr369Set("Device.X_Skyworth.SleepTime")
     public boolean SK_TR369_SetAttentiveSleepTime(String path, String ms) {
-        Log.d(TAG, "Set sleep time: " + ms);
+        LogUtils.d(TAG, "Set sleep time: " + ms);
         return Settings.Secure.putInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Secure.SLEEP_TIMEOUT, Integer.parseInt(ms));
     }

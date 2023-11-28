@@ -16,7 +16,6 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -26,6 +25,7 @@ import com.sdt.diagnose.Device.Platform.ModelX;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetWorkSpeedUtils;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 import com.sdt.diagnose.extra.CmsExtraServiceManager;
 import com.skyworth.scrrtcsrv.Device;
@@ -145,10 +145,10 @@ public class SystemDataStat {
                 if (null != mCmsExtraServiceManager) {
                     rate = mCmsExtraServiceManager.getCpuUsage();
                 } else {
-                    Log.e(TAG, "getCpuUsageRate - CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getCpuUsageRate: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getCpuUsageRate - CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCpuUsageRate: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return rate;
@@ -162,10 +162,10 @@ public class SystemDataStat {
             am.getMemoryInfo(mi);
             availMem = mi.availMem / 1024;
         } catch (Exception e) {
-            Log.e(TAG, "getMemoryIdleSize error: " + e.getMessage());
+            LogUtils.e(TAG, "getMemoryIdleSize error: " + e.getMessage());
             return 0;
         }
-        Log.d(TAG, "getMemoryAvailSize: " + availMem);
+        LogUtils.d(TAG, "getMemoryAvailSize: " + availMem);
         return availMem;
     }
 
@@ -177,10 +177,10 @@ public class SystemDataStat {
             am.getMemoryInfo(mi);
             totalMem = mi.totalMem / 1024;
         } catch (Exception e) {
-            Log.e(TAG, "getMemoryTotalSize error: " + e.getMessage());
+            LogUtils.e(TAG, "getMemoryTotalSize error: " + e.getMessage());
             return 0;
         }
-        Log.d(TAG, "getMemoryTotalSize: " + totalMem);
+        LogUtils.d(TAG, "getMemoryTotalSize: " + totalMem);
         return totalMem;
     }
 
@@ -199,11 +199,11 @@ public class SystemDataStat {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getInternalDataFreeStorage error: " + e.getMessage());
+            LogUtils.e(TAG, "getInternalDataFreeStorage error: " + e.getMessage());
             return 0;
         }
 
-        Log.d(TAG, "getInternalDataFreeStorage: " + freeSpace);
+        LogUtils.d(TAG, "getInternalDataFreeStorage: " + freeSpace);
         return freeSpace;
     }
 
@@ -222,11 +222,11 @@ public class SystemDataStat {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getInternalDataTotalStorage error: " + e.getMessage());
+            LogUtils.e(TAG, "getInternalDataTotalStorage error: " + e.getMessage());
             return 0;
         }
 
-        Log.d(TAG, "getInternalDataTotalStorage: " + totalSpace);
+        LogUtils.d(TAG, "getInternalDataTotalStorage: " + totalSpace);
         return totalSpace;
     }
 
@@ -261,7 +261,7 @@ public class SystemDataStat {
             long ethernetUsage = (ethernet == null) ? 0 : ethernet.getRxBytes();
             return (wifiUsage + ethernetUsage) / (1024 * 1024);   // 单位：MB
         } catch (Exception e) {
-            Log.e(TAG, "getRxTotalBytes error: " + e.getMessage());
+            LogUtils.e(TAG, "getRxTotalBytes error: " + e.getMessage());
             return 0;
         }
     }
@@ -280,7 +280,7 @@ public class SystemDataStat {
             long ethernetUsage = (ethernet == null) ? 0 : ethernet.getTxBytes();
             return (wifiUsage + ethernetUsage) / (1024 * 1024);   // 单位：MB
         } catch (Exception e) {
-            Log.e(TAG, "getTxTotalBytes error: " + e.getMessage());
+            LogUtils.e(TAG, "getTxTotalBytes error: " + e.getMessage());
             return 0;
         }
     }
@@ -298,7 +298,7 @@ public class SystemDataStat {
             reader = new BufferedReader(new InputStreamReader(is));
             line = reader.readLine(); // 读取第一行
             while (line != null) {
-                Log.d(TAG, "Read a line from the/proc/net/wireless file: " + line);
+                LogUtils.d(TAG, "Read a line from the/proc/net/wireless file: " + line);
                 pos = line.indexOf(parm);
                 if (pos >= 0) {
                     break;
@@ -310,12 +310,12 @@ public class SystemDataStat {
 
             if (pos >= 0) {
                 String[] numbers = line.replaceAll("\\.", "").trim().split("\\s+");
-                Log.d(TAG, "Interface: " + numbers[0] + ", status: " + numbers[1] +
+                LogUtils.d(TAG, "Interface: " + numbers[0] + ", status: " + numbers[1] +
                         ", link: " + numbers[2] + ", level: " + numbers[3] + ", noise: " + numbers[4]);
                 wifiSnr = Integer.parseInt(numbers[2]);
             }
         } catch (Exception e) {
-            Log.e(TAG, "getWifiSNR Exception error: " + e.getMessage());
+            LogUtils.e(TAG, "getWifiSNR Exception error: " + e.getMessage());
             return 0;
         }
 
@@ -379,7 +379,7 @@ public class SystemDataStat {
                 memoryUsagePercent = 100;
             }
         } catch (Exception e) {
-            Log.e(TAG, "Set MemoryUsagePercent error: " + e.getMessage());
+            LogUtils.e(TAG, "Set MemoryUsagePercent error: " + e.getMessage());
         }
 
         // Disk Storage Usage
@@ -395,7 +395,7 @@ public class SystemDataStat {
                 storageUsagePercent = 100;
             }
         } catch (Exception e) {
-            Log.e(TAG, "Set StorageUsagePercent error: " + e.getMessage());
+            LogUtils.e(TAG, "Set StorageUsagePercent error: " + e.getMessage());
         }
 
         // WiFi Information
@@ -448,10 +448,10 @@ public class SystemDataStat {
             params.put("txDelta", txDelta);
             params.put("wifiSnr", wifiSnr);
         } catch (Exception e) {
-            Log.e(TAG, "JSONObject PUT error: " + e.getMessage());
+            LogUtils.e(TAG, "JSONObject PUT error: " + e.getMessage());
         }
 
-        Log.d(TAG, "Set SystemDataStatInfo: " + params);
+        LogUtils.d(TAG, "Set SystemDataStatInfo: " + params);
         mDataStatListMap.add(params);
 
         mHandler.sendEmptyMessageDelayed(MSG_START_SYSTEM_DATA_STAT, mPeriodicMillisTime);

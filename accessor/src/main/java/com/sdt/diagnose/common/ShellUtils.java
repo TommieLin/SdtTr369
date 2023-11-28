@@ -1,6 +1,6 @@
 package com.sdt.diagnose.common;
 
-import android.util.Log;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -165,9 +165,9 @@ public class ShellUtils {
                 String s;
                 while ((s = successResult.readLine()) != null) {
                     successMsg.append(s).append("\n");
-                    Log.d(TAG, "execCommand: readLine = " + s);
+                    LogUtils.d(TAG, "execCommand readLine: " + s);
                 }
-                Log.d(TAG, "execCommand: successMsg.toString() = " + successMsg);
+                LogUtils.d(TAG, "execCommand successMsg.toString(): " + successMsg);
                 while ((s = errorResult.readLine()) != null) {
                     errorMsg.append(s);
                 }

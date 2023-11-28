@@ -13,7 +13,6 @@ import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -24,6 +23,7 @@ import com.sdt.diagnose.common.ScreenRecordActivity;
 import com.sdt.diagnose.common.ScreenRecordService;
 import com.sdt.diagnose.common.ScreenShot2;
 import com.sdt.diagnose.common.ShellUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.CreateSSL;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
@@ -101,7 +101,7 @@ public class Event {
 
     @Tr369Set("skyworth.tr369.event")
     public boolean SK_TR369_SetEventParams(String path, String value) {
-        Log.d(TAG, "skyworth.tr369.event path: " + path + ", value: " + value);
+        LogUtils.d(TAG, "skyworth.tr369.event path: " + path + ", value: " + value);
         String[] strings = split(value);
         if (strings == null || strings.length == 0) return false;
 
@@ -126,7 +126,7 @@ public class Event {
                 try {
                     ping(strings);
                 } catch (Exception e) {
-                    Log.e(TAG, "IP_PING event execution failed, " + e.getMessage());
+                    LogUtils.e(TAG, "IP_PING event execution failed, " + e.getMessage());
                 }
                 break;
             case TRACE_ROUTE:
@@ -139,20 +139,20 @@ public class Event {
                 try {
                     calcNetSpeed(strings);
                 } catch (Exception e) {
-                    Log.e(TAG, "DOWNLOAD_DIAGNOSTICS event execution failed, " + e.getMessage());
+                    LogUtils.e(TAG, "DOWNLOAD_DIAGNOSTICS event execution failed, " + e.getMessage());
                 }
                 break;
             case SHORT_MESSAGE:
-                Log.d(TAG, " ######## Outis ### SHORT_MESSAGE String: " + value);
+                LogUtils.d(TAG, "SHORT_MESSAGE String: " + value);
                 String[] values = value.split(SPLIT, 2);
                 if (values.length <= INDEX_PARAM_1) {
-                    Log.e(TAG, "Parameter error in SHORT_MESSAGE Event, values.len: " + values.length);
+                    LogUtils.e(TAG, "Parameter error in SHORT_MESSAGE Event, values.len: " + values.length);
                     break;
                 }
                 ShortMessageUtils.handleShortMessage(values[INDEX_PARAM_1]);
                 break;
             default:
-                Log.d(TAG, "Not Implemented, skyworth.tr369.event: " + value);
+                LogUtils.e(TAG, "Not Implemented, skyworth.tr369.event: " + value);
                 break;
         }
 
@@ -161,13 +161,13 @@ public class Event {
 
     private void calcNetSpeed(String[] params) {
         if (params.length <= INDEX_PARAM_2) {
-            Log.e(TAG, "Parameter error in calcNetSpeed() function, params.len: " + params.length);
+            LogUtils.e(TAG, "Parameter error in calcNetSpeed() function, params.len: " + params.length);
             DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_Internal");
             return;
         }
         String url = params[INDEX_PARAM_1];
         String duration = params[INDEX_PARAM_2];
-        Log.d(TAG, "calcNetSpeed url = " + url + ", duration = " + duration);
+        LogUtils.d(TAG, "calcNetSpeed url: " + url + ", duration: " + duration);
 
         long startTime = System.currentTimeMillis();
         long exc_duration;
@@ -185,9 +185,9 @@ public class Event {
         call.enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                LogUtils.e(TAG, "Failed to calculate network speed. Failure Message: " + e.getMessage());
                 long endTime = System.currentTimeMillis();
                 DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.EOMTime", df.format(endTime));
-                Log.e(TAG, "Failed to calculate network speed. Failure Message: " + e.getMessage());
                 DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_TransferFailed");
                 call.cancel();
                 lock.countDown();
@@ -197,14 +197,14 @@ public class Event {
             public void onResponse(@NotNull Call call, @NotNull Response response)
                     throws IOException {
                 if (response.body() == null) {
-                    Log.e(TAG, "calcNetSpeed error: response.body returns a null pointer");
+                    LogUtils.e(TAG, "calcNetSpeed error. response body returns a null pointer");
                     return;
                 }
                 // 下载 outputStream inputStream
                 InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
                 //文件的总长度
                 long maxLen = Objects.requireNonNull(response.body()).contentLength();
-                Log.d(TAG, "calcNetSpeed onResponse: maxLen = " + maxLen);
+                LogUtils.d(TAG, "calcNetSpeed onResponse maxLen: " + maxLen);
                 byte[] bytes = new byte[1024];
 
                 int readLength = 0;
@@ -226,14 +226,14 @@ public class Event {
                 }
 
                 DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.EOMTime", df.format(endTime));
-                Log.d(TAG, "calcNetSpeed onResponse: cureeLength = " + cureeLength);
+                LogUtils.d(TAG, "calcNetSpeed onResponse cureeLength: " + cureeLength);
                 long endRx = TrafficStats.getTotalRxBytes();
-                Log.d(TAG, "calcNetSpeed onResponse: Rx length = " + (endRx - startRx));
+                LogUtils.d(TAG, "calcNetSpeed onResponse Rx length: " + (endRx - startRx));
                 DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.TestBytesReceived",
                         String.valueOf(cureeLength));
                 call.cancel();
-                Log.d(TAG, "calcNetSpeed onResponse: TestBytesReceived = " + cureeLength);
-                Log.d(TAG, "calcNetSpeed call.isCanceled: " + call.isCanceled());
+                LogUtils.d(TAG, "calcNetSpeed onResponse TestBytesReceived: " + cureeLength
+                        + ", isCanceled: " + call.isCanceled());
 
                 DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Complete");
                 inputStream.close();
@@ -245,7 +245,7 @@ public class Event {
         try {
             lock.await(exc_duration + 1, TimeUnit.SECONDS);
         } catch (Exception e) {
-            Log.e(TAG, "calcNetSpeed lock.await call failed, " + e.getMessage());
+            LogUtils.e(TAG, "calcNetSpeed lock.await call failed, " + e.getMessage());
             DbManager.setDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", "Error_Internal");
         }
     }
@@ -260,15 +260,15 @@ public class Event {
         String upgradeUrl;
         String upgradeFileSize;
         String upgradeFileName;
-        Log.d(TAG, "upgradeSw: params.lenth = " + params.length);
+        LogUtils.d(TAG, "upgradeSw params.length: " + params.length);
 
         if (paramLen > INDEX_PARAM_3) {
             upgradeUrl = params[INDEX_PARAM_1];
             upgradeFileName = params[INDEX_PARAM_2];
             upgradeFileSize = params[INDEX_PARAM_3];
-            Log.d(TAG, "upgradeSw: fileUrl>> " + upgradeUrl
-                    + ", fileName>> " + upgradeFileName
-                    + ", fileSize>> " + upgradeFileSize);
+            LogUtils.d(TAG, "upgradeSw: fileUrl: " + upgradeUrl
+                    + ", fileName: " + upgradeFileName
+                    + ", fileSize: " + upgradeFileSize);
             Intent intent = new Intent();
             intent.setPackage("com.sdt.ota");
             //如果是.zip结尾表示是系统升级,.apk结尾表示是app升级
@@ -287,7 +287,7 @@ public class Event {
 
     private void downloadFile(String[] params) {
         if (params.length <= INDEX_PARAM_2) {
-            Log.e(TAG, "Parameter error in downloadFile() function, params.len: " + params.length);
+            LogUtils.e(TAG, "Parameter error in downloadFile() function, params.len: " + params.length);
             return;
         }
 
@@ -295,7 +295,7 @@ public class Event {
         okHttpClientBuilder.addNetworkInterceptor(new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
             public void log(String message) {
-                Log.d(TAG, "HttpLoggingInterceptor message = " + message);
+                LogUtils.d(TAG, "HttpLoggingInterceptor message: " + message);
             }
         }));
         Request request = new Request.Builder()
@@ -306,14 +306,14 @@ public class Event {
             call.enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    Log.e(TAG, "Failed to download file. Failure Message: " + e.getMessage());
+                    LogUtils.e(TAG, "Failed to download file. Failure Message: " + e.getMessage());
                 }
 
                 @Override
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     if (200 == response.code()) {
                         if (response.body() == null) {
-                            Log.e(TAG, "downloadFile error: response.body() is a null pointer");
+                            LogUtils.e(TAG, "downloadFile error. response.body() is a null pointer");
                             return;
                         }
                         File file = new File("/cache/", "update.zip");
@@ -328,7 +328,7 @@ public class Event {
                             fos.write(buffer, 0, len);
                             float l = (float) (count * 100 / contentLength * 1.0);
                             if (l % (1024 * 1024 * 10) == 0) {
-                                Log.d(TAG, "downloadFile result: " + (l * 1.0 / contentLength) * 100 + ("%"));
+                                LogUtils.d(TAG, "downloadFile result: " + (l * 1.0 / contentLength) * 100 + ("%"));
                             }
                         }
 
@@ -339,14 +339,23 @@ public class Event {
                 }
             });
         } catch (Exception e) {
-            Log.e(TAG, "Call to download function failed. Failure Message: " + e.getMessage());
+            LogUtils.e(TAG, "Call to download function failed. Failure Message: " + e.getMessage());
         }
 
     }
 
     public static void uploadLogFile(String uploadUrl, String filePath, int fileCount) {
         try {
-            Log.i(TAG, "uploadLogFile: Start uploading files: " + filePath + ", count: " + fileCount);
+            File file = new File(filePath);
+            if (!file.exists() || !file.isFile()) {
+                LogUtils.e(TAG, "The file in this path does not exist. path: " + filePath);
+                return;
+            }
+            long fileSize = file.length();
+            LogUtils.d(TAG, "Start uploading files: " + filePath
+                    + ", size: " + fileSize
+                    + ", count: " + fileCount
+                    + " to " + uploadUrl);
             URL url = new URL(uploadUrl);
             if (url.toString().contains("https")) {
                 HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
@@ -358,7 +367,7 @@ public class Event {
                 con.disconnect();
             }
         } catch (Exception e) {
-            Log.e(TAG, "uploadLogFile: Failed to upload log file, " + e.getMessage());
+            LogUtils.e(TAG, "Failed to upload log files, " + e.getMessage());
         }
     }
 
@@ -416,20 +425,20 @@ public class Event {
             }
 
             if (con.getResponseCode() == 200) {
-                Log.i(TAG, "uploadLogFileByHttps: File uploaded successfully! File path: " + filePath);
+                LogUtils.e(TAG, "Successfully uploaded file via https! Path: " + filePath);
                 // 上传成功，只删除分段保存的那些文件
                 if (!filePath.contains(RAW_LOG_FILE)) {
                     File file = new File(filePath);
                     if (file.exists()) {
-                        Log.d(TAG, "uploadLogFileByHttps: wait to delete file: " + filePath);
+                        LogUtils.d(TAG, "Https: Wait to delete file: " + filePath);
                         file.delete();
                     }
                 }
             } else {
-                Log.e(TAG, "uploadLogFileByHttps: Get response code: " + con.getResponseCode());
+                LogUtils.e(TAG, "The response code obtained via https is: " + con.getResponseCode());
             }
         } catch (Exception e) {
-            Log.e(TAG, "uploadLogFileByHttps: Failed to upload log file, " + e.getMessage());
+            LogUtils.e(TAG, "Failed to upload file via https, " + e.getMessage());
         }
     }
 
@@ -480,26 +489,26 @@ public class Event {
             }
 
             if (con.getResponseCode() == 200) {
-                Log.i(TAG, "uploadLogFileByHttp: File uploaded successfully! File path: " + filePath);
+                LogUtils.e(TAG, "Successfully uploaded file via http! Path: " + filePath);
                 // 上传成功，只删除分段保存的那些文件
                 if (!filePath.contains(RAW_LOG_FILE)) {
                     File file = new File(filePath);
                     if (file.exists()) {
-                        Log.d(TAG, "uploadLogFileByHttp: wait to delete file: " + filePath);
+                        LogUtils.d(TAG, "Http: Wait to delete file: " + filePath);
                         file.delete();
                     }
                 }
             } else {
-                Log.e(TAG, "uploadLogFileByHttp: Get response code: " + con.getResponseCode());
+                LogUtils.e(TAG, "The response code obtained via http is: " + con.getResponseCode());
             }
         } catch (Exception e) {
-            Log.e(TAG, "uploadLogFileByHttp: Failed to upload log file, " + e.getMessage());
+            LogUtils.e(TAG, "Failed to upload file via http, " + e.getMessage());
         }
     }
 
     private void upload(String[] params) {
         if (params.length <= INDEX_PARAM_3) {
-            Log.e(TAG, "Parameter error in upload() function, params.len: " + params.length);
+            LogUtils.e(TAG, "Parameter error in upload() function, params.len: " + params.length);
             return;
         }
         String fileType = params[INDEX_PARAM_1];
@@ -508,7 +517,7 @@ public class Event {
         switch (fileType) {
             case SCREENSHOT_TYPE:
                 if (!Device.isScreenOn()) {
-                    Log.e(TAG, "The screen is not in use and there is no need to take a screenshot.");
+                    LogUtils.e(TAG, "The screen is not in use and there is no need to take a screenshot.");
                     break;
                 }
                 ScreenShot2.getInstance().takeAndUpload(uploadUrl);
@@ -532,7 +541,7 @@ public class Event {
 
     private void handleVideoFile(String uploadUrl, String delaySeconds) {
         if (!Device.isScreenOn()) {
-            Log.e(TAG, "The screen is not in use and there is no need to perform screen recording.");
+            LogUtils.e(TAG, "The screen is not in use and there is no need to perform screen recording.");
             return;
         }
         Intent intent = new Intent(GlobalContext.getContext(), ScreenRecordActivity.class);
@@ -549,7 +558,7 @@ public class Event {
                                 + ScreenRecordActivity.WAITING_USER_AGREE_TIME_MS
                                 + 5000);
             } catch (InterruptedException e) {
-                Log.e(TAG, "Call to ScreenRecordService function failed. " + e.getMessage());
+                LogUtils.e(TAG, "Call to ScreenRecordService function failed. " + e.getMessage());
             }
         }
     }
@@ -575,18 +584,18 @@ public class Event {
 
     private void handleLogFile(String uploadUrl) {
         if (uploadUrl == null) {
-            Log.e(TAG, "Execution error: URL parameter error.");
+            LogUtils.e(TAG, "Execution error: URL parameter error.");
             return;
         }
         File folder = new File(LOG_SOURCE_DIR_PATH);
         if (!folder.exists() || !folder.isDirectory()) {
-            Log.e(TAG, "Execution error: The folder for storing logs was not found.");
+            LogUtils.e(TAG, "Execution error: The folder for storing logs was not found.");
             return;
         }
 
         File[] files = folder.listFiles();
         if (files == null) {
-            Log.e(TAG, "Execution error: This abstract pathname does not denote a directory.");
+            LogUtils.e(TAG, "Execution error: This abstract pathname does not denote a directory.");
             return;
         }
 
@@ -601,13 +610,13 @@ public class Event {
                 filterStartTime = keywords[1];
                 filterEndTime = keywords[2];
             }
-            Log.d(TAG, "The filtering condition for uploading logs is: " + filterStartTime
+            LogUtils.d(TAG, "The filtering condition for uploading logs is: " + filterStartTime
                     + " ~ " + filterEndTime + " > filterUrl: " + filterUrl);
         }
 
         ArrayList<String> logFiles = new ArrayList<>();
         if (filterUrl.isEmpty()) {
-            Log.e(TAG, "Execution error: URL recognition failed.");
+            LogUtils.e(TAG, "Execution error: URL recognition failed.");
             return;
         } else if (filterStartTime.isEmpty() || filterEndTime.isEmpty()) {
 //            File file = new File(LOG_SOURCE_FILE_PATH);
@@ -637,7 +646,7 @@ public class Event {
         int fileCounts = logFiles.size();
         if (fileCounts > 0) {
             for (String logFile : logFiles) {
-                Log.d(TAG, "About to upload file: " + logFile);
+                LogUtils.d(TAG, "About to upload file: " + logFile);
                 uploadLogFile(filterUrl, logFile, fileCounts);
                 fileCounts--;
             }
@@ -659,12 +668,12 @@ public class Event {
                         + packageInfo.applicationInfo.name + ".png", new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Log.e(TAG, "Failed to upload icon file. Failure Message: " + e.getMessage());
+                        LogUtils.e(TAG, "Failed to upload icon file. Failure Message: " + e.getMessage());
                     }
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Log.d(TAG, "uploadIconFile onResponse: " + response.protocol()
+                        LogUtils.d(TAG, "uploadIconFile onResponse: " + response.protocol()
                                 + ", code: " + response.code()
                                 + ", message: " + response.message());
                     }
@@ -684,7 +693,7 @@ public class Event {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
                 //上传app图标
             } catch (IOException e) {
-                Log.e(TAG, "Call to saveIcon function failed. " + e.getMessage());
+                LogUtils.e(TAG, "Call to saveIcon function failed. " + e.getMessage());
             }
         }
     }
@@ -710,7 +719,7 @@ public class Event {
     }
 
     private void factoryReset() {
-        Log.d(TAG, "FactoryReset called.");
+        LogUtils.d(TAG, "FactoryReset called.");
         Intent resetIntent = new Intent("android.intent.action.MASTER_CLEAR"/*Intent.ACTION_FACTORY_RESET*/);
         resetIntent.setPackage("android");
         resetIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -736,7 +745,7 @@ public class Event {
         DbManager.setDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed", "0");
 
         if (params.length <= INDEX_PARAM_4) {
-            Log.e(TAG, "Parameter error in ping() function, params.len: " + params.length);
+            LogUtils.e(TAG, "Parameter error in ping() function, params.len: " + params.length);
             DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Error_Internal");
             return;
         }
@@ -751,15 +760,13 @@ public class Event {
                 .append(" -t ").append(Integer.parseInt(timeout_ms) / 1000)    // 毫秒转换为秒
                 .append(" ").append(addr);
 
-        Log.d(TAG, "tr369_ping cmd: " + cmd);
+        LogUtils.d(TAG, "tr369_ping cmd: " + cmd);
 
         ShellUtils.CommandResult commandResult = ShellUtils.execCommand(cmd.toString(), false);
-        Log.d(TAG, "tr369_ping commandResult: " + commandResult);
+        LogUtils.d(TAG, "tr369_ping commandResult: " + commandResult);
 
         String result = (commandResult.result == 0 ? commandResult.successMsg : commandResult.errorMsg);
-        Log.d(TAG, "tr369_ping result: " + result);
-
-//        DbManager.setDBParam("skyworth.param.tr369_ping", ret);
+        LogUtils.d(TAG, "tr369_ping result: " + result);
         parsePingResult(result);
     }
 
@@ -786,7 +793,7 @@ public class Event {
             int min_us = (int) (min_ms * 1000);
             int avg_us = (int) (avg_ms * 1000);
             int max_us = (int) (max_ms * 1000);
-            Log.d(TAG, "tr369_ping parsePingResult min_ms: " + min_ms
+            LogUtils.d(TAG, "tr369_ping parsePingResult min_ms: " + min_ms
                     + ", avg_ms: " + avg_ms
                     + ", max_ms: " + max_ms
                     + ", min_us: " + min_us
@@ -803,16 +810,15 @@ public class Event {
             String[] counts_part1 = msg.split("ping statistics ---\n")[1].split(" packets transmitted, ");
             if (counts_part1.length > 1) {
                 int totalCount = Integer.parseInt(counts_part1[0]);
-                Log.d(TAG, "tr369_ping parsePingResult totalCount: " + totalCount);
+                LogUtils.d(TAG, "tr369_ping parsePingResult totalCount: " + totalCount);
                 String[] counts_part2 = counts_part1[1].split(" received,");
                 if (counts_part2.length > 1) {
                     int successCount = Integer.parseInt(counts_part2[0]);
-                    Log.d(TAG, "tr369_ping parsePingResult successCount: " + successCount);
+                    LogUtils.d(TAG, "tr369_ping parsePingResult successCount: " + successCount);
                     DbManager.setDBParam("Device.IP.Diagnostics.IPPing.SuccessCount", String.valueOf(successCount));
                     DbManager.setDBParam("Device.IP.Diagnostics.IPPing.FailureCount", String.valueOf(totalCount - successCount));
                 }
             }
-
         } else {
             DbManager.setDBParam("Device.IP.Diagnostics.IPPing.Status", "Canceled");
         }
@@ -842,14 +848,14 @@ public class Event {
                                 fileOutputStream.write(line1.getBytes(StandardCharsets.UTF_8));
                                 fileOutputStream.write(line2.getBytes(StandardCharsets.UTF_8));
                             } catch (IOException e) {
-                                Log.e(TAG, "getRefreshData Stream function call failed. " + e.getMessage());
+                                LogUtils.e(TAG, "getRefreshData Stream function call failed. " + e.getMessage());
                             }
                         }
                         fileOutputStream.close();
                         cursor.close();
                     }
                 } catch (IOException e) {
-                    Log.e(TAG, "getRefreshData File function call failed. " + e.getMessage());
+                    LogUtils.e(TAG, "getRefreshData File function call failed. " + e.getMessage());
                 }
             }
         }.start();

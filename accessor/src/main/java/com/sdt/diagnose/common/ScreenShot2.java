@@ -2,10 +2,10 @@ package com.sdt.diagnose.common;
 
 import android.os.Build;
 import android.os.Environment;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
@@ -51,7 +51,7 @@ public class ScreenShot2 {
     private boolean takeScreenshot() {
         File fileDir = new File(fileParentDirPath);
         if (!fileDir.exists() && !fileDir.mkdirs()) {
-            Log.e(TAG, "Can't create file path.");
+            LogUtils.e(TAG, "Can't create file path.");
             return false;
         }
         screenshotFilePath = String.format("%s/%s.png", fileParentDirPath, simpleDateFormat.format(new Date()));
@@ -70,7 +70,7 @@ public class ScreenShot2 {
     static class UploadFileCallback implements Callback {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-            Log.e(TAG, "Failed to upload screenshot. Failure Message: " + e.getMessage());
+            LogUtils.e(TAG, "Failed to upload screenshot. Failure Message: " + e.getMessage());
             File file = new File(screenshotFilePath);
             file.delete();
         }
@@ -78,7 +78,7 @@ public class ScreenShot2 {
         @Override
         public void onResponse(@NonNull Call call, @NonNull Response response)
                 throws IOException {
-            Log.i(TAG, "Successfully uploaded screenshot. Protocol: " + response.protocol()
+            LogUtils.i(TAG, "Successfully uploaded screenshot. Protocol: " + response.protocol()
                     + ", Code: " + response.code());
             File file = new File(screenshotFilePath);
             file.delete();

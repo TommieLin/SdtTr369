@@ -2,7 +2,8 @@ package com.sdt.diagnose.common.net;
 
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -44,7 +45,7 @@ import okhttp3.OkHttpClient;
  * SSL证书管理器
  */
 public class SSLHelper {
-    public static final String TAG = "SSLHelper";
+    private static final String TAG = "SSLHelper";
     private static final String CHARSET_NAME = "UTF-8";
     private static final String KEY_NAME = "client.bks";
     private static final String BEGIN_KEY = "-----BEGIN RSA PRIVATE KEY-----";
@@ -122,7 +123,7 @@ public class SSLHelper {
                  | CertificateException
                  | NoSuchAlgorithmException
                  | IOException e) {
-            Log.e(TAG, "buildKeyStore error:" + e.getMessage());
+            LogUtils.e(TAG, "buildKeyStore error: " + e.getMessage());
             throw new Exception(e.getLocalizedMessage());
         }
     }
@@ -179,7 +180,7 @@ public class SSLHelper {
             KeyFactory factory = KeyFactory.getInstance("RSA");
             return (RSAPrivateKey) factory.generatePrivate(spec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            Log.e(TAG, "generatePrivateKeyFromDER error:" + e.getMessage());
+            LogUtils.e(TAG, "generatePrivateKeyFromDER error: " + e.getMessage());
         }
         return null;
     }
@@ -193,7 +194,7 @@ public class SSLHelper {
             return (X509Certificate)
                     factory.generateCertificate(new ByteArrayInputStream(certBytes));
         } catch (CertificateException e) {
-            Log.e(TAG, "generateCertificateFromDER error." + e.getLocalizedMessage());
+            LogUtils.e(TAG, "generateCertificateFromDER error. " + e.getLocalizedMessage());
         }
         return null;
     }
@@ -215,7 +216,7 @@ public class SSLHelper {
 
             return trustManagerFactory;
         } catch (Exception e) {
-            Log.e(TAG, "getTrustManagerFactory error." + e.getLocalizedMessage());
+            LogUtils.e(TAG, "getTrustManagerFactory error. " + e.getLocalizedMessage());
             throw new Exception(e.getLocalizedMessage());
         }
     }
@@ -270,7 +271,7 @@ public class SSLHelper {
                 try {
                     x509CertificatesTmp = createCertificates(caCertString);
                 } catch (Exception e) {
-                    Log.e(TAG, "checkServerTrusted error." + e.getLocalizedMessage());
+                    LogUtils.e(TAG, "checkServerTrusted error. " + e.getLocalizedMessage());
                 }
 
                 Map<String, X509Certificate> issuerCertificateUniqueMap = new HashMap<>();
@@ -279,55 +280,37 @@ public class SSLHelper {
                     if (x509CertificatesTmp.length <= 0 || x509Certificates.length <= 0) {
                         throw new CertificateException("bad param");
                     }
-                    //       dumpShakeHandCerts(x509Certificates);
+                    // dumpShakeHandCerts(x509Certificates);
                     // 将ca证书内容导入到map中备用
                     for (X509Certificate certificate : x509CertificatesTmp) {
                         issuerCertificateUniqueMap.put(
                                 certificate.getSubjectDN().toString(), certificate);
                     }
 
-                    if (issuerCertificateUniqueMap.size() != 0) {
-                        X509Certificate serverDeepestCert;
-                        X509Certificate checkTmp;
-                        // 如果是证书链
-                        if (x509Certificates.length > 1) {
-                            // 正序
-                            if (x509Certificates[0]
-                                    .getIssuerDN()
-                                    .equals(x509Certificates[1].getSubjectDN())) {
-                                serverDeepestCert = x509Certificates[x509Certificates.length - 1];
-                                checkTmp =
-                                        issuerCertificateUniqueMap.get(
-                                                serverDeepestCert.getIssuerDN().toString());
-                                if (null == checkTmp) {
-                                    throw new CertificateException(
-                                            "checkServerTrusted: Do not find the currect issuer form ca cert to check the server cert");
-                                }
+                    X509Certificate serverDeepestCert;
+                    X509Certificate checkTmp;
+                    // 如果是证书链
+                    if (x509Certificates.length > 1) {
+                        // 正序
+                        if (x509Certificates[0]
+                                .getIssuerDN()
+                                .equals(x509Certificates[1].getSubjectDN())) {
+                            serverDeepestCert = x509Certificates[x509Certificates.length - 1];
+                            checkTmp =
+                                    issuerCertificateUniqueMap.get(
+                                            serverDeepestCert.getIssuerDN().toString());
+                            if (null == checkTmp) {
+                                throw new CertificateException(
+                                        "checkServerTrusted: Do not find the currect issuer form ca cert to check the server cert");
+                            }
 
-                                // 正序校验服务器发来的证书链
-                                for (index = x509Certificates.length - 1; index >= 0; index--) {
-                                    x509Certificates[index].verify(checkTmp.getPublicKey());
-                                    checkTmp = x509Certificates[index];
-                                }
-                            } else {
-                                // 反之认为是倒序
-                                serverDeepestCert = x509Certificates[0];
-                                checkTmp =
-                                        issuerCertificateUniqueMap.get(
-                                                serverDeepestCert.getIssuerDN().toString());
-                                if (null == checkTmp) {
-                                    throw new CertificateException(
-                                            "checkServerTrusted: Do not find the currect issuer form ca cert to check the server cert");
-                                }
-
-                                // 倒序校验
-                                for (index = 0; index <= x509Certificates.length - 1; index++) {
-                                    x509Certificates[index].verify(checkTmp.getPublicKey());
-                                    checkTmp = x509Certificates[index];
-                                }
+                            // 正序校验服务器发来的证书链
+                            for (index = x509Certificates.length - 1; index >= 0; index--) {
+                                x509Certificates[index].verify(checkTmp.getPublicKey());
+                                checkTmp = x509Certificates[index];
                             }
                         } else {
-                            // 非证书链的情况
+                            // 反之认为是倒序
                             serverDeepestCert = x509Certificates[0];
                             checkTmp =
                                     issuerCertificateUniqueMap.get(
@@ -336,33 +319,46 @@ public class SSLHelper {
                                 throw new CertificateException(
                                         "checkServerTrusted: Do not find the currect issuer form ca cert to check the server cert");
                             }
-                            x509Certificates[0].verify(checkTmp.getPublicKey());
-                        }
 
-                        // 确定是否是一条证书链，暂时只检验root之后的一层
-                        for (X509Certificate certificate : x509CertificatesTmp) {
-                            if (certificate.getIssuerDN().equals(checkTmp.getSubjectDN())) {
-                                if (!serverDeepestCert
-                                        .getSubjectDN()
-                                        .equals(certificate.getSubjectDN())) {
-                                    throw new CertificateException(
-                                            "checkServerTrusted: The server cert chain is not the chain with trust store");
-                                } else {
-                                    Log.d(TAG, "it is the same chain with the trust store");
-                                    break;
-                                }
+                            // 倒序校验
+                            for (index = 0; index <= x509Certificates.length - 1; index++) {
+                                x509Certificates[index].verify(checkTmp.getPublicKey());
+                                checkTmp = x509Certificates[index];
                             }
-                            // 没找到则认为checkTmp链的下一层没有子证书了
                         }
                     } else {
-                        throw new CertificateException(
-                                "checkServerTrusted: ca cert do not have issuer");
+                        // 非证书链的情况
+                        serverDeepestCert = x509Certificates[0];
+                        checkTmp =
+                                issuerCertificateUniqueMap.get(
+                                        serverDeepestCert.getIssuerDN().toString());
+                        if (null == checkTmp) {
+                            throw new CertificateException(
+                                    "checkServerTrusted: Do not find the currect issuer form ca cert to check the server cert");
+                        }
+                        x509Certificates[0].verify(checkTmp.getPublicKey());
+                    }
+
+                    // 确定是否是一条证书链，暂时只检验root之后的一层
+                    for (X509Certificate certificate : x509CertificatesTmp) {
+                        if (certificate.getIssuerDN().equals(checkTmp.getSubjectDN())) {
+                            if (!serverDeepestCert
+                                    .getSubjectDN()
+                                    .equals(certificate.getSubjectDN())) {
+                                throw new CertificateException(
+                                        "checkServerTrusted: The server cert chain is not the chain with trust store");
+                            } else {
+                                LogUtils.d(TAG, "it is the same chain with the trust store");
+                                break;
+                            }
+                        }
+                        // 没找到则认为checkTmp链的下一层没有子证书了
                     }
                 } catch (NoSuchProviderException
                          | InvalidKeyException
                          | NoSuchAlgorithmException
                          | SignatureException e) {
-                    Log.e(TAG, "CertificateException error." + e.getLocalizedMessage());
+                    LogUtils.e(TAG, "CertificateException error. " + e.getLocalizedMessage());
                     throw new CertificateException();
                 }
             }
@@ -398,7 +394,7 @@ public class SSLHelper {
         try {
             result = certificateToString(x509Certificates);
         } catch (Exception e) {
-            Log.e(TAG, "dumpShakeHandCerts error." + e.getLocalizedMessage());
+            LogUtils.e(TAG, "dumpShakeHandCerts error. " + e.getLocalizedMessage());
         }
         return result;
     }

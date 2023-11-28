@@ -3,12 +3,12 @@ package com.sdt.diagnose.Device.Wifi;
 import android.content.Context;
 import android.net.wifi.WifiManager;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 import com.sdt.diagnose.net.NetworkApiManager;
 
@@ -33,7 +33,7 @@ public class RadioX {
             paramsArr = path.replace(REFIX, "").split(REGEX);
             int index = Integer.parseInt(paramsArr[0]);
             int resultNumber = NetworkApiManager.getInstance().getNetworkApi().getWiFiRadioNumberOfEntries();
-            Log.d(TAG, "handleRadioX: " + Arrays.toString(paramsArr));
+            LogUtils.d(TAG, "handleRadioX: " + Arrays.toString(paramsArr));
             if (index <= 0 || index > resultNumber) {
                 return result;
             }
@@ -118,7 +118,7 @@ public class RadioX {
 
     @Tr369Set("Device.WiFi.Radio.1.Alias")
     public boolean SK_TR369_SetSsidAlias(String path, String value) {
-        Log.d(TAG, "SetSsidAlias path = " + path + ", value = " + value);
+        LogUtils.d(TAG, "SetSsidAlias path: " + path + ", value: " + value);
         return (DbManager.setDBParam(path, value) == 0);
     }
 
@@ -127,12 +127,12 @@ public class RadioX {
     }
 
     public String getRadioChannelsInUse(String path) {
-        Log.d(TAG, "getRadioChannelsInUse path = " + path);
+        LogUtils.d(TAG, "getRadioChannelsInUse path: " + path);
         return NetworkApiManager.getInstance().getNetworkApi().getWiFiRadioChannelsInUse(GlobalContext.getContext(), 0);
     }
 
     public String getRadioChannel(String path) {
-        Log.d(TAG, "getRadioChannel path = " + path);
+        LogUtils.d(TAG, "getRadioChannel path: " + path);
         int value = NetworkApiManager.getInstance().getNetworkApi().getWiFiRadioChannel(GlobalContext.getContext(), 0);
         return String.valueOf(value);
     }
@@ -142,7 +142,7 @@ public class RadioX {
     }
 
     public String getRadioMaxBitRate(String path) {
-        Log.d(TAG, "getRadioMaxBitRate path = " + path);
+        LogUtils.d(TAG, "getRadioMaxBitRate path: " + path);
         String[] status = NetworkApiManager.getInstance().getNetworkApi().getWiFiMaxBitRate(GlobalContext.getContext());
         if (status != null && status.length > 0) {
             return status[0];
@@ -151,7 +151,7 @@ public class RadioX {
     }
 
     public String operatingFrequencyBand(String path) {
-        Log.d(TAG, "operatingFrequencyBand path = " + path);
+        LogUtils.d(TAG, "operatingFrequencyBand path: " + path);
         return NetworkApiManager.getInstance().getNetworkApi().getWiFiRadioOperatingFrequencyBand(GlobalContext.getContext(), 0);
     }
 

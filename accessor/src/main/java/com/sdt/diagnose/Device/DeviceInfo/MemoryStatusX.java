@@ -2,10 +2,10 @@ package com.sdt.diagnose.Device.DeviceInfo;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 
 public class MemoryStatusX {
@@ -20,10 +20,10 @@ public class MemoryStatusX {
             am.getMemoryInfo(mi);
             result = String.valueOf(mi.totalMem / 1024);
         } catch (Exception e) {
-            Log.e(TAG, "GetMemoryStatusTotal error, " + e.getMessage());
+            LogUtils.e(TAG, "GetMemoryStatusTotal error, " + e.getMessage());
         }
 
-        Log.d(TAG, "GetMemoryStatusTotal result = " + result);
+        LogUtils.d(TAG, "GetMemoryStatusTotal result: " + result);
         return result;
     }
 
@@ -36,10 +36,10 @@ public class MemoryStatusX {
             am.getMemoryInfo(mi);
             result = String.valueOf(mi.availMem / 1024);
         } catch (Exception e) {
-            Log.e(TAG, "GetMemoryStatusFree error, " + e.getMessage());
+            LogUtils.e(TAG, "GetMemoryStatusFree error, " + e.getMessage());
             return "-1";
         }
-        Log.d(TAG, "GetMemoryStatusFree result = " + result);
+        LogUtils.d(TAG, "GetMemoryStatusFree result: " + result);
         return result;
     }
 

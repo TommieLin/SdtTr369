@@ -122,32 +122,32 @@ public final class ControlMessage {
 
     public static String getTypeStr(int type) {
         switch (type) {
-        case TYPE_INJECT_KEYCODE:
-            return "keycode";
-        case TYPE_INJECT_TEXT:
-            return "text";
-        case TYPE_INJECT_TOUCH_EVENT:
-            return "touchscreen";
-        case TYPE_INJECT_SCROLL_EVENT:
-            return "scroll";
-        case TYPE_BACK_OR_SCREEN_ON:
-            return "backorscreenon";
-        case TYPE_EXPAND_NOTIFICATION_PANEL:
-            return "expandnotificationpanel";
-        case TYPE_EXPAND_SETTINGS_PANEL:
-            return "expandsettingspanel";
-        case TYPE_COLLAPSE_PANELS:
-            return "collapesepanels";
-        case TYPE_GET_CLIPBOARD:
-            return "getclipboard";
-        case TYPE_SET_CLIPBOARD:
-            return "setclipboard";
-        case TYPE_SET_SCREEN_POWER_MODE:
-            return "setscreenpowermode";
-        case TYPE_ROTATE_DEVICE:
-            return "rotatedevice";
-        default:
-            return "unknown";
+            case TYPE_INJECT_KEYCODE:
+                return "keycode";
+            case TYPE_INJECT_TEXT:
+                return "text";
+            case TYPE_INJECT_TOUCH_EVENT:
+                return "touchscreen";
+            case TYPE_INJECT_SCROLL_EVENT:
+                return "scroll";
+            case TYPE_BACK_OR_SCREEN_ON:
+                return "backorscreenon";
+            case TYPE_EXPAND_NOTIFICATION_PANEL:
+                return "expandnotificationpanel";
+            case TYPE_EXPAND_SETTINGS_PANEL:
+                return "expandsettingspanel";
+            case TYPE_COLLAPSE_PANELS:
+                return "collapesepanels";
+            case TYPE_GET_CLIPBOARD:
+                return "getclipboard";
+            case TYPE_SET_CLIPBOARD:
+                return "setclipboard";
+            case TYPE_SET_SCREEN_POWER_MODE:
+                return "setscreenpowermode";
+            case TYPE_ROTATE_DEVICE:
+                return "rotatedevice";
+            default:
+                return "unknown";
         }
     }
 

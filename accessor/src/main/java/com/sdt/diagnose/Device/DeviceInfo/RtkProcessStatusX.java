@@ -1,8 +1,7 @@
 package com.sdt.diagnose.Device.DeviceInfo;
 
-import android.util.Log;
-
 import com.realtek.hardware.RtkVoutUtilManager;
+import com.sdt.diagnose.common.log.LogUtils;
 
 public class RtkProcessStatusX {
     private static final String TAG = "RtkProcessStatusX";
@@ -24,9 +23,9 @@ public class RtkProcessStatusX {
             RtkVoutUtilManager manager = new RtkVoutUtilManager();
             usage = (double) manager.getProcStat();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getCpuUsageByRtk - RtkVoutUtilManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getCpuUsageByRtk: RtkVoutUtilManager call failed, " + e.getMessage());
         }
-        Log.d(TAG, "getCpuUsageByRtk: " + usage);
+        LogUtils.d(TAG, "getCpuUsageByRtk usage: " + usage);
         return usage;
     }
 }

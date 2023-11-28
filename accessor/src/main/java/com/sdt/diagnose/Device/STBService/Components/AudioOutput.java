@@ -4,7 +4,6 @@ import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.provider.Settings;
-import android.util.Log;
 
 import com.sdt.accessor.R;
 import com.sdt.annotations.Tr369Get;

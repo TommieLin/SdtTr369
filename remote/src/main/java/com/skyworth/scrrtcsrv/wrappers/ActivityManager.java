@@ -66,7 +66,8 @@ public class ActivityManager {
                 return null;
             }
             return new ContentProvider(this, provider, name, token);
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | NoSuchFieldException e) {
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException |
+                 NoSuchFieldException e) {
             Ln.e("Could not invoke method", e);
             return null;
         }

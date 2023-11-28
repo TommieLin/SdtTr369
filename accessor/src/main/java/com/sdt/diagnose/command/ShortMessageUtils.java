@@ -18,7 +18,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import com.google.gson.Gson;
@@ -26,6 +25,7 @@ import com.sdt.accessor.R;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.ShortMessageBean;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
 
@@ -54,11 +54,11 @@ public class ShortMessageUtils {
     private static final String ACTION_START_UPDATE_TASK = "com.skw.ota.update.internal.tr069";
 
     public static void handleShortMessage(String json) {
-        Log.d(TAG, "[handleShortMessage] Get Json data: " + json);
+        LogUtils.d(TAG, "Get Json data: " + json);
         Gson gson = new Gson();
         ShortMessageBean shortMessage = gson.fromJson(json, ShortMessageBean.class);
         if (shortMessage != null) {
-            Log.d(TAG, "[handleShortMessage] Get Launcher message: " + shortMessage);
+            LogUtils.d(TAG, "Get Launcher message: " + shortMessage);
             if (shortMessage.getType().equals(TYPE_NOTIFY)) {
                 // type值为04时，此消息为Notifications通知
                 notifyNotification(shortMessage.getTitle(), shortMessage.getContent());
@@ -84,7 +84,7 @@ public class ShortMessageUtils {
                 GlobalContext.getContext().startActivity(intent);
             }
         } else {
-            Log.d(TAG, "[handleShortMessage] Failed to parse Json content.");
+            LogUtils.e(TAG, "Failed to parse Json content.");
         }
     }
 
@@ -132,7 +132,7 @@ public class ShortMessageUtils {
         if (!url.isEmpty()) {
             HttpsUtils.noticeResponse(url + "/tr369/message/sendResult", params);
         } else {
-            Log.e(TAG, "ManagementServer URL is empty.");
+            LogUtils.e(TAG, "ManagementServer URL is empty.");
         }
     }
 
@@ -157,7 +157,7 @@ public class ShortMessageUtils {
             field.setAccessible(true);
             Object sProviderInstance = field.get(null);
             if (sProviderInstance != null) {
-                Log.i(TAG, "sProviderInstance isn't null");
+                LogUtils.i(TAG, "sProviderInstance isn't null");
                 return;
             }
 
@@ -167,7 +167,7 @@ public class ShortMessageUtils {
             } else if (sdkInt == 22) {
                 getProviderClassMethod = factoryClass.getDeclaredMethod("getFactoryClass");
             } else {
-                Log.i(TAG, "Don't need to Hook WebView");
+                LogUtils.i(TAG, "Don't need to Hook WebView");
                 return;
             }
             getProviderClassMethod.setAccessible(true);
@@ -175,12 +175,11 @@ public class ShortMessageUtils {
             Class<?> delegateClass = Class.forName("android.webkit.WebViewDelegate");
             Constructor<?> delegateConstructor = delegateClass.getDeclaredConstructor();
             delegateConstructor.setAccessible(true);
-            if (sdkInt < 26) {//低于Android O版本
+            if (sdkInt < 26 && factoryProviderClass != null) {
+                //低于Android O版本
                 Constructor<?> providerConstructor = factoryProviderClass.getConstructor(delegateClass);
-                if (providerConstructor != null) {
-                    providerConstructor.setAccessible(true);
-                    sProviderInstance = providerConstructor.newInstance(delegateConstructor.newInstance());
-                }
+                providerConstructor.setAccessible(true);
+                sProviderInstance = providerConstructor.newInstance(delegateConstructor.newInstance());
             } else {
                 Field chromiumMethodName = factoryClass.getDeclaredField("CHROMIUM_WEBVIEW_FACTORY_METHOD");
                 chromiumMethodName.setAccessible(true);
@@ -189,19 +188,17 @@ public class ShortMessageUtils {
                     chromiumMethodNameStr = "create";
                 }
                 Method staticFactory = factoryProviderClass.getMethod(chromiumMethodNameStr, delegateClass);
-                if (staticFactory != null) {
-                    sProviderInstance = staticFactory.invoke(null, delegateConstructor.newInstance());
-                }
+                sProviderInstance = staticFactory.invoke(null, delegateConstructor.newInstance());
             }
 
             if (sProviderInstance != null) {
                 field.set("sProviderInstance", sProviderInstance);
-                Log.i(TAG, "########### Outis &&& Hook success!");
+                LogUtils.i(TAG, "Hook success!");
             } else {
-                Log.i(TAG, "########### Outis &&& Hook failed!");
+                LogUtils.i(TAG, "Hook failed!");
             }
         } catch (Throwable e) {
-            Log.e(TAG, "########### Outis &&& hookWebView error, " + e.getMessage());
+            LogUtils.e(TAG, "hookWebView error, " + e.getMessage());
         }
     }
 }

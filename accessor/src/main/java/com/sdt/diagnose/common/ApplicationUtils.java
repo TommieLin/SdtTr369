@@ -17,10 +17,10 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.print.PrintManager;
-import android.util.Log;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class ApplicationUtils {
 
         try {
             List<String> packageNames = parseStringList(pkgs);
-            Log.d(TAG, "Waiting to uninstall apps: " + packageNames);
+            LogUtils.d(TAG, "Waiting to uninstall apps: " + packageNames);
             if (packageNames.isEmpty()) return false;
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
@@ -73,14 +73,14 @@ public class ApplicationUtils {
                 if (packageNames.contains(pkgName)) {
                     if (!pkgName.contains("sdt")) {
                         uninstall(pkgName);
-                        Log.d(TAG, "Uninstallation process completed.");
+                        LogUtils.d(TAG, "Uninstallation process completed.");
                     } else {
-                        Log.i(TAG, "This application cannot be uninstalled: " + pkgName);
+                        LogUtils.i(TAG, "This application cannot be uninstalled: " + pkgName);
                     }
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to execute uninstallApps. " + e.getMessage());
+            LogUtils.e(TAG, "Failed to execute uninstallApps. " + e.getMessage());
             return false;
         }
 
@@ -164,7 +164,7 @@ public class ApplicationUtils {
                             | PackageManager.GET_UNINSTALLED_PACKAGES
                             | PackageManager.GET_SIGNATURES);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "getPackageInfo error, " + e.getMessage());
+            LogUtils.e(TAG, "getPackageInfo error, " + e.getMessage());
             return false;
         }
         return !(homePackages.contains(pkg) || isSystemPackage(context.getResources(), pm, packageInfo));
@@ -178,7 +178,7 @@ public class ApplicationUtils {
                             | PackageManager.GET_UNINSTALLED_PACKAGES
                             | PackageManager.GET_SIGNATURES);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "getPackageInfo error, " + e.getMessage());
+            LogUtils.e(TAG, "getPackageInfo error, " + e.getMessage());
             return false;
         }
         return packageInfo.applicationInfo.enabled;
@@ -214,7 +214,7 @@ public class ApplicationUtils {
             } catch (Exception e) {
                 // e.g. named alternate package not found during lookup;
                 // this is an expected case sometimes
-                Log.e(TAG, "signaturesMatch checkSignatures error, " + e.getMessage());
+                LogUtils.e(TAG, "signaturesMatch checkSignatures error, " + e.getMessage());
             }
         }
         return false;
@@ -263,7 +263,7 @@ public class ApplicationUtils {
             final PackageInfo sys = pm.getPackageInfo("android", PackageManager.GET_SIGNATURES);
             return getFirstSignature(sys);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "SystemSignature getPackageInfo error, " + e.getMessage());
+            LogUtils.e(TAG, "SystemSignature getPackageInfo error, " + e.getMessage());
         }
         return null;
     }
@@ -282,10 +282,8 @@ public class ApplicationUtils {
         PackageInfo pi = new PackageInfo();
         ActivityManager am = (ActivityManager) context.getSystemService(ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> runs = am.getRunningAppProcesses();
-        String name = "";
-        Log.d(TAG, "runs.size(): " + runs.size());
+        LogUtils.d(TAG, "runs.size(): " + runs.size());
         for (ActivityManager.RunningAppProcessInfo run : runs) {
-            name = run.processName;
             for (String pkg : run.pkgList) {
                 if (pkg.contains(packageName)) {
                     return true;

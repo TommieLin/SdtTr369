@@ -3,9 +3,9 @@ package com.sdt.android.tr369.Receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.sdt.diagnose.common.DeviceInfoUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
 
@@ -23,7 +23,7 @@ public class ShutdownReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.ACTION_SHUTDOWN")) {
-            Log.e(TAG, "ACTION_SHUTDOWN");
+            LogUtils.d(TAG, "ACTION_SHUTDOWN");
             HashMap<String, String> params = new HashMap<>();
             String serialNumber = DeviceInfoUtils.getSerialNumber();
             params.put("serialNumber", serialNumber);
@@ -31,7 +31,7 @@ public class ShutdownReceiver extends BroadcastReceiver {
             if (!url.isEmpty()) {
                 HttpsUtils.noticeResponse(url + path, params);
             } else {
-                Log.e(TAG, "ManagementServer URL is empty.");
+                LogUtils.e(TAG, "ManagementServer URL is empty.");
             }
         }
     }

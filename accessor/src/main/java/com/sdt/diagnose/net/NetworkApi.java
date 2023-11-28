@@ -7,10 +7,10 @@ import android.net.wifi.WifiManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.opentr369.OpenTR369Native;
 
 import java.io.BufferedReader;
@@ -24,7 +24,7 @@ import java.util.List;
  * Wifi 和 路由器相关接口在这里
  */
 public class NetworkApi {
-    public final String TAG = "NetworkApi";
+    private static final String TAG = "NetworkApi";
     private DeviceWiFiScan mDeviceWiFiScan;
 
     private String getChannelByFrequency(int frequency) {
@@ -115,7 +115,7 @@ public class NetworkApi {
     public String getGatewayProduct() {
         //TODO:sys.gatewayinfo.productclass will be set by frameowrk if option 125 support later
         String productclass = SystemProperties.get("sys.gatewayinfo.productclass", "");
-        Log.i(TAG, "getGatewayProduct: " + productclass);
+        LogUtils.i(TAG, "getGatewayProduct: " + productclass);
         return productclass;
     }
 
@@ -138,7 +138,7 @@ public class NetworkApi {
     public String getGatewaySerialNumber() {
         //TODO:sys.gatewayinfo.serialnumber will be set by frameowrk if option 125 support later
         String serialnumber = SystemProperties.get("sys.gatewayinfo.serialnumber", "");
-        Log.i(TAG, "getGatewaySerialNumber: " + serialnumber);
+        LogUtils.i(TAG, "getGatewaySerialNumber: " + serialnumber);
         return serialnumber;
     }
 
@@ -153,7 +153,7 @@ public class NetworkApi {
     public String getGatewayManufacturerOUI() {
         //TODO:sys.gatewayinfo.manufactureroui will be set by frameowrk if option 125 support later
         String manufactureroui = SystemProperties.get("sys.gatewayinfo.manufactureroui", "");
-        Log.i(TAG, "getGatewayManufacturerOUI: " + manufactureroui);
+        LogUtils.i(TAG, "getGatewayManufacturerOUI: " + manufactureroui);
         return manufactureroui;
     }
 
@@ -178,7 +178,7 @@ public class NetworkApi {
      ***************************************************************/
     public String[] getEthernetMaxBitRate() {
         String[] arr = new String[1];
-        Log.i(TAG, "getEthernetMaxBitRate: " + arr[0]);
+        LogUtils.i(TAG, "getEthernetMaxBitRate: " + arr[0]);
         return arr;
     }
 
@@ -195,7 +195,7 @@ public class NetworkApi {
             arr[0] = String.valueOf(mWifiInfo.getMaxSupportedRxLinkSpeedMbps());
         }
         if (null != arr[0]) {
-            Log.i(TAG, "getWiFiMaxBitRate: " + arr[0]);
+            LogUtils.i(TAG, "getWiFiMaxBitRate: " + arr[0]);
         }
         return arr;
     }
@@ -215,7 +215,7 @@ public class NetworkApi {
             ssid = mWifiInfo.getSSID();
         }
         if (!TextUtils.isEmpty(ssid)) {
-            Log.i(TAG, "getWiFiSsid: " + ssid);
+            LogUtils.i(TAG, "getWiFiSsid: " + ssid);
             if (ssid.contains("<")) {
                 ssid = ssid.replace("<", "");
             }
@@ -240,7 +240,7 @@ public class NetworkApi {
             bssid = mWifiInfo.getBSSID();
         }
         if (null != bssid) {
-            Log.i(TAG, "getWiFiBssid: " + bssid);
+            LogUtils.i(TAG, "getWiFiBssid: " + bssid);
         }
         return bssid;
     }
@@ -266,7 +266,7 @@ public class NetworkApi {
         }
         arr[0] = getChannelByFrequency(Frequency);
         if (null != arr[0]) {
-            Log.i(TAG, "getWiFiChannel: " + arr[0]);
+            LogUtils.i(TAG, "getWiFiChannel: " + arr[0]);
         }
         return arr;
     }
@@ -284,7 +284,7 @@ public class NetworkApi {
         if (null != mWifiInfo) {
             arr[0] = mWifiInfo.getLinkSpeed();
         }
-        Log.i(TAG, "getWiFiMaxBitRate: " + arr[0]);
+        LogUtils.i(TAG, "getWiFiMaxBitRate: " + arr[0]);
         return arr;
     }
 
@@ -315,7 +315,7 @@ public class NetworkApi {
      ***************************************************************/
     public int getWiFiRadioNumberOfEntries() {
         int entries = 1;
-        Log.i(TAG, "getWiFiRadioNumberOfEntries: " + entries);
+        LogUtils.i(TAG, "getWiFiRadioNumberOfEntries: " + entries);
         return entries;
     }
 
@@ -333,7 +333,7 @@ public class NetworkApi {
      ***************************************************************/
     public int getWiFiSSIDNumberOfEntries() {
         int entries = 1;
-        Log.i(TAG, "getWiFiSSIDNumberOfEntries: " + entries);
+        LogUtils.i(TAG, "getWiFiSSIDNumberOfEntries: " + entries);
         return entries;
     }
 
@@ -351,7 +351,7 @@ public class NetworkApi {
      ***************************************************************/
     public int getWiFiAccessPointNumberOfEntries() {
         int entries = 0;
-        Log.i(TAG, "getWiFiAccessPointNumberOfEntries: " + entries);
+        LogUtils.i(TAG, "getWiFiAccessPointNumberOfEntries: " + entries);
         return entries;
     }
 
@@ -369,7 +369,7 @@ public class NetworkApi {
      ***************************************************************/
     public int getWiFiEndPointNumberOfEntries() {
         int entries = -2;
-        Log.i(TAG, "getWiFiEndPointNumberOfEntries: " + entries + "((not support))");
+        LogUtils.i(TAG, "getWiFiEndPointNumberOfEntries: " + entries + "((not support))");
         return entries;
     }
 
@@ -390,7 +390,7 @@ public class NetworkApi {
             return false;
         }
         enable = mWifiManager.isWifiEnabled();
-        Log.i(TAG, "getWiFiRadioEnable get: " + enable);
+        LogUtils.i(TAG, "getWiFiRadioEnable get: " + enable);
         return enable;
     }
 
@@ -411,10 +411,10 @@ public class NetworkApi {
         }
 
         if (mWifiManager.isWifiEnabled() == enable) {
-            Log.i(TAG, "getWiFiRadioEnable set: at same status no need to set");
+            LogUtils.i(TAG, "getWiFiRadioEnable set: at same status no need to set");
             return true;
         }
-        Log.i(TAG, "getWiFiRadioEnable set[" + index + "]: " + enable);
+        LogUtils.i(TAG, "getWiFiRadioEnable set[" + index + "]: " + enable);
         return mWifiManager.setWifiEnabled(enable);
 
     }
@@ -432,7 +432,7 @@ public class NetworkApi {
     public String getWiFiRadioAlias(int index) {
         String key_name = String.format("persist.sys.wifi.radio.%s.alias", index);
         String key_value = SystemProperties.get(key_name, null);
-        Log.i(TAG, "getWiFiRadioAlias get[" + index + "]: " + key_value);
+        LogUtils.i(TAG, "getWiFiRadioAlias get[" + index + "]: " + key_value);
         return key_value;
     }
 
@@ -448,7 +448,7 @@ public class NetworkApi {
      ***************************************************************/
     public void getWiFiRadioAlias(int index, String Alias) {
         String key_name = String.format("persist.sys.wifi.radio.%s.alias", index);
-        Log.i(TAG, "getWiFiRadioAlias set[" + index + "] " + key_name + " to " + Alias);
+        LogUtils.i(TAG, "getWiFiRadioAlias set[" + index + "] " + key_name + " to " + Alias);
         SystemProperties.set(key_name, Alias);
     }
 
@@ -464,7 +464,7 @@ public class NetworkApi {
      ***************************************************************/
     public String getWiFiRadioName(int index) {
         String key_value = SystemProperties.get("wifi.interface", "wlan0");
-        Log.i(TAG, "getWiFiRadioName[" + index + "]: " + key_value);
+        LogUtils.i(TAG, "getWiFiRadioName[" + index + "]: " + key_value);
         return key_value;
     }
 
@@ -487,7 +487,7 @@ public class NetworkApi {
         }
         int Frequency = mWifiInfo.getFrequency();
         String Channels = getChannelByFrequency(Frequency);
-        Log.i(TAG, "getWiFiRadioChannelsInUse Frequency: " + Frequency +
+        LogUtils.i(TAG, "getWiFiRadioChannelsInUse Frequency: " + Frequency +
                 "[" + index + "]: " + Channels);
         return Channels;
     }
@@ -512,7 +512,7 @@ public class NetworkApi {
         }
         int Frequency = mWifiInfo.getFrequency();
         String Channels = getChannelByFrequency(Frequency);
-        Log.i(TAG, "getWiFiRadioChannel[" + index + "] : " + Channels);
+        LogUtils.i(TAG, "getWiFiRadioChannel[" + index + "] : " + Channels);
         return Integer.parseInt(Channels);
     }
 
@@ -526,7 +526,7 @@ public class NetworkApi {
      * can not get, default value
      ***************************************************************/
     public String getWiFiRadioTransmitPowerSupported(int index) {
-        Log.i(TAG, "getWiFiRadioTransmitPowerSupported[" + index + "] : 0,25,50,75,100");
+        LogUtils.i(TAG, "getWiFiRadioTransmitPowerSupported[" + index + "] : 0,25,50,75,100");
         return "0,25,50,75,100";
     }
 
@@ -540,7 +540,7 @@ public class NetworkApi {
      * can not get, default value
      ***************************************************************/
     public String getWiFiRadioTransmitPower(int index) {
-        Log.i(TAG, "getWiFiRadioTransmitPower[" + index + "] : -1 as auto");
+        LogUtils.i(TAG, "getWiFiRadioTransmitPower[" + index + "] : -1 as auto");
         return "-1";
     }
 
@@ -553,7 +553,7 @@ public class NetworkApi {
      * readOnly
      ***************************************************************/
     public String getWiFiRadioSupportedFrequencyBands(int index) {
-        Log.i(TAG, "getWiFiRadioSupportedFrequencyBands[" + index + "] : 2.4GHz,5GHz");
+        LogUtils.i(TAG, "getWiFiRadioSupportedFrequencyBands[" + index + "] : 2.4GHz,5GHz");
         return "2.4GHz,5GHz";
     }
 
@@ -579,12 +579,12 @@ public class NetworkApi {
         int mFrequency = mWifiInfo.getFrequency();
 
         if (mWifiInfo.is24GHz()/*is24GHzWifi(mFrequency)*/) {
-            Log.i(TAG, "getWiFiRadioOperatingFrequencyBand[" + index + "] : 2.4GHz");
+            LogUtils.i(TAG, "getWiFiRadioOperatingFrequencyBand[" + index + "] : 2.4GHz");
             return "2.4GHz";
         }
 
         if (mWifiInfo.is5GHz()/*is5GHzWifi(mFrequency)*/) {
-            Log.i(TAG, "getWiFiRadioOperatingFrequencyBand[" + index + "] : 5GHz");
+            LogUtils.i(TAG, "getWiFiRadioOperatingFrequencyBand[" + index + "] : 5GHz");
             return "5GHz";
         }
 
@@ -630,7 +630,7 @@ public class NetworkApi {
             return false;
         }
         enable = mWifiManager.isWifiEnabled();
-        Log.i(TAG, "getWiFiSSIDEnable get: " + enable);
+        LogUtils.i(TAG, "getWiFiSSIDEnable get: " + enable);
         return enable;
     }
 
@@ -651,10 +651,10 @@ public class NetworkApi {
         }
 
         if (mWifiManager.isWifiEnabled() == enable) {
-            Log.i(TAG, "getWiFiSSIDEnable set: at same status no need to set");
+            LogUtils.i(TAG, "getWiFiSSIDEnable set: at same status no need to set");
             return true;
         }
-        Log.i(TAG, "getWiFiSSIDEnable set[" + index + "]: " + enable);
+        LogUtils.i(TAG, "getWiFiSSIDEnable set[" + index + "]: " + enable);
         return mWifiManager.setWifiEnabled(enable);
     }
 
@@ -683,7 +683,7 @@ public class NetworkApi {
     public String getWiFiSSIDAlias(int index) {
         String key_name = String.format("persist.sys.wifi.SSID.%s.alias", index);
         String key_value = SystemProperties.get(key_name, null);
-        Log.i(TAG, "getWiFiSSIDAlias get[" + index + "]: " + key_value);
+        LogUtils.i(TAG, "getWiFiSSIDAlias get[" + index + "]: " + key_value);
         return key_value;
     }
 
@@ -699,7 +699,7 @@ public class NetworkApi {
      ***************************************************************/
     public void getWiFiSSIDAlias(int index, String Alias) {
         String key_name = String.format("persist.sys.wifi.SSID.%s.alias", index);
-        Log.i(TAG, "getWiFiRadioAlias set[" + index + "] " + key_name + " to " + Alias);
+        LogUtils.i(TAG, "getWiFiRadioAlias set[" + index + "] " + key_name + " to " + Alias);
         SystemProperties.set(key_name, Alias);
     }
 
@@ -716,7 +716,7 @@ public class NetworkApi {
             WifiInfo wifiInfo = NetworkUtils.getConnectedWifiInfo(GlobalContext.getContext());
             if (wifiInfo == null) return null;
             String ssid = wifiInfo.getSSID();
-            Log.i(TAG, "getWiFiRadioName[" + index + "] : " + ssid);
+            LogUtils.i(TAG, "getWiFiRadioName[" + index + "] : " + ssid);
             return ssid;
         }
         return null;
@@ -747,7 +747,7 @@ public class NetworkApi {
      *    -2 mean not support
      ***************************************************************/
     public int getWiFiEndPointStatsSignalStrength(int index) {
-        Log.i(TAG, "getWiFiEndPointStatsSignalStrength: -2(not support)");
+        LogUtils.i(TAG, "getWiFiEndPointStatsSignalStrength: -2(not support)");
         return -2;
     }
 
@@ -764,7 +764,7 @@ public class NetworkApi {
      *    -2 mean not support
      ***************************************************************/
     public int getWiFiEndPointStatsRetransmissions(int index) {
-        Log.i(TAG, "getWiFiEndPointStatsRetransmissions: -2(not support)");
+        LogUtils.i(TAG, "getWiFiEndPointStatsRetransmissions: -2(not support)");
         return -2;
     }
 
@@ -950,7 +950,7 @@ public class NetworkApi {
                     mScanResult.EncryptionMode = "AES";
                 }
 
-                Log.i(TAG, "deviceWiFiScanResults[" + i + "]: " + mScanResult.toString());
+                LogUtils.i(TAG, "deviceWiFiScanResults[" + i + "]: " + mScanResult.toString());
                 deviceWiFiScanResults.add(i++, mScanResult);
 //                mDeviceWiFiScanResult[i++] = mScanResult;
             }
@@ -991,7 +991,7 @@ public class NetworkApi {
                 return null;
             }
             mDeviceWiFiScan = new DeviceWiFiScan(mWifiManager);
-            Log.i(TAG, "mResultNumber = " + mDeviceWiFiScan.getResultNumberOfEntries());
+            LogUtils.i(TAG, "mResultNumber = " + mDeviceWiFiScan.getResultNumberOfEntries());
         }
 
         return mDeviceWiFiScan;
@@ -1008,7 +1008,7 @@ public class NetworkApi {
      ***************************************************************/
     public int getResultNumberOfEntries(Context context) {
         int entries = getDeviceWiFiScan(context).getResultNumberOfEntries();
-        Log.i(TAG, "getResultNumberOfEntries: " + entries);
+        LogUtils.i(TAG, "getResultNumberOfEntries: " + entries);
         return entries;
     }
 
@@ -1108,7 +1108,7 @@ public class NetworkApi {
 
         String statBuffer = OpenTR369Native.GetNetInterfaceStatus("wlan0");
 
-        Log.i(TAG, "getWiFiWiFiStats statBuffer: " + statBuffer.toString());
+        LogUtils.i(TAG, "getWiFiWiFiStats statBuffer: " + statBuffer.toString());
         String result[] = statBuffer.split(";");
 
         if (6 <= result.length) {
@@ -1126,7 +1126,7 @@ public class NetworkApi {
 //            mDeviceWiFiRadioStats.nRxErrors = Integer.parseInt(result[5]);
         }
 
-        Log.i(TAG, "getWiFiWiFiStats: " + mDeviceWiFiRadioStats);
+        LogUtils.i(TAG, "getWiFiWiFiStats: " + mDeviceWiFiRadioStats);
         return radioStatsMap;
 
     }
@@ -1143,7 +1143,7 @@ public class NetworkApi {
      ***************************************************************/
     public int getWiFiRadioNoise(int index) {
         int nNoise = OpenTR369Native.GetWirelessNoise("wlan0");
-        Log.i(TAG, "getWiFiRadioNoise: " + nNoise);
+        LogUtils.i(TAG, "getWiFiRadioNoise: " + nNoise);
         return nNoise;
 
     }
@@ -1161,7 +1161,7 @@ public class NetworkApi {
 
     private DeviceWiFiRadioStats getRadioStats(String param, int index) {
 //        String readStr = FileUtils.readFileToStr("/proc/net/dev");
-//        Log.d(TAG, "getRadioStats readStr = " + readStr);
+//        LogUtils.d(TAG, "getRadioStats readStr = " + readStr);
         DeviceWiFiRadioStats deviceWiFiRadioStats = new DeviceWiFiRadioStats();
 
         String line = null;
@@ -1169,11 +1169,11 @@ public class NetworkApi {
         try {
             reader = new BufferedReader(new FileReader("/proc/net/dev"));
             while (null != (line = reader.readLine())) {
-                Log.d(TAG, "line = " + line);
+                LogUtils.d(TAG, "line = " + line);
                 String regex = ":";
                 if (line.contains(regex)) {
                     String[] lineArr = line.trim().split(regex);
-//                    Log.d(TAG, "getRadioStats lineArr = " + Arrays.toString(lineArr));
+//                    LogUtils.d(TAG, "getRadioStats lineArr = " + Arrays.toString(lineArr));
                     if (lineArr.length > 1 && lineArr[0].equalsIgnoreCase(param)) {
                         String content = lineArr[1];
                         String[] params = content.trim().split("\\s+");
@@ -1182,8 +1182,8 @@ public class NetworkApi {
                                 + "Transmit[bytes:%s packets:%s";
                         String result = String.format(formatter, param, lineArr[0], params[0], params[1], params[2], params[3], params[4]
                                 , params[5], params[6], params[7], params[8], params[9]);
-                        Log.d(TAG, "getRadioStats params = " + Arrays.toString(params));
-                        Log.d(TAG, "getRadioStats result = " + result);
+                        LogUtils.d(TAG, "getRadioStats params: " + Arrays.toString(params));
+                        LogUtils.d(TAG, "getRadioStats result: " + result);
 
                         deviceWiFiRadioStats.mName = param;
                         deviceWiFiRadioStats.mBytesSent = Integer.parseInt(params[8]);
@@ -1197,13 +1197,13 @@ public class NetworkApi {
                 }
             }
         } catch (IOException e) {
-            Log.d(TAG, "getRadioStats error, " + e.getMessage());
+            LogUtils.d(TAG, "getRadioStats error, " + e.getMessage());
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (Exception e) {
-                    Log.d(TAG, "getRadioStats finally error, " + e.getMessage());
+                    LogUtils.d(TAG, "getRadioStats finally error, " + e.getMessage());
                 }
             }
         }

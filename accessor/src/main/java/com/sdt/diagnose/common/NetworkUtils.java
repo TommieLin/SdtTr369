@@ -23,12 +23,12 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.util.ArrayUtils;
 import com.sdt.diagnose.common.bean.NetworkStatisticsInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -135,7 +135,7 @@ public class NetworkUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "isEthernetAvailable call failed, " + e.getMessage());
+            LogUtils.e(TAG, "isEthernetAvailable call failed, " + e.getMessage());
         }
         return ret;
     }
@@ -153,7 +153,7 @@ public class NetworkUtils {
         } else {
             Ipv4Addr = getEthernetIPv4Address(context);
         }
-        Log.d(TAG, "getIpv4Address: " + Ipv4Addr);
+        LogUtils.d(TAG, "getIpv4Address: " + Ipv4Addr);
         return (Ipv4Addr != null && !Ipv4Addr.isEmpty()) ? Ipv4Addr : "0.0.0.0";
     }
 
@@ -164,7 +164,7 @@ public class NetworkUtils {
         } else {
             Ipv6Addr = getEthernetIPv6Address(context);
         }
-        Log.d(TAG, "getIpv6Address: " + Ipv6Addr);
+        LogUtils.d(TAG, "getIpv6Address: " + Ipv6Addr);
         return (!Ipv6Addr.isEmpty()) ? Ipv6Addr : "0.0.0.0";
     }
 
@@ -195,14 +195,14 @@ public class NetworkUtils {
             List<LinkAddress> linkAddressList = linkProperties.getLinkAddresses();
             for (LinkAddress linkAddress : linkAddressList) {
                 InetAddress inetAddress = linkAddress.getAddress();
-                Log.d(TAG, "getWifiIPv4Address inetAddress: " + inetAddress
+                LogUtils.d(TAG, "getWifiIPv4Address inetAddress: " + inetAddress
                         + ", isIpv4: " + linkAddress.isIpv4());
                 if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
                     return inetAddress.getHostAddress();
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getWifiIPv4Address call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getWifiIPv4Address call failed, " + e.getMessage());
         }
         return "0.0.0.0";
     }
@@ -221,7 +221,7 @@ public class NetworkUtils {
             List<LinkAddress> linkAddressList = linkProperties.getLinkAddresses();
             for (LinkAddress linkAddress : linkAddressList) {
                 InetAddress inetAddress = linkAddress.getAddress();
-                Log.d(TAG, "getWifiIPv6Address inetAddress: " + inetAddress
+                LogUtils.d(TAG, "getWifiIPv6Address inetAddress: " + inetAddress
                         + ", isIpv6: " + linkAddress.isIpv6());
                 if (/*!inetAddress.isLoopbackAddress() &&*/ inetAddress instanceof Inet6Address) {
 //                    return inetAddress.getHostAddress();
@@ -230,13 +230,13 @@ public class NetworkUtils {
                     }
                     String hostAddress = inetAddress.getHostAddress();
                     sb.append(hostAddress);
-                    Log.d(TAG, "getWifiIPv6Address hostAddress: " + hostAddress);
+                    LogUtils.d(TAG, "getWifiIPv6Address hostAddress: " + hostAddress);
                     gotAddress = true;
                 }
             }
             return (gotAddress) ? sb.toString() : "";
         } catch (Exception e) {
-            Log.e(TAG, "getWifiIPv6Address call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getWifiIPv6Address call failed, " + e.getMessage());
         }
         return "";
     }
@@ -251,14 +251,14 @@ public class NetworkUtils {
             List<LinkAddress> linkAddressList = linkProperties.getLinkAddresses();
             for (LinkAddress linkAddress : linkAddressList) {
                 InetAddress inetAddress = linkAddress.getAddress();
-                Log.d(TAG, "getEthernetIPv4Address inetAddress: " + inetAddress
+                LogUtils.d(TAG, "getEthernetIPv4Address inetAddress: " + inetAddress
                         + ", isIpv4: " + linkAddress.isIpv4());
                 if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
                     return inetAddress.getHostAddress();
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getEthernetIPv4Address call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getEthernetIPv4Address call failed, " + e.getMessage());
         }
         return "0.0.0.0";
     }
@@ -275,7 +275,7 @@ public class NetworkUtils {
             List<LinkAddress> linkAddressList = linkProperties.getLinkAddresses();
             for (LinkAddress linkAddress : linkAddressList) {
                 InetAddress inetAddress = linkAddress.getAddress();
-                Log.d(TAG, "getEthernetIPv6Address inetAddress: " + inetAddress
+                LogUtils.d(TAG, "getEthernetIPv6Address inetAddress: " + inetAddress
                         + ", isIpv6: " + linkAddress.isIpv6());
                 if (/*!inetAddress.isLoopbackAddress() &&*/ inetAddress instanceof Inet6Address) {
 //                    return inetAddress.getHostAddress();
@@ -284,13 +284,13 @@ public class NetworkUtils {
                     }
                     String hostAddress = inetAddress.getHostAddress();
                     sb.append(hostAddress);
-                    Log.d(TAG, "getEthernetIPv6Address hostAddress: " + hostAddress);
+                    LogUtils.d(TAG, "getEthernetIPv6Address hostAddress: " + hostAddress);
                     gotAddress = true;
                 }
             }
             return (gotAddress) ? sb.toString() : "";
         } catch (Exception e) {
-            Log.e(TAG, "getEthernetIPv6Address call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getEthernetIPv6Address call failed, " + e.getMessage());
         }
         return "";
     }
@@ -308,7 +308,7 @@ public class NetworkUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getFirstEthernet call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getFirstEthernet call failed, " + e.getMessage());
         }
         return null;
     }
@@ -323,7 +323,7 @@ public class NetworkUtils {
         try {
 //            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
             NetworkInterface networkInterface = NetworkInterface.getByName(networkType);
-//            Log.d(TAG, "NetworkInterfaces has: " + all.size());
+//            LogUtils.d(TAG, "NetworkInterfaces has: " + all.size());
             if (networkInterface == null) return "00:00:00:00:00:00";
             byte[] macBytes = networkInterface.getHardwareAddress();
             StringBuilder res1 = new StringBuilder();
@@ -333,10 +333,10 @@ public class NetworkUtils {
             if (res1.length() > 0) {
                 res1.deleteCharAt(res1.length() - 1);
             }
-//            Log.d(TAG, "getNetworkMac type: " + networkType + " mac: " + res1.toString());
+            LogUtils.d(TAG, "getNetworkMac type: " + networkType + " mac: " + res1);
             return res1.toString().toLowerCase();
         } catch (Exception e) {
-            Log.e(TAG, "getNetworkMac call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getNetworkMac call failed, " + e.getMessage());
         }
         return "00:00:00:00:00:00";
     }
@@ -348,10 +348,10 @@ public class NetworkUtils {
     public static String getEthernetMacAddress() {
         String macAddress = getMacAddress();
         if (macAddress.length() == 0) {
-            Log.e(TAG, "Unable to read ethernet mac address from system properties");
+            LogUtils.e(TAG, "Unable to read ethernet mac address from system properties");
             macAddress = getEthernetMac();
             if (macAddress.length() == 0) {
-                Log.e(TAG, "Unable to read ethernet mac address from ConnectivityManager");
+                LogUtils.e(TAG, "Unable to read ethernet mac address from ConnectivityManager");
                 macAddress = getNetworkMac("eth0");
             }
         }
@@ -367,12 +367,12 @@ public class NetworkUtils {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) GlobalContext.getContext()
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo info = mConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
-        Log.e(TAG, "Get ethernet mac address from ConnectivityManager");
+        LogUtils.e(TAG, "Get ethernet mac address from ConnectivityManager");
         if (info != null) {
             ethMac = info.getExtraInfo();
-            Log.d(TAG, "Get ethernet mac = " + ethMac);
+            LogUtils.d(TAG, "Get ethernet mac: " + ethMac);
         } else {
-            Log.e(TAG, "NetworkInfo is null!");
+            LogUtils.e(TAG, "NetworkInfo is null!");
         }
         return ethMac;
     }
@@ -386,9 +386,9 @@ public class NetworkUtils {
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             try {
                 wifiMac = wifiManager.getConnectionInfo().getMacAddress();
-                Log.d(TAG, "wifiMac: " + wifiMac);
+                LogUtils.d(TAG, "wifiMac: " + wifiMac);
             } catch (Exception e) {
-                Log.e(TAG, "getWifiMac call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getWifiMac call failed, " + e.getMessage());
             }
         }
         return wifiMac;
@@ -400,9 +400,9 @@ public class NetworkUtils {
             WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             try {
                 wifiInfo = wifiManager.getConnectionInfo();
-                Log.d(TAG, "wifiInfo: " + wifiInfo);
+                LogUtils.d(TAG, "wifiInfo: " + wifiInfo);
             } catch (Exception e) {
-                Log.e(TAG, "getConnectedWifiInfo call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getConnectedWifiInfo call failed, " + e.getMessage());
             }
         }
         return wifiInfo;
@@ -419,9 +419,9 @@ public class NetworkUtils {
             NetworkInfo info = manager.getNetworkInfo(ConnectivityManager.TYPE_ETHERNET);
             if (info != null) {
                 ethMac = info.getExtraInfo();   //这个ExtraInfo就是以太网的mac地址
-                Log.d(TAG, "ethernet mac = " + ethMac);
+                LogUtils.d(TAG, "ethernet mac: " + ethMac);
             } else {
-                Log.d(TAG, "info is null!");
+                LogUtils.d(TAG, "info is null!");
             }
         }
         return ethMac;
@@ -539,7 +539,7 @@ public class NetworkUtils {
                     if (lineArr.length > 1 && lineArr[0].equalsIgnoreCase(param)) {
                         String content = lineArr[1];
                         String[] params = content.trim().split("\\s+");
-                        Log.d(TAG, "Obtained parameters: " + ArrayUtils.deepToString(params));
+                        LogUtils.d(TAG, "Obtained parameters: " + ArrayUtils.deepToString(params));
 
                         statisticsInfo.mName = param;
                         statisticsInfo.mReceiveBytes = params[0];
@@ -556,13 +556,13 @@ public class NetworkUtils {
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, "getRadioStatisticsInfo call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getRadioStatisticsInfo call failed, " + e.getMessage());
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (Exception e) {
-                    Log.e(TAG, "getRadioStatisticsInfo finally failed, " + e.getMessage());
+                    LogUtils.e(TAG, "getRadioStatisticsInfo finally failed, " + e.getMessage());
                 }
             }
         }
@@ -654,7 +654,7 @@ public class NetworkUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getDnsFromCommand call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getDnsFromCommand call failed, " + e.getMessage());
         }
         return dnsServers.isEmpty()
                 ? new String[0]
@@ -674,10 +674,10 @@ public class NetworkUtils {
             f.seek(0);
             wifiMac = f.readLine().trim();
             f.close();
-            Log.d(TAG, "getWifiMacFromNode: " + wifiMac);
+            LogUtils.d(TAG, "getWifiMacFromNode: " + wifiMac);
             return wifiMac;
         } catch (IOException e) {
-            Log.e(TAG, "getWifiMacFromNode call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getWifiMacFromNode call failed, " + e.getMessage());
             return wifiMac;
         } finally {
             if (f != null) {
@@ -685,7 +685,7 @@ public class NetworkUtils {
                     f.close();
                     f = null;
                 } catch (IOException e) {
-                    Log.e(TAG, "getWifiMacFromNode finally failed, " + e.getMessage());
+                    LogUtils.e(TAG, "getWifiMacFromNode finally failed, " + e.getMessage());
                 }
             }
         }
@@ -703,7 +703,7 @@ public class NetworkUtils {
                         if (networkInfo != null
                                 && networkInfo.getType() == activeNetworkInfo.getType()) {
                             LinkProperties lp = connectivityManager.getLinkProperties(network);
-                            Log.d(TAG, "getCurrentNetworkInterfaceName: " + lp.toString());
+                            LogUtils.d(TAG, "getCurrentNetworkInterfaceName: " + lp.toString());
                             return lp.getInterfaceName();
                         }
                     }
@@ -890,13 +890,13 @@ public class NetworkUtils {
             WifiManager wifiManager =
                     (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
             if (wifiManager == null) {
-                Log.e(TAG, "Failed to get WIFI_SERVICE, wifiManager is empty.");
+                LogUtils.e(TAG, "Failed to get WIFI_SERVICE, wifiManager is empty.");
                 return IpConfiguration.IpAssignment.UNASSIGNED.name();
             }
 
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             String ssid = wifiInfo.getSSID();
-            Log.d(TAG, "getWifiIpAssignment ssid = " + ssid);
+            LogUtils.d(TAG, "getWifiIpAssignment ssid: " + ssid);
             List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
             for (WifiConfiguration wifiConfiguration : list) {
                 if (!TextUtils.isEmpty(ssid) && ssid.equals(wifiConfiguration.SSID)) {
@@ -904,7 +904,7 @@ public class NetworkUtils {
                 }
             }
         }
-        Log.d(TAG, "IpAssignment of WifiConfiguration is not assigned.");
+        LogUtils.d(TAG, "IpAssignment of WifiConfiguration is not assigned.");
         return IpConfiguration.IpAssignment.UNASSIGNED.name();
     }
 
@@ -924,24 +924,24 @@ public class NetworkUtils {
             EthernetManager ethernetManager =
                     (EthernetManager) context.getSystemService(Context.ETHERNET_SERVICE);
             if (ethernetManager == null) {
-                Log.e(TAG, "Failed to get ETHERNET_SERVICE, ethernetManager is empty.");
+                LogUtils.e(TAG, "Failed to get ETHERNET_SERVICE, ethernetManager is empty.");
                 return IpConfiguration.IpAssignment.UNASSIGNED.name();
             }
 
             String[] interfaces = ethernetManager.getAvailableInterfaces();
             if (interfaces.length <= 0) {
-                Log.e(TAG, "Unable to get available interfaces.");
+                LogUtils.e(TAG, "Unable to get available interfaces.");
                 return IpConfiguration.IpAssignment.UNASSIGNED.name();
             }
-            Log.d(TAG, "getEthIpAssignment ifaces: " + Arrays.toString(interfaces));
+            LogUtils.d(TAG, "getEthIpAssignment ifaces: " + Arrays.toString(interfaces));
 
             LinkProperties defLinkProperties =
                     connectivityManager.getLinkProperties(activeNetwork);
             if (defLinkProperties == null) {
-                Log.e(TAG, "Failed to get LinkProperties.");
+                LogUtils.e(TAG, "Failed to get LinkProperties.");
                 return IpConfiguration.IpAssignment.UNASSIGNED.name();
             }
-            Log.d(TAG, "getEthIpAssignment defLinkProperties: " + defLinkProperties);
+            LogUtils.d(TAG, "getEthIpAssignment defLinkProperties: " + defLinkProperties);
 
             IpConfiguration ipConfig =
                     ethernetManager.getConfiguration(defLinkProperties.getInterfaceName());
@@ -952,7 +952,7 @@ public class NetworkUtils {
                         : IpConfiguration.IpAssignment.DHCP.name();
             }
         }
-        Log.d(TAG, "IpAssignment of EthernetManager is not assigned.");
+        LogUtils.d(TAG, "IpAssignment of EthernetManager is not assigned.");
         return IpConfiguration.IpAssignment.UNASSIGNED.name();
     }
 
@@ -969,7 +969,7 @@ public class NetworkUtils {
                                 && networkInfo.getType() == activeNetworkInfo.getType()) {
                             NetworkCapabilities networkCapabilities =
                                     connectivityManager.getNetworkCapabilities(network);
-                            Log.d(TAG, "getLinkDownstreamBandwidthKbps: "
+                            LogUtils.d(TAG, "getLinkDownstreamBandwidthKbps: "
                                     + networkCapabilities.toString());
                             return String.valueOf(
                                     networkCapabilities.getLinkDownstreamBandwidthKbps());
@@ -994,7 +994,7 @@ public class NetworkUtils {
                                 && networkInfo.getType() == activeNetworkInfo.getType()) {
                             NetworkCapabilities networkCapabilities =
                                     connectivityManager.getNetworkCapabilities(network);
-                            Log.d(TAG, "getLinkUpstreamBandwidthKbps: "
+                            LogUtils.d(TAG, "getLinkUpstreamBandwidthKbps: "
                                     + networkCapabilities.toString());
                             return String.valueOf(
                                     networkCapabilities.getLinkUpstreamBandwidthKbps());
@@ -1013,7 +1013,7 @@ public class NetworkUtils {
             if (connectivityManager != null) {
                 for (Network network : connectivityManager.getAllNetworks()) {
                     NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-                    Log.d(TAG, "networkInfo: " + networkInfo.toString());
+                    LogUtils.d(TAG, "networkInfo: " + networkInfo.toString());
                     LinkProperties lp = connectivityManager.getLinkProperties(network);
                     if (lp.getInterfaceName().equals(ifaceName)) {
                         return lp;
@@ -1030,22 +1030,19 @@ public class NetworkUtils {
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             if (connectivityManager != null) {
                 NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-                Log.d(TAG, "activeNetworkInfo: " + activeNetworkInfo.toString());
-                if (activeNetworkInfo != null) {
-                    for (Network network : connectivityManager.getAllNetworks()) {
-                        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-                        Log.d(TAG, "networkInfo: " + networkInfo.toString());
-                        if (networkInfo != null
-                                && networkInfo.getType() == activeNetworkInfo.getType()) {
-                            LinkProperties lp = connectivityManager.getLinkProperties(network);
-                            Log.d(TAG, "LinkProperties: " + lp.toString());
-                            List<LinkAddress> linkAddressList = lp.getLinkAddresses();
-                            for (LinkAddress linkAddress : linkAddressList) {
-                                if (isIPv4 && (linkAddress.isIpv4())) {
-                                    return String.valueOf(linkAddress.isIpv4());
-                                } else if (!isIPv4 && linkAddress.isIpv6()) {
-                                    return String.valueOf(linkAddress.isIpv6());
-                                }
+                LogUtils.d(TAG, "activeNetworkInfo: " + activeNetworkInfo.toString());
+                for (Network network : connectivityManager.getAllNetworks()) {
+                    NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+                    LogUtils.d(TAG, "networkInfo: " + networkInfo.toString());
+                    if (networkInfo.getType() == activeNetworkInfo.getType()) {
+                        LinkProperties lp = connectivityManager.getLinkProperties(network);
+                        LogUtils.d(TAG, "LinkProperties: " + lp.toString());
+                        List<LinkAddress> linkAddressList = lp.getLinkAddresses();
+                        for (LinkAddress linkAddress : linkAddressList) {
+                            if (isIPv4 && (linkAddress.isIpv4())) {
+                                return String.valueOf(linkAddress.isIpv4());
+                            } else if (!isIPv4 && linkAddress.isIpv6()) {
+                                return String.valueOf(linkAddress.isIpv6());
                             }
                         }
                     }
@@ -1061,24 +1058,21 @@ public class NetworkUtils {
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
             if (connectivityManager != null) {
                 NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-                Log.d(TAG, "activeNetworkInfo: " + activeNetworkInfo.toString());
-                if (activeNetworkInfo != null) {
-                    for (Network network : connectivityManager.getAllNetworks()) {
-                        NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
-                        Log.d(TAG, "networkInfo: " + networkInfo.toString());
-                        if (networkInfo != null
-                                && networkInfo.getType() == activeNetworkInfo.getType()) {
-                            LinkProperties lp = connectivityManager.getLinkProperties(network);
-                            List<LinkAddress> linkAddressList = lp.getLinkAddresses();
-                            for (LinkAddress linkAddress : linkAddressList) {
-                                InetAddress inetAddress = linkAddress.getAddress();
-                                if (isIPv4 && linkAddress.isIpv4()
-                                        && (!inetAddress.isLoopbackAddress())) {
-                                    return String.valueOf(linkAddress.isIpv4());
-                                } else if ((!isIPv4) && linkAddress.isIPv6()
-                                        && (!inetAddress.isLoopbackAddress())) {
-                                    return String.valueOf(linkAddress.isIpv6());
-                                }
+                LogUtils.d(TAG, "activeNetworkInfo: " + activeNetworkInfo.toString());
+                for (Network network : connectivityManager.getAllNetworks()) {
+                    NetworkInfo networkInfo = connectivityManager.getNetworkInfo(network);
+                    LogUtils.d(TAG, "networkInfo: " + networkInfo.toString());
+                    if (networkInfo.getType() == activeNetworkInfo.getType()) {
+                        LinkProperties lp = connectivityManager.getLinkProperties(network);
+                        List<LinkAddress> linkAddressList = lp.getLinkAddresses();
+                        for (LinkAddress linkAddress : linkAddressList) {
+                            InetAddress inetAddress = linkAddress.getAddress();
+                            if (isIPv4 && linkAddress.isIpv4()
+                                    && (!inetAddress.isLoopbackAddress())) {
+                                return String.valueOf(linkAddress.isIpv4());
+                            } else if ((!isIPv4) && linkAddress.isIPv6()
+                                    && (!inetAddress.isLoopbackAddress())) {
+                                return String.valueOf(linkAddress.isIpv6());
                             }
                         }
                     }
@@ -1107,7 +1101,7 @@ public class NetworkUtils {
                                     String maskAddress =
                                             calcMaskByPrefixLength(
                                                     linkAddress.getNetworkPrefixLength());
-                                    Log.d(TAG, "getLanMask: " + maskAddress);
+                                    LogUtils.d(TAG, "getLanMask: " + maskAddress);
                                     return maskAddress;
                                 }
                             }
@@ -1141,7 +1135,7 @@ public class NetworkUtils {
                                     String gateway =
                                             calcSubnetAddress(
                                                     inetAddress.getHostAddress(), maskAddress);
-                                    Log.d(TAG, "getGateway: " + maskAddress);
+                                    LogUtils.d(TAG, "getGateway: " + maskAddress);
                                     return gateway;
                                 }
                             }
@@ -1177,7 +1171,7 @@ public class NetworkUtils {
                     }
                     String gateway = route.getGateway().getHostAddress();
                     sb.append(gateway);
-                    Log.d(TAG, "Get default gateway: " + gateway);
+                    LogUtils.d(TAG, "Get default gateway: " + gateway);
                     gotGateway = true;
                 }
             }
@@ -1211,7 +1205,7 @@ public class NetworkUtils {
         }
         if (null != gateway) {
             gatewayMac = getArpByTable(gateway);
-            Log.i(TAG, "getGatewayMac: " + gatewayMac);
+            LogUtils.i(TAG, "getGatewayMac: " + gatewayMac);
             return gatewayMac;
         }
 
@@ -1242,22 +1236,22 @@ public class NetworkUtils {
                         break;
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "getArpByTable read failed, " + e.getMessage());
+                    LogUtils.e(TAG, "getArpByTable read failed, " + e.getMessage());
                 }
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "getArpByTable call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getArpByTable call failed, " + e.getMessage());
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "getArpByTable finally failed, " + e.getMessage());
+                    LogUtils.e(TAG, "getArpByTable finally failed, " + e.getMessage());
                 }
             }
         }
-        Log.i(TAG, "getArpByTable: ip: " + dtsip + " mac: " + mac);
+        LogUtils.i(TAG, "getArpByTable ip: " + dtsip + " mac: " + mac);
         return mac;
     }
 
@@ -1314,7 +1308,7 @@ public class NetworkUtils {
 //                return nifs.size();
 //            }
 //        } catch (SocketException e) {
-//            Log.e(TAG, "getNetworkInterfaceNumberOfEntries call failed, " + e.getMessage());
+//            LogUtils.e(TAG, "getNetworkInterfaceNumberOfEntries call failed, " + e.getMessage());
 //        }
         return 2;
     }
@@ -1335,7 +1329,7 @@ public class NetworkUtils {
                 return count;
             }
         } catch (SocketException e) {
-            Log.e(TAG, "getIPv4AddressNumberOfEntries call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getIPv4AddressNumberOfEntries call failed, " + e.getMessage());
         }
         return 0;
     }
@@ -1346,7 +1340,7 @@ public class NetworkUtils {
             if (networkInterface == null) return null;
             return networkInterface.isUp() ? "Up" : "Down";
         } catch (SocketException e) {
-            Log.e(TAG, "getNetworkInterfaceStatus call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getNetworkInterfaceStatus call failed, " + e.getMessage());
             return "Error";
         }
     }
@@ -1356,7 +1350,7 @@ public class NetworkUtils {
         try {
             return NetworkInterface.getByName(ifaceName);
         } catch (SocketException e) {
-            Log.e(TAG, "getNetworkInterface call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getNetworkInterface call failed, " + e.getMessage());
         }
         return null;
     }
@@ -1408,7 +1402,7 @@ public class NetworkUtils {
                 result.append(".").append(resultRaw[i]);
             }
         } catch (UnknownHostException e) {
-            Log.e(TAG, "calcSubnetAddress call failed, " + e.getMessage());
+            LogUtils.e(TAG, "calcSubnetAddress call failed, " + e.getMessage());
         }
 
         return result.toString();
@@ -1432,7 +1426,7 @@ public class NetworkUtils {
             }
             mac_s = buf.toString();
         } catch (Exception e) {
-            Log.e(TAG, "getMacAddressFromIp call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getMacAddressFromIp call failed, " + e.getMessage());
         }
 
         return mac_s;
@@ -1449,7 +1443,7 @@ public class NetworkUtils {
         try {
             return InetAddress.getByAddress(addressBytes);
         } catch (UnknownHostException e) {
-            Log.e(TAG, "intToInetAddress call failed, " + e.getMessage());
+            LogUtils.e(TAG, "intToInetAddress call failed, " + e.getMessage());
             throw new AssertionError();
         }
     }
@@ -1466,7 +1460,7 @@ public class NetworkUtils {
             if (wifiManager != null) {
                 DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
                 if (dhcpInfo != null) {
-                    Log.d(TAG, "dhcpInfo.toString(): " + dhcpInfo.toString());
+                    LogUtils.d(TAG, "dhcpInfo.toString(): " + dhcpInfo.toString());
                     return intToInetAddress(dhcpInfo.serverAddress).getHostAddress();
                 }
             }

@@ -18,7 +18,6 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemProperties;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -37,6 +36,7 @@ import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogRepository;
 import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
 import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 import com.sdt.opentr369.OpenTR369Native;
 
@@ -64,12 +64,12 @@ public class SdtTr369Service extends Service {
         switch (msg.what) {
             case MSG_START_TR369_SERVICE:
                 mHandler.removeMessages(MSG_START_TR369_SERVICE);
-                Log.e(TAG, " ####### Outis ### handleServiceMessage MSG_START_TR369_SERVICE");
+                LogUtils.d(TAG, "MSG_START_TR369_SERVICE");
                 startTr369Service();
                 break;
             case MSG_STOP_TR369_SERVICE:
                 mHandler.removeMessages(MSG_STOP_TR369_SERVICE);
-                Log.e(TAG, " ####### Outis ### handleServiceMessage MSG_STOP_TR369_SERVICE");
+                LogUtils.d(TAG, "MSG_STOP_TR369_SERVICE");
                 break;
             default:
                 break;
@@ -78,13 +78,13 @@ public class SdtTr369Service extends Service {
 
     @Override
     public IBinder onBind(Intent arg0) {
-        Log.e(TAG, " ####### Outis ### onBind start");
+        LogUtils.d(TAG, "onBind");
         return null;
     }
 
     @Override
     public void onCreate() {
-        Log.e(TAG, " ####### Outis ### onCreate start");
+        LogUtils.d(TAG, "onCreate");
         super.onCreate();
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -93,19 +93,18 @@ public class SdtTr369Service extends Service {
         startForeground(1, notification);
 
         GlobalContext.setContext(getApplicationContext());
-        Log.e(TAG, " ####### Outis ### onCreate return");
     }
 
     @SuppressLint("WrongConstant")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e(TAG, " ####### Outis ### onStartCommand start");
+        LogUtils.d(TAG, "onStartCommand");
         initTr369Service();
         return super.onStartCommand(intent, START_STICKY, startId);
     }
 
     private void initTr369Service() {
-        Log.e(TAG, " ####### Outis ### initTr369Service start");
+        LogUtils.d(TAG, "initTr369Service start");
         mHandlerThread = new HandlerThread("tr369_server");
         // 先启动，再初始化handler
         mHandlerThread.start();
@@ -125,7 +124,7 @@ public class SdtTr369Service extends Service {
     }
 
     private void registerSdtTr369Receiver() {
-        Log.e(TAG, " ####### Outis ### registerSdtTr369Receiver start");
+        LogUtils.d(TAG, "registerSdtTr369Receiver");
         mSdtTr369Receiver = new SdtTr369Receiver(getApplicationContext());
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -134,7 +133,7 @@ public class SdtTr369Service extends Service {
     }
 
     private void registerPackageReceiver() {
-        Log.e(TAG, " ####### Outis ### registerPackageReceiver start");
+        LogUtils.d(TAG, "registerPackageReceiver");
         mPackageReceiver = new PackageReceiver();
         IntentFilter intentFilter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -146,7 +145,7 @@ public class SdtTr369Service extends Service {
     }
 
     private void registerBluetoothMonitorReceiver() {
-        Log.e(TAG, " ####### Outis ### registerBluetoothMonitorReceiver start");
+        LogUtils.d(TAG, "registerBluetoothMonitorReceiver");
         if (mBluetoothMonitorReceiver == null) {
             mBluetoothMonitorReceiver = new BluetoothMonitorReceiver();
         }
@@ -192,7 +191,7 @@ public class SdtTr369Service extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e(TAG, " ####### Outis ### onDestroy start");
+        LogUtils.d(TAG, "onDestroy");
         if (mSdtTr369Receiver != null) unregisterReceiver(mSdtTr369Receiver);
         if (mBluetoothMonitorReceiver != null) unregisterReceiver(mBluetoothMonitorReceiver);
         if (mPackageReceiver != null) unregisterReceiver(mPackageReceiver);
@@ -222,8 +221,8 @@ public class SdtTr369Service extends Service {
         // 开机同步后台logcat状态
         LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
         // 初始化tcpdump参数
-        SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
         SystemProperties.set("persist.sys.skyworth.tcpdump", "0");
+        SystemProperties.set("persist.sys.skyworth.tcpdump.args", " ");
         // 在启动时，检测抓包文件是否存在，如果存在就删除文件
         File file = new File("/data/tcpdump/test1.pcap");
         if (file.exists()) {
@@ -292,7 +291,7 @@ public class SdtTr369Service extends Service {
         if (args.length > 1) {
             String cmd = args[0];
             String path = args[1];
-            Log.d(TAG, "mSkParamDB dumpsys args: " + Arrays.toString(args));
+            LogUtils.d(TAG, "mSkParamDB dumpsys args: " + Arrays.toString(args));
             if ("dbget".equalsIgnoreCase(cmd)) {
                 pw.println(formatString(path));
             } else if ("dbset".equalsIgnoreCase(cmd) && args.length > 2) {

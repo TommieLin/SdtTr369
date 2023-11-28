@@ -1,7 +1,6 @@
 package com.sdt.diagnose.Device.DeviceInfo;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
@@ -9,6 +8,7 @@ import com.sdt.diagnose.common.IProtocolArray;
 import com.sdt.diagnose.common.ProcessManager;
 import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.ProcessInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +23,7 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
 
     @Tr369Get("Device.DeviceInfo.ProcessStatus.Process.")
     public String SK_TR369_GetProcessInfo(String path) {
-        Log.d(TAG, "getProcessInfo: path = " + path);
+        LogUtils.d(TAG, "GetProcessInfo path: " + path);
         return handleProcessInfoX(path);
     }
 
@@ -83,7 +83,7 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
         }
         mProcessManager = new ProcessManager(GlobalContext.getContext());
         int size = mProcessManager.getList().size();
-        Log.d(TAG, "Get the number of Process list: " + size);
+        LogUtils.d(TAG, "Get the number of Process list: " + size);
         if (size > 0) DbManager.addMultiObject("Device.DeviceInfo.ProcessStatus.Process", size);
     }
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RemoteControlAPI {
-    public static void start(Context context, HashMap<String, String> params){
+    public static void start(Context context, HashMap<String, String> params) {
         Intent intent = new Intent(context, RtcActivity.class);
         intent.putExtra(context.getString(R.string.socketio_url)
                 , params.get(context.getString(R.string.socketio_url)));
@@ -25,13 +25,13 @@ public class RemoteControlAPI {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
-    
-    public static void stop(Context context){
+
+    public static void stop(Context context) {
         Intent intent = new Intent(context, RtcService.class);
         context.stopService(intent);
     }
 
-    public static boolean isRunning(Context context){
+    public static boolean isRunning(Context context) {
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         //although ActivityManager#getRunningServices has been deprecated from Android 8.0;
         //it will still return the caller's own services;

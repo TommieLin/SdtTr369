@@ -1,14 +1,15 @@
 package com.sdt.diagnose.Device.Platform;
 
 import android.os.SystemProperties;
-import android.util.Log;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 public class ModelX {
     private static final String TAG = "ModelX";
 
     public static Type getPlatform() {
         String platform = SystemProperties.get("ro.soc.model", "").toLowerCase();
-        Log.d(TAG, "platform is [" + platform + "]");
+        LogUtils.d(TAG, "platform is [" + platform + "]");
         if (platform.startsWith("aml")) {
             return Type.Amlogic;
         } else if (platform.startsWith("rtd")) {

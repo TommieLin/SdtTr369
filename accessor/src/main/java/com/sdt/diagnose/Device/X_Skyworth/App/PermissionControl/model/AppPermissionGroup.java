@@ -38,7 +38,6 @@ import android.os.UserHandle;
 import android.permission.PermissionManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,6 +48,7 @@ import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.utils.ArrayUtils
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.utils.LocationUtils;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.utils.SoftRestrictedPermissionPolicy;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.utils.Utils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ import java.util.Set;
  * #getBackgroundPermissions() background permissions group}.
  */
 public final class AppPermissionGroup implements Comparable<AppPermissionGroup> {
-    private static final String LOG_TAG = AppPermissionGroup.class.getSimpleName();
+    private static final String TAG = "AppPermissionGroup";
     private static final String PLATFORM_PACKAGE_NAME = "android";
     private static final String KILL_REASON_APP_OP_CHANGE = "Permission related app op changed";
     private final Context mContext;
@@ -1288,7 +1288,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
             try {
                 pi = mPackageManager.getPermissionInfo(splitPerm, 0);
             } catch (NameNotFoundException e) {
-                Log.w(LOG_TAG, "No such permission: " + splitPerm, e);
+                LogUtils.e(TAG, "No such split permission: " + splitPerm + ", Error: " + e);
                 continue;
             }
 
@@ -1309,7 +1309,7 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
                 try {
                     pi = mPackageManager.getPermissionInfo(newPerm, 0);
                 } catch (NameNotFoundException e) {
-                    Log.w(LOG_TAG, "No such permission: " + newPerm, e);
+                    LogUtils.w(TAG, "No such new permission: " + newPerm + ", Error: " + e);
                     continue;
                 }
 

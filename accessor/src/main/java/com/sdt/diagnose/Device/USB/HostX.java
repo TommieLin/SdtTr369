@@ -4,12 +4,12 @@ import android.content.Context;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
 import com.sdt.diagnose.common.ProtocolPathUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,12 +51,12 @@ public class HostX implements IProtocolArray<UsbDevice> {
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
         List<UsbDevice> usbDeviceList = new ArrayList<>();
         if (deviceList != null && !deviceList.isEmpty()) {
-            Log.d(TAG, "deviceList.size(): " + deviceList.size());
+            LogUtils.d(TAG, "deviceList.size(): " + deviceList.size());
             for (String key : deviceList.keySet()) {
-                Log.d(TAG, "key: " + key);
+                LogUtils.d(TAG, "key: " + key);
                 String[] all = key.split("/");
                 int index = Integer.parseInt(all[4]);
-                Log.d(TAG, "index: " + index);
+                LogUtils.d(TAG, "index: " + index);
                 UsbDevice usbDevice = deviceList.get(key);
                 if (usbDeviceList.size() == 0 && index == 2) {
                     usbDeviceList.add(null);
@@ -139,7 +139,7 @@ public class HostX implements IProtocolArray<UsbDevice> {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getUSBHostDeviceNumberOfEntries error, " + e.getMessage());
+            LogUtils.e(TAG, "getUSBHostDeviceNumberOfEntries error, " + e.getMessage());
         }
         return String.valueOf(0);
     }

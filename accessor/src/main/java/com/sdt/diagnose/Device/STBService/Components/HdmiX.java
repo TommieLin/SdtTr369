@@ -1,12 +1,12 @@
 package com.sdt.diagnose.Device.STBService.Components;
 
 import android.os.Build;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.Device.Platform.ModelX;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.extra.CmsExtraServiceManager;
 
 import java.util.List;
@@ -45,10 +45,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     isPlugged = mCmsExtraServiceManager.isHdmiPlugged();
                 } else {
-                    Log.e(TAG, "isHDMIPlugged: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "isHDMIPlugged: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "isHDMIPlugged: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "isHDMIPlugged: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
 
@@ -69,10 +69,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     status = mCmsExtraServiceManager.getHdmiStatus();
                 } else {
-                    Log.e(TAG, "getHdmiEnable: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiEnable: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiEnable: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiEnable: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return status;
@@ -89,7 +89,7 @@ public class HdmiX {
         try {
             isEnable = "1".equals(val) || "true".equals(val);
         } catch (Exception e) {
-            Log.e(TAG, "setHdmiEnable: parseBoolean failed, " + e.getMessage());
+            LogUtils.e(TAG, "setHdmiEnable: parseBoolean failed, " + e.getMessage());
         }
 
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
@@ -102,10 +102,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     mCmsExtraServiceManager.setHdmiStatus(isEnable);
                 } else {
-                    Log.e(TAG, "setHdmiEnable: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "setHdmiEnable: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "setHdmiEnable: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "setHdmiEnable: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
 
@@ -132,10 +132,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     isBest = mCmsExtraServiceManager.isBestOutputMode();
                 } else {
-                    Log.e(TAG, "getHdmiResolutionMode: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiResolutionMode: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiResolutionMode: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiResolutionMode: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return isBest ? "Best" : "Manual";
@@ -156,10 +156,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     name = mCmsExtraServiceManager.getHdmiProductName();
                 } else {
-                    Log.e(TAG, "getHdmiName: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiName: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiName: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiName: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return name;
@@ -180,10 +180,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     mode = mCmsExtraServiceManager.getHdmiResolutionValue();
                 } else {
-                    Log.e(TAG, "getHdmiResolutionValue: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiResolutionValue: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiResolutionValue: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiResolutionValue: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return mode;
@@ -203,16 +203,16 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     String supportList = mCmsExtraServiceManager.getHdmiSupportResolution();
                     if (!supportList.contains(value)) {
-                        Log.e(TAG, "This resolution is not supported!");
+                        LogUtils.e(TAG, "This resolution is not supported!");
                         return false;
                     }
                     mCmsExtraServiceManager.setHdmiResolutionValue(value);
                     return true;
                 } else {
-                    Log.e(TAG, "setHdmiResolutionValue: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "setHdmiResolutionValue: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "setHdmiResolutionValue: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "setHdmiResolutionValue: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
 
@@ -241,10 +241,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     supportList = mCmsExtraServiceManager.getHdmiSupportResolution();
                 } else {
-                    Log.e(TAG, "getHdmiDisplayDevSupportedResolutions: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiDisplayDevSupportedResolutions: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiDisplayDevSupportedResolutions: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiDisplayDevSupportedResolutions: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return supportList;
@@ -270,10 +270,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     name = mCmsExtraServiceManager.getHdmiProductName();
                 } else {
-                    Log.e(TAG, "getHdmiDisplayDevName: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiDisplayDevName: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiDisplayDevName: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiDisplayDevName: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return name;
@@ -294,10 +294,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     edid = mCmsExtraServiceManager.getHdmiEdidVersion();
                 } else {
-                    Log.e(TAG, "getHdmiDisplayDevEEDID: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiDisplayDevEEDID: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiDisplayDevEEDID: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiDisplayDevEEDID: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return edid;
@@ -318,10 +318,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     mode = mCmsExtraServiceManager.getHdmiResolutionValue();
                 } else {
-                    Log.e(TAG, "getHdmiDisplayDevPreferredResolution: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiDisplayDevPreferredResolution: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiDisplayDevPreferredResolution: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiDisplayDevPreferredResolution: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return mode;
@@ -342,10 +342,10 @@ public class HdmiX {
                 if (null != mCmsExtraServiceManager) {
                     isSupport = mCmsExtraServiceManager.isHdmiCecSupport();
                 } else {
-                    Log.e(TAG, "getHdmiDisplayDevCECSupport: CmsExtraServiceManager is null");
+                    LogUtils.e(TAG, "getHdmiDisplayDevCECSupport: CmsExtraServiceManager is null");
                 }
             } catch (NullPointerException e) {
-                Log.e(TAG, "getHdmiDisplayDevCECSupport: CmsExtraServiceManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiDisplayDevCECSupport: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
         return Boolean.toString(isSupport);

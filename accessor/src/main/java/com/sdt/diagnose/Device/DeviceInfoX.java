@@ -1,28 +1,18 @@
 package com.sdt.diagnose.Device;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.LinkProperties;
-import android.net.Network;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
-import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.database.DbManager;
 
-import java.net.InetAddress;
 import java.text.SimpleDateFormat;
-import java.util.Iterator;
 
 public class DeviceInfoX {
-    private static final String TAG = "DeviceInfoX";
 
     @Tr369Get("Device.DeviceInfo.Manufacturer")
     public String SK_TR369_GetManufacturer() {

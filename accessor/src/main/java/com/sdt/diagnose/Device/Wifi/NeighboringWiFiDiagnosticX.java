@@ -2,7 +2,6 @@ package com.sdt.diagnose.Device.Wifi;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.Device.Wifi.NeighboringWiFiDiagnostic.Result;
-import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.ScanedWifiInfo;
 
 import java.util.List;

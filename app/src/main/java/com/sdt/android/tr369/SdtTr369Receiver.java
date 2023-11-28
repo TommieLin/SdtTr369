@@ -8,11 +8,11 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Utils.FileUtil;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.opentr369.OpenTR369Native;
 
 public class SdtTr369Receiver extends BroadcastReceiver {
@@ -25,13 +25,13 @@ public class SdtTr369Receiver extends BroadcastReceiver {
     public void handleProtocolMessage(@NonNull Message msg) {
         if (msg.what == MSG_START_TR369_PROTOCOL) {
             mHandler.removeMessages(MSG_START_TR369_PROTOCOL);
-            Log.e(TAG, " ####### Outis ### handleProtocolMessage MSG_START_TR369_PROTOCOL");
+            LogUtils.d(TAG, "MSG_START_TR369_PROTOCOL");
             startTr369Protocol();
         }
     }
 
     public SdtTr369Receiver(Context context) {
-        Log.e(TAG, " ############ Outis ### SdtTr369Receiver create");
+        LogUtils.d(TAG, "create");
         mContext = context;
         mHandlerThread = new HandlerThread("tr369_protocol");
         // 先启动，再初始化handler
@@ -50,20 +50,19 @@ public class SdtTr369Receiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Log.d(TAG, " ############ Outis ### action = " + action);
+        LogUtils.d(TAG, "action: " + action);
         if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
             // 获取承有网络连接信恿
             if (isConnected(context.getApplicationContext())) {
-                Log.d(TAG, " ############ Outis ### isConnected true");
+                LogUtils.d(TAG, "Connected to the network.");
                 mHandler.sendEmptyMessage(MSG_START_TR369_PROTOCOL);
             } else {
-                Log.e(TAG, " ############ Outis ### isConnected false");
+                LogUtils.e(TAG, "Not connected to the network.");
             }
         }
     }
 
     private boolean isConnected(Context context) {
-        Log.e(TAG, " ############ Outis ### isConnected start");
         ConnectivityManager cm =
                 (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
@@ -73,17 +72,17 @@ public class SdtTr369Receiver extends BroadcastReceiver {
     private void startTr369Protocol() {
         FileUtil.copyTr369AssetsToFile(mContext);
         String defaultFilePath = mContext.getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_DEFAULT;
-        Log.e(TAG, " ############ Outis ### startTr369Protocol defaultFilePath: " + defaultFilePath);
+        LogUtils.d(TAG, "startTr369Protocol defaultFilePath: " + defaultFilePath);
 
         int ret = OpenTR369Native.SetInitFilePath(defaultFilePath);
-        Log.e(TAG, " ############ Outis ### startTr369Protocol SetInitFilePath ret: " + ret);
+        LogUtils.d(TAG, "startTr369Protocol SetInitFilePath ret: " + ret);
 
         String modelFile = mContext.getDataDir().getPath() + "/" + FileUtil.PLATFORM_TMS_TR369_MODEL_XML;
         ret = OpenTR369Native.OpenTR369Init(modelFile);
-        Log.e(TAG, " ############ Outis ### startTr369Protocol ret: " + ret);
+        LogUtils.d(TAG, "startTr369Protocol ret: " + ret);
 
         String test_str = OpenTR369Native.stringFromJNI();
-        Log.e(TAG, " ############ Outis ### startTr369Protocol test_str: " + test_str);
+        LogUtils.e(TAG, "startTr369Protocol test_str: " + test_str);
     }
 
 }

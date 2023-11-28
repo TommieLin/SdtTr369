@@ -1,6 +1,6 @@
 package com.sdt.diagnose.Device.X_Skyworth;
 
-import android.util.Log;
+import com.sdt.diagnose.common.log.LogUtils;
 
 /**
  * @Author Outis
@@ -8,7 +8,7 @@ import android.util.Log;
  * @Version 1.0
  */
 public abstract class LogThread extends Thread {
-    public static final String TAG = "LogThread";
+    private static final String TAG = "LogThread";
     private volatile boolean suspend = false;
     private final String control = ""; // 只是需要一个对象而已，这个对象没有实际意义
 
@@ -30,7 +30,7 @@ public abstract class LogThread extends Thread {
         while (!Thread.currentThread().isInterrupted()) {
             this.getLog();
         }
-        Log.d(TAG, "Thread is finished.");
+        LogUtils.d(TAG, "Thread is finished.");
     }
 
     public abstract void getLog();

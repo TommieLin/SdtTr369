@@ -6,7 +6,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -28,7 +27,7 @@ public final class Controller {
     private final Object mHandlerFence = new Object();
     private MessageHandler mHandler;
     private HandlerThread mThread;
-    private Device device;
+    private final Device device;
 
     // private final DeviceMessageSender sender;
     private final boolean clipboardAutosync;
@@ -106,62 +105,62 @@ public final class Controller {
             int type = ctrl.getType();
             Ln.d("received control message: type=" + ControlMessage.getTypeStr(type));
             switch (type) {
-            case ControlMessage.TYPE_INJECT_KEYCODE:
-                if (device.supportsInputEvents()) {
-                    injectKeycode(ctrl.getAction(), ctrl.getKeycode(),
-                        ctrl.getRepeat(), ctrl.getMetaState());
-                }
-                break;
-            case ControlMessage.TYPE_INJECT_TEXT:
-                if (device.supportsInputEvents()) {
-                    injectText(ctrl.getText());
-                }
-                break;
-            case ControlMessage.TYPE_INJECT_TOUCH_EVENT:
-                if (device.supportsInputEvents()) {
-                    injectTouch(ctrl.getAction(), ctrl.getPointerId(),
-                        ctrl.getPosition(), ctrl.getPressure(), ctrl.getButtons());
-                }
-                break;
-            case ControlMessage.TYPE_INJECT_SCROLL_EVENT:
-                if (device.supportsInputEvents()) {
-                    injectScroll(ctrl.getPosition(), ctrl.getHScroll(),
-                        ctrl.getVScroll(), ctrl.getButtons());
-                }
-                break;
-            case ControlMessage.TYPE_BACK_OR_SCREEN_ON:
-                if (device.supportsInputEvents()) {
-                    pressBackOrTurnScreenOn(ctrl.getAction());
-                }
-                break;
-            case ControlMessage.TYPE_EXPAND_NOTIFICATION_PANEL:
-                Device.expandNotificationPanel();
-                break;
-            case ControlMessage.TYPE_EXPAND_SETTINGS_PANEL:
-                Device.expandSettingsPanel();
-                break;
-            case ControlMessage.TYPE_COLLAPSE_PANELS:
-                Device.collapsePanels();
-                break;
-            case ControlMessage.TYPE_GET_CLIPBOARD:
-                getClipboard(ctrl.getCopyKey());
-                break;
-            case ControlMessage.TYPE_SET_CLIPBOARD:
-                setClipboard(ctrl.getText(), ctrl.getPaste(), ctrl.getSequence());
-                break;
-            case ControlMessage.TYPE_SET_SCREEN_POWER_MODE:
-                if (device.supportsInputEvents()) {
-                    int mode = ctrl.getAction();
-                    boolean setPowerModeOk = Device.setScreenPowerMode(mode);
-                    if (setPowerModeOk) {
-                        keepPowerModeOff = mode == Device.POWER_MODE_OFF;
-                        Ln.i("Device screen turned " + (mode == Device.POWER_MODE_OFF ? "off" : "on"));
+                case ControlMessage.TYPE_INJECT_KEYCODE:
+                    if (device.supportsInputEvents()) {
+                        injectKeycode(ctrl.getAction(), ctrl.getKeycode(),
+                                ctrl.getRepeat(), ctrl.getMetaState());
                     }
-                }
-                break;
-            case ControlMessage.TYPE_ROTATE_DEVICE:
-                Device.rotateDevice();
-                break;
+                    break;
+                case ControlMessage.TYPE_INJECT_TEXT:
+                    if (device.supportsInputEvents()) {
+                        injectText(ctrl.getText());
+                    }
+                    break;
+                case ControlMessage.TYPE_INJECT_TOUCH_EVENT:
+                    if (device.supportsInputEvents()) {
+                        injectTouch(ctrl.getAction(), ctrl.getPointerId(),
+                                ctrl.getPosition(), ctrl.getPressure(), ctrl.getButtons());
+                    }
+                    break;
+                case ControlMessage.TYPE_INJECT_SCROLL_EVENT:
+                    if (device.supportsInputEvents()) {
+                        injectScroll(ctrl.getPosition(), ctrl.getHScroll(),
+                                ctrl.getVScroll(), ctrl.getButtons());
+                    }
+                    break;
+                case ControlMessage.TYPE_BACK_OR_SCREEN_ON:
+                    if (device.supportsInputEvents()) {
+                        pressBackOrTurnScreenOn(ctrl.getAction());
+                    }
+                    break;
+                case ControlMessage.TYPE_EXPAND_NOTIFICATION_PANEL:
+                    Device.expandNotificationPanel();
+                    break;
+                case ControlMessage.TYPE_EXPAND_SETTINGS_PANEL:
+                    Device.expandSettingsPanel();
+                    break;
+                case ControlMessage.TYPE_COLLAPSE_PANELS:
+                    Device.collapsePanels();
+                    break;
+                case ControlMessage.TYPE_GET_CLIPBOARD:
+                    getClipboard(ctrl.getCopyKey());
+                    break;
+                case ControlMessage.TYPE_SET_CLIPBOARD:
+                    setClipboard(ctrl.getText(), ctrl.getPaste(), ctrl.getSequence());
+                    break;
+                case ControlMessage.TYPE_SET_SCREEN_POWER_MODE:
+                    if (device.supportsInputEvents()) {
+                        int mode = ctrl.getAction();
+                        boolean setPowerModeOk = Device.setScreenPowerMode(mode);
+                        if (setPowerModeOk) {
+                            keepPowerModeOff = mode == Device.POWER_MODE_OFF;
+                            Ln.i("Device screen turned " + (mode == Device.POWER_MODE_OFF ? "off" : "on"));
+                        }
+                    }
+                    break;
+                case ControlMessage.TYPE_ROTATE_DEVICE:
+                    Device.rotateDevice();
+                    break;
             }
         }
     }
@@ -243,8 +242,8 @@ public final class Controller {
         }
 
         MotionEvent event = MotionEvent
-            .obtain(lastTouchDown, now, action, pointerCount, pointerProperties, pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source,
-                0);
+                .obtain(lastTouchDown, now, action, pointerCount, pointerProperties, pointerCoords, 0, buttons, 1f, 1f, DEFAULT_DEVICE_ID, 0, source,
+                        0);
         return device.injectEvent(event, Device.INJECT_MODE_ASYNC);
     }
 
@@ -266,10 +265,10 @@ public final class Controller {
         coords.setAxisValue(MotionEvent.AXIS_VSCROLL, vScroll);
 
         MotionEvent event = MotionEvent
-            .obtain(lastTouchDown, now, MotionEvent.ACTION_SCROLL, 1,
-                pointerProperties, pointerCoords, 0, buttons,
-                1f, 1f, DEFAULT_DEVICE_ID, 0,
-                InputDevice.SOURCE_MOUSE, 0);
+                .obtain(lastTouchDown, now, MotionEvent.ACTION_SCROLL, 1,
+                        pointerProperties, pointerCoords, 0, buttons,
+                        1f, 1f, DEFAULT_DEVICE_ID, 0,
+                        InputDevice.SOURCE_MOUSE, 0);
         return device.injectEvent(event, Device.INJECT_MODE_ASYNC);
     }
 

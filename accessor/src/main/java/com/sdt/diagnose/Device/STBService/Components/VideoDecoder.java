@@ -1,9 +1,8 @@
 package com.sdt.diagnose.Device.STBService.Components;
 
-import android.util.Log;
-
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.FileUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 public class VideoDecoder {
     private static final String TAG = "VideoDecoder";
@@ -35,7 +34,7 @@ public class VideoDecoder {
     private int getProfileIndex(String[] profilesArray) {
         int curIndex = -1;
         String profileContent = FileUtils.readFileToStr(FILE_NODE_VDEC_PROFILE);
-        Log.d(TAG, "profileContent: " + profileContent);
+        LogUtils.d(TAG, "profileContent: " + profileContent);
         if (null != profileContent && profilesArray != null) {
             if (!profileContent.contains(ERROR_VDEC_NOT_SUPPORT) && !profileContent
                     .contains(ERROR_VDEC_EMPTY_LIST)) {
@@ -52,7 +51,7 @@ public class VideoDecoder {
     private int getLevelIndex(String[] levelsArray) {
         int curLevelIndex = -1;
         String levelContent = FileUtils.readFileToStr(FILE_NODE_VDEC_LEVEL);
-        Log.d(TAG, "levelContent: " + levelContent);
+        LogUtils.d(TAG, "levelContent: " + levelContent);
         if (null != levelContent && levelsArray != null) {
             if (!levelContent.contains(ERROR_VDEC_NOT_SUPPORT) && !levelContent
                     .contains(ERROR_VDEC_EMPTY_LIST)) {
@@ -77,7 +76,7 @@ public class VideoDecoder {
             int nameEnd = nameStr.indexOf("\n");
             videoDecoderName = nameStr.substring(KEY_WORD_DEV_NAME.length(), nameEnd - 1);
         }
-        Log.d(TAG, "videoDecoderName: " + videoDecoderName);
+        LogUtils.d(TAG, "videoDecoderName: " + videoDecoderName);
         return videoDecoderName;
     }
 
@@ -149,7 +148,7 @@ public class VideoDecoder {
     @Tr369Get("Device.Services.STBService.1.Components.VideoDecoder.1.ContentAspectRatio")
     public String SK_TR369_GetVdecAspectRatio() {
         String aspectRatio = FileUtils.readFileToStr(FILE_NODE_ASPECT_RATIO);
-        Log.d(TAG, "GetVdecAspectRatio: " + aspectRatio);
+        LogUtils.d(TAG, "GetVdecAspectRatio: " + aspectRatio);
         if (null == aspectRatio || aspectRatio.contains("NA")) {
             return "";
         } else {

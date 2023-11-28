@@ -1,8 +1,8 @@
 package com.sdt.diagnose.common.net;
 
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.opentr369.OpenTR369Native;
 
 import java.io.BufferedReader;
@@ -40,7 +40,7 @@ public class CreateSSL {
             checkCertExist();
             ssl = SSLHelper.getSslSocketFactory(ca, certKey, certificate, CLIENT_CER_PASSWORD);
         } catch (Exception e) {
-            Log.e(TAG, "Get checked ssl exception:" + e.getMessage());
+            LogUtils.e(TAG, "Get checked ssl exception: " + e.getMessage());
             ssl = SSLHelper.getNoCheckSSLSocketFactory();
         }
         X509TrustManager trustManager =
@@ -75,7 +75,7 @@ public class CreateSSL {
             }
             br.close();
         } catch (Exception e) {
-            Log.d(TAG, "getCertString call failed, " + e.getMessage());
+            LogUtils.d(TAG, "getCertString call failed, " + e.getMessage());
         }
 
         return (sb != null) ? sb.toString() : "";
@@ -86,7 +86,7 @@ public class CreateSSL {
             checkCertExist();
             return SSLHelper.getSslSocketFactory(ca, certKey, certificate, CLIENT_CER_PASSWORD);
         } catch (Exception e) {
-            Log.e(TAG, "getSslSocketFactory call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getSslSocketFactory call failed, " + e.getMessage());
         }
         return null;
     }

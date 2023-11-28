@@ -1,12 +1,11 @@
 package com.sdt.diagnose.Device.STBService.Components;
 
-import android.util.Log;
-
 import com.droidlogic.app.SystemControlManager;
 import com.realtek.hardware.RtkHDMIManager2;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.Device.Platform.ModelX;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 public class VideoOutput {
     private static final String TAG = "VideoOutput";
@@ -58,7 +57,7 @@ public class VideoOutput {
                 }
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHDCPStatusByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHDCPStatusByAml: SystemControlManager call failed, " + e.getMessage());
         }
         return RESULT_FAILED;
     }
@@ -66,12 +65,12 @@ public class VideoOutput {
     private String getHDCPStatusByRtk() {
         try {
             int hdcp = RtkHDMIManager2.getRtkHDMIManager(GlobalContext.getContext()).getHDCPVersion();
-            Log.d(TAG, "Get HDCP version: " + hdcp);
+            LogUtils.d(TAG, "Get HDCP version: " + hdcp);
             if (hdcp > RtkHDMIManager2.HDCP_NONE) {
                 return RESULT_SUCCESS;
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHDCPStatusByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHDCPStatusByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return RESULT_FAILED;
     }
@@ -108,7 +107,7 @@ public class VideoOutput {
                 }
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHDCPTypeByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHDCPTypeByAml: SystemControlManager call failed, " + e.getMessage());
         }
         return HDCP_NONE;
     }
@@ -116,14 +115,14 @@ public class VideoOutput {
     private String getHDCPTypeByRtk() {
         try {
             int hdcp = RtkHDMIManager2.getRtkHDMIManager(GlobalContext.getContext()).getHDCPVersion();
-            Log.d(TAG, "Get HDCP version: " + hdcp);
+            LogUtils.d(TAG, "Get HDCP version: " + hdcp);
             if (hdcp == RtkHDMIManager2.HDCP_14) {
                 return HDCP_14;
             } else if (hdcp == RtkHDMIManager2.HDCP_22) {
                 return HDCP_22;
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHDCPTypeByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHDCPTypeByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return HDCP_NONE;
     }

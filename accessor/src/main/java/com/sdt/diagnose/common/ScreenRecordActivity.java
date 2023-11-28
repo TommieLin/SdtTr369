@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.media.projection.MediaProjectionManager;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.sdt.accessor.R;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -46,7 +46,7 @@ public class ScreenRecordActivity extends Activity {
                 @Override
                 public void run() {
                     finishActivity(REQUEST_CODE);
-                    Log.e(TAG, "TimerTask: User reject this request!");
+                    LogUtils.e(TAG, "TimerTask: User reject this request!");
                     synchronized (ScreenRecordService.SYNC_OBJ) {
                         ScreenRecordService.SYNC_OBJ.notify();
                     }
@@ -68,7 +68,7 @@ public class ScreenRecordActivity extends Activity {
             service.putExtra(ScreenRecordService.DELAY_SECONDS, delaySeconds);
             startForegroundService(service);
         } else {
-            Log.e(TAG, "onActivityResult: User reject this request!");
+            LogUtils.e(TAG, "onActivityResult: User reject this request!");
             synchronized (ScreenRecordService.SYNC_OBJ) {
                 ScreenRecordService.SYNC_OBJ.notify();
             }

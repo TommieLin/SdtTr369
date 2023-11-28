@@ -4,9 +4,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.diagnose.common.bean.BluetoothDeviceInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -25,27 +25,27 @@ public class BluetoothDeviceManager extends AbstractCachedArray<BluetoothDeviceI
         }
         final BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter == null) {
-            Log.e(TAG, "BluetoothAdapter is null.");
+            LogUtils.e(TAG, "BluetoothAdapter is null.");
             return;
         }
         final Set<BluetoothDevice> bondedDevices = mBtAdapter.getBondedDevices();
         if (bondedDevices == null) {
-            Log.e(TAG, "no bonded devices");
+            LogUtils.e(TAG, "no bonded devices");
             return;
         }
 
-        Log.d(TAG, "bonded devices size = " + bondedDevices.size());
+        LogUtils.d(TAG, "bonded devices size: " + bondedDevices.size());
         if (bondedDevices.size() == 0) {
             return;
         }
         for (final BluetoothDevice device : bondedDevices) {
             final String deviceAddress = device.getAddress();
             if (TextUtils.isEmpty(deviceAddress)) {
-                Log.e(TAG, "bluetooth device address null");
+                LogUtils.e(TAG, "bluetooth device address null");
                 continue;
             }
             BluetoothDeviceInfo bluetoothDeviceInfo = new BluetoothDeviceInfo(context, device);
-            Log.d(TAG, "BluetoothDeviceInfo: " + bluetoothDeviceInfo);
+            LogUtils.d(TAG, "BluetoothDeviceInfo: " + bluetoothDeviceInfo);
             add(bluetoothDeviceInfo);
         }
     }

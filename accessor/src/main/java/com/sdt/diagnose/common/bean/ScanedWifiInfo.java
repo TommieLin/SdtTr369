@@ -6,7 +6,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -17,6 +16,7 @@ import static com.sdt.diagnose.common.NetworkUtils.SECURITY_PSK;
 import static com.sdt.diagnose.common.NetworkUtils.SECURITY_SAE;
 
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 public class ScanedWifiInfo implements Comparable<ScanedWifiInfo> {
     private static final String TAG = "ScanedWifiInfo";
@@ -346,7 +346,7 @@ public class ScanedWifiInfo implements Comparable<ScanedWifiInfo> {
                 || (mConfig != null && mConfig.shared != config.shared)) {
             return false;
         }
-        Log.d(TAG, "match WifiConfiguration for: " + ssid);
+        LogUtils.d(TAG, "match WifiConfiguration for: " + ssid);
         final int configSecurity = NetworkUtils.getSecurity(config);
         if (mIsPskSaeTransitionMode) {
             if (configSecurity == SECURITY_SAE && wm.isWpa3SaeSupported()) {

@@ -3,11 +3,11 @@ package com.sdt.diagnose;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.sdt.annotations.processor.MethodProperty;
 import com.sdt.annotations.policy.Tr369GetPolicy;
 import com.sdt.annotations.policy.Tr369SetPolicy;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -38,7 +38,7 @@ public class Tr369PathInvoke {
         Set<Map.Entry<String, MethodProperty>> entries = arrayMap.entrySet();
         for (Map.Entry<String, MethodProperty> next : entries) {
             String key = next.getKey();
-            Log.d(TAG, "filterParams key: " + key);
+            LogUtils.d(TAG, "filterParams key: " + key);
             if (!TextUtils.isEmpty(key) && key.startsWith("Device.X_Skyworth.")) {
                 arrayMap.remove(key);
             }
@@ -56,7 +56,7 @@ public class Tr369PathInvoke {
 
     private ArrayMap<String, CallInfo> createMap(int type, ArrayMap<String, MethodProperty> mapBuild) {
         ArrayMap<String, CallInfo> mapRet = new ArrayMap<String, CallInfo>();
-        Log.d(TAG, "createMap type: " + type);
+        LogUtils.d(TAG, "createMap type: " + type);
         for (Map.Entry<String, MethodProperty> entry : mapBuild.entrySet()) {
             CallInfo value = new CallInfo();
             String key = entry.getKey();
@@ -67,7 +67,7 @@ public class Tr369PathInvoke {
                 value.mObject = value.mClass.newInstance();
                 value.mWithParam = false;
             } catch (Exception e) {
-                Log.e(TAG, "createMap error, " + e.getMessage());
+                LogUtils.e(TAG, "createMap error, " + e.getMessage());
                 continue;
             }
 
@@ -82,10 +82,10 @@ public class Tr369PathInvoke {
                                         value.mProperty.mMethodName, String.class);
                         value.mWithParam = true;
                     } catch (NoSuchMethodException e1) {
-                        Log.e(TAG, "createMap getDeclaredMethod error, 1: " + e1.getMessage());
+                        LogUtils.e(TAG, "createMap getDeclaredMethod error, 1: " + e1.getMessage());
                         continue;
                     }
-                    Log.i(TAG, "createMap getDeclaredMethod error, 2: " + e.getMessage());
+                    LogUtils.i(TAG, "createMap getDeclaredMethod error, 2: " + e.getMessage());
                 }
             } else if (type == TYPE_TR369_SET) {
                 try {
@@ -104,7 +104,7 @@ public class Tr369PathInvoke {
 
     public String getString(String path) {
         if (TextUtils.isEmpty(path)) return null;
-//        Log.d(TAG, "getString path: " + path);
+//        LogUtils.d(TAG, "getString path: " + path);
         if (mapRunGet == null) return null;
         //优先查询全路径
         CallInfo info = mapRunGet.get(path);
@@ -126,14 +126,14 @@ public class Tr369PathInvoke {
                 return (String) info.mMethod.invoke(info.mObject);
             }
         } catch (Exception e) {
-            Log.e(TAG, "getString error, " + e.getMessage());
+            LogUtils.e(TAG, "getString error, " + e.getMessage());
         }
         return null;
     }
 
     public boolean setString(String path, String value) {
         if (TextUtils.isEmpty(path)) return false;
-//        Log.d(TAG, "setString path: " + path);
+        LogUtils.d(TAG, "setString path: " + path);
         if (mapRunSet == null) return false;
         //优先查询全路径
         CallInfo info = mapRunSet.get(path);
@@ -151,7 +151,7 @@ public class Tr369PathInvoke {
         try {
             return (Boolean) info.mMethod.invoke(info.mObject, path, value);
         } catch (Exception e) {
-            Log.d(TAG, "setString error, " + e.getMessage());
+            LogUtils.d(TAG, "setString error, " + e.getMessage());
         }
         return false;
     }

@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.sdtcmsextra.ICmsExtraService;
 
 public class CmsExtraServiceManager {
@@ -28,13 +28,13 @@ public class CmsExtraServiceManager {
     private void connectCmsExtraService() {
         try {
             Intent intent = buildCmsExtraServiceIntent();
-            Log.d(TAG, "Begin to bindService " + intent.getPackage() + " with action " + intent.getAction());
+            LogUtils.d(TAG, "Begin to bindService " + intent.getPackage() + " with action " + intent.getAction());
             boolean ret = mContext.bindService(intent, mServiceConnection, Service.BIND_AUTO_CREATE);
             if (ret) {
-                Log.d(TAG, "BindService finished");
+                LogUtils.d(TAG, "BindService finished");
             }
         } catch (Exception e) {
-            Log.e(TAG, "CmsExtraService build failed, " + e.getMessage());
+            LogUtils.e(TAG, "CmsExtraService build failed, " + e.getMessage());
         }
     }
 
@@ -49,7 +49,7 @@ public class CmsExtraServiceManager {
     public static CmsExtraServiceManager getInstance(@NonNull Context context) {
         if (null == mCmsExtraServiceManager || null == mCmsExtraService) {
             synchronized (CmsExtraServiceManager.class) {
-                Log.d(TAG, "Binding failed, we need to renew a service manager");
+                LogUtils.d(TAG, "Binding failed, we need to renew a service manager");
                 mContext = context;
                 mCmsExtraServiceManager = new CmsExtraServiceManager();
             }
@@ -61,28 +61,28 @@ public class CmsExtraServiceManager {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "ICmsExtraService connected");
+            LogUtils.d(TAG, "ICmsExtraService connected");
             mCmsExtraService = ICmsExtraService.Stub.asInterface(service);
             try {
                 mCmsExtraService.asBinder().linkToDeath(mBinderPoolDeathRecipient, 0);
             } catch (RemoteException e) {
-                Log.e(TAG, "mCmsExtraService linkToDeath failed, " + e.getMessage());
+                LogUtils.e(TAG, "mCmsExtraService linkToDeath failed, " + e.getMessage());
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "ICmsExtraService Disconnected");
+            LogUtils.d(TAG, "ICmsExtraService Disconnected");
         }
 
         @Override
         public void onBindingDied(ComponentName name) {
-            Log.d(TAG, "ICmsExtraService BindingDied");
+            LogUtils.d(TAG, "ICmsExtraService BindingDied");
         }
 
         @Override
         public void onNullBinding(ComponentName name) {
-            Log.d(TAG, "ICmsExtraService NullBinding");
+            LogUtils.d(TAG, "ICmsExtraService NullBinding");
         }
     };
 
@@ -90,7 +90,7 @@ public class CmsExtraServiceManager {
         @Override
         public void binderDied() {
             synchronized (CmsExtraServiceManager.class) {
-                Log.e(TAG, "CmsExtraService Died");
+                LogUtils.e(TAG, "CmsExtraService Died");
                 mCmsExtraService.asBinder().unlinkToDeath(mBinderPoolDeathRecipient, 0);
                 mCmsExtraService = null;
                 connectCmsExtraService();
@@ -109,10 +109,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.getCpuUsage();
                 } else {
-                    Log.e(TAG, "getCpuUsageRate: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getCpuUsageRate: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getCpuUsageRate execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCpuUsageRate execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -129,10 +129,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.getCpuTemp();
                 } else {
-                    Log.e(TAG, "getCpuTemperature: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getCpuTemperature: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getCpuTemperature execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getCpuTemperature execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -149,10 +149,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.isHdmiPlugged();
                 } else {
-                    Log.e(TAG, "isHDMIPlugged: mCmsExtraService is null");
+                    LogUtils.e(TAG, "isHDMIPlugged: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "isHDMIPlugged execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "isHDMIPlugged execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -169,10 +169,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.isHdmiEnabled() ? "Enabled" : "Disabled";
                 } else {
-                    Log.e(TAG, "getHDMIStatus: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getHDMIStatus: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getHDMIStatus execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHDMIStatus execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -189,10 +189,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.setHdmiStatus(isEnable);
                 } else {
-                    Log.e(TAG, "setHDMIStatus: mCmsExtraService is null");
+                    LogUtils.e(TAG, "setHDMIStatus: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "setHDMIStatus execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "setHDMIStatus execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -209,10 +209,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.getHdmiSupportResolution();
                 } else {
-                    Log.e(TAG, "getHdmiSupportResolution: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getHdmiSupportResolution: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getHdmiSupportResolution execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiSupportResolution execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -229,10 +229,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.getHdmiResolutionValue();
                 } else {
-                    Log.e(TAG, "getHdmiResolutionValue: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getHdmiResolutionValue: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getHdmiResolutionValue execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiResolutionValue execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -249,10 +249,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.setHdmiResolutionValue(mode);
                 } else {
-                    Log.e(TAG, "setHdmiResolutionValue: mCmsExtraService is null");
+                    LogUtils.e(TAG, "setHdmiResolutionValue: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "setHdmiResolutionValue execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "setHdmiResolutionValue execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -269,10 +269,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.isBestOutputMode();
                 } else {
-                    Log.e(TAG, "isBestOutputmode: mCmsExtraService is null");
+                    LogUtils.e(TAG, "isBestOutputmode: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "isBestOutputmode execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "isBestOutputmode execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -289,10 +289,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.isHdmiCecSupport();
                 } else {
-                    Log.e(TAG, "isHdmiCecSupport: mCmsExtraService is null");
+                    LogUtils.e(TAG, "isHdmiCecSupport: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "isHdmiCecSupport execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "isHdmiCecSupport execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -309,10 +309,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.getHdmiProductName();
                 } else {
-                    Log.e(TAG, "getHdmiProductName: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getHdmiProductName: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getHdmiProductName execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiProductName execution failed, " + e.getMessage());
             }
         }
         return ret;
@@ -329,10 +329,10 @@ public class CmsExtraServiceManager {
                 if (null != mCmsExtraService) {
                     ret = mCmsExtraService.getHdmiEdidVersion();
                 } else {
-                    Log.e(TAG, "getHdmiEdidVersion: mCmsExtraService is null");
+                    LogUtils.e(TAG, "getHdmiEdidVersion: mCmsExtraService is null");
                 }
             } catch (Exception e) {
-                Log.e(TAG, "getHdmiEdidVersion execution failed, " + e.getMessage());
+                LogUtils.e(TAG, "getHdmiEdidVersion execution failed, " + e.getMessage());
             }
         }
         return ret;

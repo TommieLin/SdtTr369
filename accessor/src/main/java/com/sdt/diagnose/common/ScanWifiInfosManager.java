@@ -13,9 +13,9 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.diagnose.common.bean.ScanedWifiInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,11 +36,11 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
     public void buildList(Context context) {
         WifiManager mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         if (!NetworkUtils.isWifiEnabled(mWifiManager)) {
-            Log.e(TAG, "Wifi disable.");
+            LogUtils.e(TAG, "Wifi disable.");
             return;
         }
         if (!mWifiManager.startScan()) {
-            Log.e(TAG, "Wifi scan failed.");
+            LogUtils.e(TAG, "Wifi scan failed.");
             return;
         }
         // 堵塞线程6秒,等待wifi 扫描结束.正常是监听WifiManager.SCAN_RESULTS_AVAILABLE_ACTION广播
@@ -60,11 +60,11 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
         if (null == newScanResults) {
             return;
         }
-        Log.d(TAG, "newScanResults size = " + newScanResults.size());
+        LogUtils.d(TAG, "newScanResults size: " + newScanResults.size());
         // Filter all unsupported networks from the scan result list
         final List<ScanResult> filteredScanResults =
                 filterScanResultsByCapabilities(wm, newScanResults);
-        Log.d(TAG, "filteredScanResults size = " + filteredScanResults.size());
+        LogUtils.d(TAG, "filteredScanResults size: " + filteredScanResults.size());
 
         // 把同名同加密方式的ssid放在同一个list中,后面只取其中一个作为一个wifi看待
         HashMap<String, List<ScanResult>> cached = new HashMap<>();

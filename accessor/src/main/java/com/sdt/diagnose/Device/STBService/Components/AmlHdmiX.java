@@ -2,13 +2,13 @@ package com.sdt.diagnose.Device.STBService.Components;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.droidlogic.app.OutputModeManager;
 import com.droidlogic.app.SystemControlManager;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +58,7 @@ public class AmlHdmiX {
         try {
             isPlugged = OutputModeManager.getInstance(mContext).isHDMIPlugged();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "isHDMIPluggedByAml: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "isHDMIPluggedByAml: OutputModeManager call failed, " + e.getMessage());
         }
         return isPlugged;
     }
@@ -69,7 +69,7 @@ public class AmlHdmiX {
             String ret = SystemControlManager.getInstance().readSysFs("/sys/class/amhdmitx/amhdmitx0/avmute");
             status = Boolean.toString("-1".equals(ret));
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiEnableByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiEnableByAml: SystemControlManager call failed, " + e.getMessage());
         }
         return status;
     }
@@ -79,7 +79,7 @@ public class AmlHdmiX {
             SystemControlManager.getInstance().writeSysFs("/sys/class/amhdmitx/amhdmitx0/avmute",
                     isEnable ? "-1" : "1");
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "setHdmiEnableByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "setHdmiEnableByAml: SystemControlManager call failed, " + e.getMessage());
         }
     }
 
@@ -88,7 +88,7 @@ public class AmlHdmiX {
         try {
             isBest = OutputModeManager.getInstance(mContext).isBestOutputmode();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiResolutionModeByAml: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiResolutionModeByAml: OutputModeManager call failed, " + e.getMessage());
         }
         return isBest;
     }
@@ -101,7 +101,7 @@ public class AmlHdmiX {
                 name = readStr.split("Rx Product Name: ")[1].split("Manufacture Week")[0];
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiNameByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiNameByAml: SystemControlManager call failed, " + e.getMessage());
         }
         return name;
     }
@@ -111,7 +111,7 @@ public class AmlHdmiX {
         try {
             mode = OutputModeManager.getInstance(mContext).getCurrentOutputMode();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiResolutionValueByAml: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiResolutionValueByAml: OutputModeManager call failed, " + e.getMessage());
         }
         if (mode.equals("dummy_l")) {
             return "";
@@ -122,7 +122,7 @@ public class AmlHdmiX {
     public boolean setHdmiResolutionValueByAml(String value) {
         List<String> listHdmiMode = getHdmiSupportListByAml();
         if (!listHdmiMode.contains(value)) {
-            Log.e(TAG, "This resolution is not supported!");
+            LogUtils.e(TAG, "This resolution is not supported!");
             return false;
         }
 
@@ -142,7 +142,7 @@ public class AmlHdmiX {
                 return true;
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "setHdmiResolutionValueByAml: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "setHdmiResolutionValueByAml: OutputModeManager call failed, " + e.getMessage());
         }
 
         return false;
@@ -154,10 +154,10 @@ public class AmlHdmiX {
         try {
             list = OutputModeManager.getInstance(mContext).getHdmiSupportList();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiSupportListByAml: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiSupportListByAml: OutputModeManager call failed, " + e.getMessage());
         }
 
-        Log.d(TAG, "getHdmiSupportList: " + list);
+        LogUtils.d(TAG, "getHdmiSupportList: " + list);
 
         List<String> listHdmiMode;
         if (list != null && list.length() != 0 && !list.contains("null")) {
@@ -180,13 +180,13 @@ public class AmlHdmiX {
             String readStr = SystemControlManager.getInstance().readSysFs("/sys/class/amhdmitx/amhdmitx0/edid");
             if (!readStr.isEmpty()) {
                 String version = readStr.split("EDID Version: ")[1].split("EDID block number")[0];
-                Log.d(TAG, "getHdmiEdidByAml: EDID Version " + version);
+                LogUtils.d(TAG, "getHdmiEdidByAml: EDID Version " + version);
                 if (null != version) {
                     edid = "EDID Version:" + version/*.replace("\n", " ")*/;
                 }
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiEdidByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiEdidByAml: SystemControlManager call failed, " + e.getMessage());
         }
         return edid;
     }
@@ -197,7 +197,7 @@ public class AmlHdmiX {
         try {
             readStr = SystemControlManager.getInstance().readSysFs("/sys/class/cec/pin_status");
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getCapHdmiCecSupportByAml: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getCapHdmiCecSupportByAml: SystemControlManager call failed, " + e.getMessage());
         }
 
         if (null != readStr) {

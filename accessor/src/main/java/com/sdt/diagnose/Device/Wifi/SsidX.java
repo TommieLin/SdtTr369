@@ -1,11 +1,10 @@
 package com.sdt.diagnose.Device.Wifi;
 
-import android.util.Log;
-
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.net.NetworkApiManager;
 
 public class SsidX {
@@ -29,7 +28,7 @@ public class SsidX {
 
     @Tr369Get("Device.WiFi.SSID.1.BSSID")
     public String SK_TR369_GetSsidBSSID(String path) {
-        Log.d(TAG, "GetSsidBSSID path: " + path);
+        LogUtils.d(TAG, "GetSsidBSSID path: " + path);
         return NetworkApiManager.getInstance().getNetworkApi().getWiFiBssid(GlobalContext.getContext());
     }
 
@@ -45,7 +44,7 @@ public class SsidX {
 
     @Tr369Set("Device.WiFi.SSID.1.Enable")
     public boolean SK_TR369_SetSsidEnable(String path, String value) {
-        Log.d(TAG, "SetSsidEnable path: " + path + ", value: " + value);
+        LogUtils.d(TAG, "SetSsidEnable path: " + path + ", value: " + value);
         return NetworkApiManager.getInstance().getNetworkApi().setWiFiSSIDEnable(GlobalContext.getContext(), 0, Boolean.parseBoolean(value));
     }
 

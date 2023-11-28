@@ -33,8 +33,9 @@ import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Xml;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -50,7 +51,6 @@ import java.util.List;
 
 public class DreamBackend {
     private static final String TAG = "DreamBackend";
-    private static final boolean DEBUG = false;
 
     public static class DreamInfo {
         public CharSequence caption;
@@ -140,7 +140,7 @@ public class DreamBackend {
         try {
             return mDreamManager.getDefaultDreamComponentForUser(mContext.getUserId());
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get default dream", e);
+            LogUtils.e(TAG, "Failed to get default dream. error: " + e);
             return null;
         }
     }
@@ -261,7 +261,7 @@ public class DreamBackend {
             ComponentName[] dreams = {dream};
             mDreamManager.setDreamComponents(dream == null ? null : dreams);
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to set active dream to " + dream, e);
+            LogUtils.e(TAG, "Failed to set active dream to " + dream + ", error: " + e);
         }
     }
 
@@ -272,7 +272,7 @@ public class DreamBackend {
             ComponentName[] dreams = mDreamManager.getDreamComponents();
             return dreams != null && dreams.length > 0 ? dreams[0] : null;
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to get active dream", e);
+            LogUtils.e(TAG, "Failed to get active dream. error: " + e);
             return null;
         }
     }
@@ -292,7 +292,7 @@ public class DreamBackend {
         try {
             mDreamManager.testDream(mContext.getUserId(), dreamInfo.componentName);
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to preview " + dreamInfo, e);
+            LogUtils.e(TAG, "Failed to preview " + dreamInfo + ", error: " + e);
         }
     }
 
@@ -303,7 +303,7 @@ public class DreamBackend {
         try {
             mDreamManager.dream();
         } catch (RemoteException e) {
-            Log.w(TAG, "Failed to dream", e);
+            LogUtils.e(TAG, "Failed to dream. error: " + e);
         }
     }
 
@@ -324,7 +324,7 @@ public class DreamBackend {
         try {
             parser = resolveInfo.serviceInfo.loadXmlMetaData(pm, DreamService.DREAM_META_DATA);
             if (parser == null) {
-                Log.w(TAG, "No " + DreamService.DREAM_META_DATA + " meta-data");
+                LogUtils.w(TAG, "No " + DreamService.DREAM_META_DATA + " meta-data");
                 return null;
             }
             Resources res = pm.getResourcesForApplication(resolveInfo.serviceInfo.applicationInfo);
@@ -335,7 +335,7 @@ public class DreamBackend {
             }
             String nodeName = parser.getName();
             if (!"dream".equals(nodeName)) {
-                Log.w(TAG, "Meta-data does not start with dream tag");
+                LogUtils.w(TAG, "Meta-data does not start with dream tag");
                 return null;
             }
             TypedArray sa = res.obtainAttributes(attrs, com.android.internal.R.styleable.Dream);
@@ -347,7 +347,7 @@ public class DreamBackend {
             if (parser != null) parser.close();
         }
         if (caughtException != null) {
-            Log.w(TAG, "Error parsing : " + resolveInfo.serviceInfo.packageName, caughtException);
+            LogUtils.e(TAG, "Error parsing: " + resolveInfo.serviceInfo.packageName + ", caughtException: " + caughtException);
             return null;
         }
         if (cn != null && cn.indexOf('/') < 0) {
@@ -357,8 +357,7 @@ public class DreamBackend {
     }
 
     private static void logd(String msg, Object... args) {
-        if (DEBUG)
-            Log.d(TAG, args == null || args.length == 0 ? msg : String.format(msg, args));
+        LogUtils.d(TAG, args == null || args.length == 0 ? msg : String.format(msg, args));
     }
 
     private static class DreamInfoComparator implements Comparator<DreamInfo> {

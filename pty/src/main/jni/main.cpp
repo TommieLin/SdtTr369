@@ -113,7 +113,8 @@ static char *const *getStrings(JNIEnv *const env, const jobjectArray array) {
     return ret;
 }
 
-char* m_workDir = nullptr;
+char *m_workDir = nullptr;
+
 static jboolean JNICALL m_setWorkDir(JNIEnv *const env, const jobject jthis, const jstring path) {
     const char *const workPath = env->GetStringUTFChars(path, nullptr);
     unsigned int len = strlen(workPath);

@@ -11,7 +11,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.sdt.accessor.R;
@@ -26,6 +25,7 @@ import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
 import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.AppInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +78,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         }
         mAppsManager = new AppsManager(GlobalContext.getContext());
         int size = mAppsManager.getList().size();
-        Log.d(TAG, " ============ Outis === Get the number of App List: " + size);
+        LogUtils.d(TAG, "Get the number of App List: " + size);
         if (size > 0) {
             DbManager.addMultiObject("Device.X_Skyworth.App", size);
             for (int i = 0; i < size; i++) {
@@ -116,7 +116,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                     .getPackageManager().getPackageInfo(packageInfo.packageName,
                             PackageManager.GET_PERMISSIONS);
         } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Failed to add permission information. Error: " + e.getMessage());
+            LogUtils.e(TAG, "Failed to add permission information. Error: " + e.getMessage());
         }
 
         if (packageInfo.requestedPermissions != null) {
@@ -141,7 +141,7 @@ public class AppX implements IProtocolArray<AppInfo> {
             }
         }
         String path = "Device.X_Skyworth.App." + paramsArr + ".Permissions";
-        Log.d(TAG, " ============ Outis === addPermission path: " + path + ", mGroups.size(): " + mGroups.size());
+        LogUtils.d(TAG, "addPermission path: " + path + ", mGroups.size(): " + mGroups.size());
         if (mGroups.size() > 0) {
             DbManager.addMultiObject(path, mGroups.size());
         }
@@ -171,7 +171,7 @@ public class AppX implements IProtocolArray<AppInfo> {
             case "Type":
                 return t.isSystem() ? "System" : "ThirdParty";
             case "isUpdatedSystem":
-                Log.d(TAG, "isUpdatedSystem: " + t.isUpdatedSystem());
+                LogUtils.d(TAG, "isUpdatedSystem: " + t.isUpdatedSystem());
                 return t.isUpdatedSystem() ? "1" : "0";
             case "PackageName":
                 return t.getPackageName();
@@ -251,7 +251,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                             break;
                     }
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to obtain permission information. Error: " + e.getMessage());
+                    LogUtils.e(TAG, "Failed to obtain permission information. Error: " + e.getMessage());
                     return null;
                 }
         }
@@ -260,7 +260,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     @Tr369Set("Device.X_Skyworth.App.")
     public boolean SK_TR369_HandleAppInfoSetCmd(String path, String value) {
-        Log.d(TAG, "Appx path = " + path);
+        LogUtils.d(TAG, "Appx path = " + path);
         AppInfo appInfo = getAppByPath(path);
         if (appInfo == null) return false;
 
@@ -307,7 +307,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                             paths[3]);
                     return success;
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to set permission information. Error: " + e.getMessage());
+                    LogUtils.e(TAG, "Failed to set permission information. Error: " + e.getMessage());
                 }
             }
         }
@@ -351,7 +351,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 continue;
             whiteListPkgNames.add(pkgName);
         }
-        Log.d(TAG, "whiteListPkgNames: " + whiteListPkgNames);
+        LogUtils.d(TAG, "whiteListPkgNames: " + whiteListPkgNames);
         return new Gson().toJson(whiteListPkgNames);
     }
 
@@ -360,7 +360,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
         List<String> packageNames = ApplicationUtils.parseStringList(value);
-        Log.d(TAG, "Wait to suspend application: " + packageNames);
+        LogUtils.d(TAG, "Wait to suspend application: " + packageNames);
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
         SuspendDialogInfo suspendDialogInfo = new SuspendDialogInfo.Builder()
@@ -373,7 +373,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
         if (failedPackages.length != 0) {
             // 处理未成功挂起的应用程序，未成功挂起的应用将被移出黑名单全局变量
-            Log.e(TAG, "Failed to suspend App: " + Arrays.toString(failedPackages));
+            LogUtils.e(TAG, "Failed to suspend App: " + Arrays.toString(failedPackages));
             for (String packageName : failedPackages) {
                 packageNames.remove(packageName);
             }
@@ -395,7 +395,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
         List<String> packageNames = ApplicationUtils.parseStringList(value);
-        Log.d(TAG, "Wait to cancel pending application: " + packageNames);
+        LogUtils.d(TAG, "Wait to cancel pending application: " + packageNames);
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
 
@@ -407,7 +407,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 if (failedPackages.length != 0) {
                     // 如果某个应用解除挂起失败，包名仍然留在黑名单全局变量中
                     if (Arrays.asList(failedPackages).contains(packageName)) {
-                        Log.e(TAG, "Unsuspended application failed: " + packageName);
+                        LogUtils.e(TAG, "Unsuspended application failed: " + packageName);
                         continue;
                     }
                 }
@@ -465,7 +465,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppBlackList();
 
         List<String> packageNames = ApplicationUtils.parseStringList(value);
-        Log.i(TAG, "Waiting for blacklist to be set: " + packageNames);
+        LogUtils.i(TAG, "Waiting for blacklist to be set: " + packageNames);
         if (packageNames.isEmpty()) {
             return true;
         }
@@ -500,9 +500,9 @@ public class AppX implements IProtocolArray<AppInfo> {
                 final ApplicationInfo info = pkgInfo.applicationInfo;
                 if (!info.isSystemApp()) {
                     ApplicationUtils.uninstall(pkgName);
-                    Log.d(TAG, "Uninstallation process completed.");
+                    LogUtils.d(TAG, "Uninstallation process completed.");
                 } else {
-                    Log.i(TAG, "This application is a system app and cannot be uninstalled.");
+                    LogUtils.i(TAG, "This application is a system app and cannot be uninstalled.");
                 }
             }
         }
@@ -529,7 +529,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppWhiteList();
 
         List<String> packageNames = ApplicationUtils.parseStringList(value);
-        Log.i(TAG, "Waiting for whitelist to be set: " + packageNames);
+        LogUtils.i(TAG, "Waiting for whitelist to be set: " + packageNames);
         if (packageNames.isEmpty()) {
             return true;
         }
@@ -589,7 +589,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
         try {
             appInfo = apps.get(index - 1);
-            Log.d(TAG, "Appx: " + appInfo.toString() + ", path = " + path);
+            LogUtils.d(TAG, "Appx: " + appInfo.toString() + ", path: " + path);
         } catch (Exception e) {
             return null;
         }
@@ -659,11 +659,11 @@ public class AppX implements IProtocolArray<AppInfo> {
             while ((line = bufferedReader.readLine()) != null) {
                 if (command.contains("cpuinfo")) {
                     if (line.contains(packageName) && line.trim().length() > 1) {
-                        Log.d(TAG, "The data obtained from the '" + command +
+                        LogUtils.d(TAG, "The data obtained from the '" + command +
                                 "' command is: " + line);
                         float ret = Float.parseFloat(line.split("%", 2)[0]);
                         cpuUsage += ret;
-                        Log.d(TAG, "App: " + packageName + ", CPU usage: " + cpuUsage + "%");
+                        LogUtils.d(TAG, "App: " + packageName + ", CPU usage: " + cpuUsage + "%");
                     }
                 } else if (command.contains("meminfo")) {
                     if (line.contains("TOTAL RSS")) {
@@ -672,7 +672,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Appx: getUsage call failed, " + e.getMessage());
+            LogUtils.e(TAG, "Appx: getUsage call failed, " + e.getMessage());
         } finally {
             if (process != null) {
                 process.destroy();
@@ -681,7 +681,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 try {
                     bufferedReader.close();
                 } catch (IOException e) {
-                    Log.e(TAG, "bufferedReader close call failed, " + e.getMessage());
+                    LogUtils.e(TAG, "bufferedReader close call failed, " + e.getMessage());
                 }
             }
         }

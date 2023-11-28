@@ -11,18 +11,18 @@ import android.util.Log;
 import android.view.WindowManager;
 
 public class RtcActivity extends Activity {
-    private static final String TAG = "RtcActivity";
+    private static final String TAG = "TR369 RtcActivity";
     private static final int CAPTURE_PERMISSION_REQUEST_CODE = 1;
     private static final String[] MANDATORY_PERMISSIONS = {
-        "android.permission.INTERNET"
+            "android.permission.INTERNET"
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         setContentView(R.layout.activity_remote_control_helper);
 
         Bundle bundle = getIntent().getExtras();
@@ -77,8 +77,8 @@ public class RtcActivity extends Activity {
 
     private void startScreenCapture() {
         MediaProjectionManager manager = (MediaProjectionManager) getApplication()
-            .getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+                .getSystemService(Context.MEDIA_PROJECTION_SERVICE);
         startActivityForResult(manager.createScreenCaptureIntent(),
-            CAPTURE_PERMISSION_REQUEST_CODE);
+                CAPTURE_PERMISSION_REQUEST_CODE);
     }
 }

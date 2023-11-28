@@ -7,11 +7,11 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 
 /**
@@ -66,7 +66,7 @@ public class FTIMonitor {
         SystemProperties.set("persist.sys.tr369.FTI.residence.duration", String.valueOf(duration));
 
         if (isUserSetupComplete()) {
-            Log.d(TAG, "The monitored FTI residence duration time is: " + duration + "ms");
+            LogUtils.d(TAG, "The monitored FTI residence duration time is: " + duration + "ms");
             mHandler.removeMessages(MSG_START_MONITOR_FTI_DURATION);
         } else {
             mCycles++;

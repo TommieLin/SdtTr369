@@ -1,6 +1,6 @@
 package com.sdt.diagnose.common;
 
-import android.util.Log;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,7 +39,7 @@ public class XshellClient {
 
             String workPath = GlobalContext.getContext().getDataDir().getPath();
             if (!PtyProcess.setWorkPath(workPath)) {
-                Log.e(TAG, "Failed to set work path: " + workPath);
+                LogUtils.e(TAG, "Failed to set work path: " + workPath);
             }
 
             Map<String, String> env = new HashMap<>(System.getenv());
@@ -50,7 +50,7 @@ public class XshellClient {
 
             mSocket.on(Socket.EVENT_CONNECT, XshellClient::onConnected)
                     .on(Socket.EVENT_DISCONNECT, XshellClient::onDisConnected)
-                    .on(Socket.EVENT_PONG, objects -> Log.i(TAG, "IoSocket pong..."))
+                    .on(Socket.EVENT_PONG, objects -> LogUtils.i(TAG, "IoSocket pong..."))
                     .on(Socket.EVENT_CONNECT_ERROR, XshellClient::onConnectError)
                     // 自定义事件`SEND_DATA_EVENT` -> 接收服务端消息
                     .on(Socket.EVENT_MESSAGE, XshellClient::onMessage);
@@ -59,7 +59,7 @@ public class XshellClient {
             forwardThread = new ForwardThread();
             mSocket.connect();
         } catch (Exception e) {
-            Log.e(TAG, "XshellClient start error, " + e.getMessage());
+            LogUtils.e(TAG, "start error, " + e.getMessage());
         }
     }
 
@@ -68,7 +68,7 @@ public class XshellClient {
             if (ptyProcessOutputStream != null) ptyProcessOutputStream.close();
             if (ptyProcessInputStream != null) ptyProcessInputStream.close();
         } catch (IOException e) {
-            Log.e(TAG, "pty ProcessStream error, " + e.getMessage());
+            LogUtils.e(TAG, "pty ProcessStream error, " + e.getMessage());
         } finally {
             ptyProcessOutputStream = null;
             ptyProcessInputStream = null;
@@ -91,12 +91,12 @@ public class XshellClient {
 
 
     private static void onConnected(Object[] objects) {
-        Log.i(TAG, "XshellClient connected...");
+        LogUtils.i(TAG, "connected...");
         forwardThread.start();
     }
 
     private static void onDisConnected(Object[] objects) {
-        Log.i(TAG, "XshellClient disconnect...");
+        LogUtils.i(TAG, "disconnect...");
         stop();
     }
 
@@ -111,7 +111,7 @@ public class XshellClient {
     }
 
     private static void onConnectError(Object[] objects) {
-        Log.i(TAG, "XshellClient onConnectError: " + objects[0].toString());
+        LogUtils.i(TAG, "onConnectError: " + objects[0].toString());
         stop();
     }
 
@@ -119,7 +119,7 @@ public class XshellClient {
         @Override
         public void run() {
             try {
-                Log.i(TAG, "XshellClient forwardThread started......");
+                LogUtils.i(TAG, "ForwardThread started......");
                 int len = 0;
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 byte[] bytes = new byte[1024];
@@ -131,7 +131,7 @@ public class XshellClient {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.i(TAG, "XshellClient forwardThread end...");
+            LogUtils.i(TAG, "ForwardThread end...");
         }
     }
 }

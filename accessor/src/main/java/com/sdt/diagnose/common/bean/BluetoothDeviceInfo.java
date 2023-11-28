@@ -8,9 +8,10 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -115,13 +116,13 @@ public class BluetoothDeviceInfo {
 
     private void parseType(BluetoothDevice device) {
         final BluetoothClass bluetoothClass = device.getBluetoothClass();
-        Log.d(TAG, "BluetoothDeviceInfo: bluetoothClass=" + bluetoothClass);
+        LogUtils.d(TAG, "bluetoothClass: " + bluetoothClass);
         int devClass = -1;
         if (bluetoothClass != null) {
             devClass = bluetoothClass.getDeviceClass();
         }
 
-        Log.d(TAG, "BluetoothDeviceInfo: devClass=" + devClass);
+        LogUtils.d(TAG, "devClass: " + devClass);
 
         String type = "";
         if (devClass == BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET) {
@@ -146,7 +147,7 @@ public class BluetoothDeviceInfo {
     }
 
     public void disConnectGatt() {
-        Log.d(TAG, "disConnectGatt");
+        LogUtils.d(TAG, "disConnectGatt");
         mDeviceGatt.disconnect();
         mDeviceGatt.getDevice().removeBond();
         mDeviceGatt.close();
@@ -160,7 +161,7 @@ public class BluetoothDeviceInfo {
             method.setAccessible(true);
             method.invoke(this.mDeviceGatt);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            Log.e(TAG, "BluetoothDeviceInfo: refresh error, " + e.getMessage());
+            LogUtils.e(TAG, "refresh error, " + e.getMessage());
         }
     }
 
@@ -172,14 +173,14 @@ public class BluetoothDeviceInfo {
                 mDeviceGatt.close();
             }
             mDeviceGatt = device.connectGatt(context, true, new BluetoothDeviceInfo.GattBatteryCallbacks());
-            Log.d(TAG, mDeviceGatt.hashCode() + "");
+            LogUtils.d(TAG, "connectGatt Code: " + mDeviceGatt.hashCode());
             // device.connectGatt 后，会通过AIDL运行在系统进程，此线程未等GattBatteryCallbacks回调就会走完.
             // 就会导致获取不到蓝牙遥控器的版本号和电量。
             // 另一种方案:加锁。此方案风险在于在何时解锁；如果是第三方遥控器也执行到此处，也加锁了怎么办?
             try {
                 Thread.sleep(2000);
             } catch (Exception e) {
-                Log.e(TAG, "BluetoothDeviceInfo: connectGatt error, " + e.getMessage());
+                LogUtils.e(TAG, "connectGatt error, " + e.getMessage());
             }
         }
     }
@@ -208,8 +209,8 @@ public class BluetoothDeviceInfo {
 
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            Log.d(TAG, "Connection status:" + status + " state:" + newState);
-            Log.d(TAG, "onConnectionStateChange : " + Thread.currentThread().getId());
+            LogUtils.d(TAG, "Connection status: " + status + ", state: " + newState);
+            LogUtils.d(TAG, "onConnectionStateChange: " + Thread.currentThread().getId());
             if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED) {
                 gatt.discoverServices();
             } else if (status == 22 && newState == BluetoothGatt.STATE_DISCONNECTED) {
@@ -219,29 +220,29 @@ public class BluetoothDeviceInfo {
 
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            Log.d(TAG, "onServicesDiscovered : " + Thread.currentThread().getId());
+            LogUtils.d(TAG, "onServicesDiscovered: " + Thread.currentThread().getId());
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                Log.d(TAG, "Service discovery failure on " + gatt);
+                LogUtils.e(TAG, "Service discovery failure on " + gatt);
                 return;
             }
 
             final BluetoothGattService battService = gatt.getService(GATT_BATTERY_SERVICE_UUID);
             if (battService == null) {
-                Log.d(TAG, "No battery service");
+                LogUtils.e(TAG, "No battery service");
                 return;
             }
 
             final BluetoothGattCharacteristic battLevel =
                     battService.getCharacteristic(GATT_BATTERY_LEVEL_CHARACTERISTIC_UUID);
             if (battLevel == null) {
-                Log.d(TAG, "No battery level");
+                LogUtils.e(TAG, "No battery level");
                 return;
             }
 
             gatt.readCharacteristic(battLevel);
 
             //get remote version
-            Log.d(TAG, "rcu version service");
+            LogUtils.d(TAG, "rcu version service");
             addGattCharacteristic(findGattServiceCharacter(mDeviceGatt));
             setCharacteristicNotification(CHARACTER_VENDOR_IN_NAME, true);
             setCharacteristicNotification(CHARACTER_HID_IN_NAME, true);
@@ -250,16 +251,16 @@ public class BluetoothDeviceInfo {
         @Override
         public void onCharacteristicRead(BluetoothGatt gatt,
                                          BluetoothGattCharacteristic characteristic, int status) {
-            Log.d(TAG, "onCharacteristicRead : " + Thread.currentThread().getId());
+            LogUtils.d(TAG, "onCharacteristicRead: " + Thread.currentThread().getId());
             if (status != BluetoothGatt.GATT_SUCCESS) {
-                Log.d(TAG, "Read characteristic failure on " + gatt + " " + characteristic);
+                LogUtils.e(TAG, "Read characteristic failure on " + gatt + ".. " + characteristic);
                 return;
             }
 
             if (GATT_BATTERY_LEVEL_CHARACTERISTIC_UUID.equals(characteristic.getUuid())) {
                 final int batteryLevel =
                         characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-                Log.d(TAG, "batteryLevel =" + batteryLevel);
+                LogUtils.d(TAG, "batteryLevel: " + batteryLevel);
                 setBatteryLevel(batteryLevel);
             }
 
@@ -275,14 +276,14 @@ public class BluetoothDeviceInfo {
 
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
-            Log.d(TAG, "onCharacteristicChanged :" + Thread.currentThread().getId());
+            LogUtils.d(TAG, "onCharacteristicChanged: " + Thread.currentThread().getId());
             super.onCharacteristicChanged(gatt, characteristic);
             if (!characteristic.getUuid().toString().equals("00002a4d-0000-1000-8000-00805f9b34fb")) {
-                Log.d(TAG, "on not care CharacteristicChanged ");
+                LogUtils.d(TAG, "on not care CharacteristicChanged");
                 return;
             }
             if (characteristic.getValue().length == 8) {
-                Log.d(TAG, "key input");
+                LogUtils.d(TAG, "key input");
                 return;
             }
 
@@ -294,7 +295,7 @@ public class BluetoothDeviceInfo {
 
             if (recBuff[1] == BLE_VERSION_ASW) {
                 String rcuVersion = byteToHexStr(recBuff[5]) + byteToHexStr(recBuff[4]);
-                Log.d(TAG, "rcuVersion:" + rcuVersion);
+                LogUtils.d(TAG, "rcuVersion: " + rcuVersion);
                 setSkyRcuVersion(rcuVersion);
                 setType("RemoteControl");
             }
@@ -324,14 +325,14 @@ public class BluetoothDeviceInfo {
 
     private BluetoothGattCharacteristic getGattCharacteristic(String characteristicKey) {
         if (mGattCharacteristicMap == null) {
-            Log.d(TAG, "mGattCharacteristicMap is null.");
+            LogUtils.d(TAG, "mGattCharacteristicMap is null.");
             return null;
         }
         return mGattCharacteristicMap.get(characteristicKey);
     }
 
     private void writeCharacteristic(String characterKey, byte[] buf) {
-        Log.d(TAG, "writeCharacteristic");
+        LogUtils.d(TAG, "writeCharacteristic");
         final String key = characterKey;
         final byte[] bufs = buf;
 
@@ -342,13 +343,13 @@ public class BluetoothDeviceInfo {
             }
             characteristic.setValue(bufs);
             isWriteThread = mDeviceGatt.writeCharacteristic(characteristic);
-            Log.d(TAG, "writeCharacteristic--isWriteThread:" + isWriteThread);
+            LogUtils.d(TAG, "writeCharacteristic isWriteThread: " + isWriteThread);
         }).start();
     }
 
     private HashMap<String, BluetoothGattCharacteristic> findGattServiceCharacter(BluetoothGatt gatt) {
         HashMap<String, BluetoothGattCharacteristic> map = new HashMap<String, BluetoothGattCharacteristic>();
-        Log.d(TAG, "findGattServiceCharacter");
+        LogUtils.d(TAG, "findGattServiceCharacter");
         BluetoothGattService hidService = gatt.getService(UUID_HID_SERVICE);
         if (hidService != null) {
             List<BluetoothGattCharacteristic> hidCharList = hidService.getCharacteristics();

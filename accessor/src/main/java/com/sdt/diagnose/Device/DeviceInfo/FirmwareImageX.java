@@ -2,10 +2,10 @@ package com.sdt.diagnose.Device.DeviceInfo;
 
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.ProtocolPathUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 
@@ -56,7 +56,7 @@ public class FirmwareImageX {
         list.add("_a");
         list.add("_b");
         String active = SystemProperties.get("ro.boot.slot_suffix", "_a");
-        Log.d(TAG, "getFirmwareImageName: active=" + active);
+        LogUtils.d(TAG, "getFirmwareImageName active: " + active);
 
         if (index == 1) {
             return active;

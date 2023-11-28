@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +11,7 @@ import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 /**
  * Device.LAN. tr181已废弃
@@ -37,7 +37,7 @@ public class LanX {
                         if (msg.what == MSG_CHECK_INTERNET_CONNECTION) {
                             mHandler.removeMessages(MSG_CHECK_INTERNET_CONNECTION);
                             if (!NetworkUtils.canAccessInternet(GlobalContext.getContext())) {
-                                Log.e(TAG, "Unable to access the internet, switching to dynamic IP soon.");
+                                LogUtils.e(TAG, "Unable to access the internet, switching to dynamic IP soon.");
                                 NetworkUtils.setStaticIP(GlobalContext.getContext(), "DHCP", null);
                             }
                         }
@@ -75,7 +75,7 @@ public class LanX {
         NetworkUtils.setStaticIP(GlobalContext.getContext(), Lan.AddressType, Lan.ip);
         if (Lan.AddressType.equals("Static")) {
             if (!mHandler.hasMessages(MSG_CHECK_INTERNET_CONNECTION)) {
-                Log.i(TAG, "Switched to static IP, about to verify if this IP can access the internet.");
+                LogUtils.i(TAG, "Switched to static IP, about to verify if this IP can access the internet.");
                 mHandler.sendEmptyMessageDelayed(MSG_CHECK_INTERNET_CONNECTION, 10000);
             }
         }

@@ -5,7 +5,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -17,6 +16,7 @@ import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.NetworkStatisticsInfo;
 import com.sdt.diagnose.common.bean.ScanedWifiInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.List;
 
@@ -140,7 +140,7 @@ public class EndPointX {
         try {
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
             int index = wifiInfo.getWifiStandard();
-            Log.d(TAG, "The WiFi standard is: " + wifiStandard[index] + ", index: " + index);
+             LogUtils.d(TAG, "The WiFi standard is: " + wifiStandard[index] + ", index: " + index);
             return wifiStandard[index];
         } catch (Exception e) {
             return wifiStandard[0];

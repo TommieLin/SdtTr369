@@ -6,7 +6,8 @@ import android.net.NetworkInfo;
 import android.net.TrafficStats;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.util.Log;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -95,7 +96,7 @@ public class NetWorkSpeedUtils {
             proc = runtime.exec(command);
             stringBuffer = new StringBuilder();
             if (proc.waitFor() != 0) {
-                Log.e(TAG, "runShellCommand exit value: " + proc.exitValue());
+                LogUtils.e(TAG, "runShellCommand exit value: " + proc.exitValue());
             }
             BufferedReader in = new BufferedReader(new InputStreamReader(
                     proc.getInputStream()));
@@ -106,12 +107,12 @@ public class NetWorkSpeedUtils {
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "runShellCommand exit error: " + e.getMessage());
+            LogUtils.e(TAG, "runShellCommand exit error: " + e.getMessage());
         } finally {
             try {
                 if (proc != null) proc.destroy();
             } catch (Exception e2) {
-                Log.e(TAG, "runShellCommand destroy error: " + e2.getMessage());
+                LogUtils.e(TAG, "runShellCommand destroy error: " + e2.getMessage());
             }
         }
         return (stringBuffer != null) ? stringBuffer.toString() : "";

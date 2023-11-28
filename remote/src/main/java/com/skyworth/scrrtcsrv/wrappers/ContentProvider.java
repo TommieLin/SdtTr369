@@ -108,7 +108,8 @@ public class ContentProvider implements Closeable {
                     break;
             }
             return (Bundle) method.invoke(provider, args);
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | ClassNotFoundException | InstantiationException e) {
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException |
+                 ClassNotFoundException | InstantiationException e) {
             Ln.e("Could not invoke method", e);
             throw e;
         }

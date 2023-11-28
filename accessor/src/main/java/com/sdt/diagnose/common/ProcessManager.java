@@ -3,9 +3,9 @@ package com.sdt.diagnose.common;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Debug;
-import android.util.Log;
 
 import com.sdt.diagnose.common.bean.ProcessInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.List;
 
@@ -23,10 +23,10 @@ public class ProcessManager extends AbstractCachedArray<ProcessInfo> {
         if (am != null) {
             procInfoList = am.getRunningAppProcesses();
             if (!procInfoList.isEmpty()) {
-                Log.d(TAG, "buildList: procInfoList size = " + procInfoList.size());
+                LogUtils.d(TAG, "procInfoList size: " + procInfoList.size());
                 for (int i = 0; i < procInfoList.size(); i++) {
                     ProcessInfo process = new ProcessInfo(procInfoList.get(i));
-                    Log.d(TAG, "buildList: procInfoList name = " + process.getCommand());
+                    LogUtils.d(TAG, "procInfoList name: " + process.getCommand());
                     int[] pids = new int[1];
                     pids[0] = process.getPid();
                     Debug.MemoryInfo[] curMemInfo = am.getProcessMemoryInfo(pids);

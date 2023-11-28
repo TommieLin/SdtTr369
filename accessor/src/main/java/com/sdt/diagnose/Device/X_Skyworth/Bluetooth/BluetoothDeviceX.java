@@ -1,7 +1,6 @@
 package com.sdt.diagnose.Device.X_Skyworth.Bluetooth;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
@@ -10,6 +9,7 @@ import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.IProtocolArray;
 import com.sdt.diagnose.common.ProtocolPathUtils;
 import com.sdt.diagnose.common.bean.BluetoothDeviceInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
 
     @Tr369Set("Device.X_Skyworth.BluetoothDevice.1.ConnectionStatus")
     public boolean SK_TR369_SetConnectionStatus(String path, String val) {
-        Log.d(TAG, "SetConnectionStatus");
+        LogUtils.d(TAG, "SetConnectionStatus");
         boolean ret = false;
         if (mBluetoothDevices == null) {
             mBluetoothDevices = new BluetoothDeviceManager(GlobalContext.getContext());
@@ -106,7 +106,7 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
         try {
             Thread.sleep(2000);
         } catch (InterruptedException e) {
-            Log.e(TAG, "updateBluetoothList error, " + e.getMessage());
+            LogUtils.e(TAG, "updateBluetoothList error, " + e.getMessage());
         }
 
         if (mBluetoothDevices != null) {
@@ -119,7 +119,7 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
 
         mBluetoothDevices = new BluetoothDeviceManager(GlobalContext.getContext());
         int size = mBluetoothDevices.getList().size();
-        Log.d(TAG, "Get the number of Bluetooth devices: " + size);
+        LogUtils.d(TAG, "Get the number of Bluetooth devices: " + size);
         if (size > 0) DbManager.addMultiObject("Device.X_Skyworth.BluetoothDevice", size);
     }
 }

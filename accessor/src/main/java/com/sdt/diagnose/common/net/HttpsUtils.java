@@ -1,7 +1,6 @@
 package com.sdt.diagnose.common.net;
 
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +11,7 @@ import com.sdt.diagnose.common.FileUtils;
 import com.sdt.diagnose.common.bean.LogResponseBean;
 import com.sdt.diagnose.common.bean.NotificationBean;
 import com.sdt.diagnose.common.bean.StandbyBean;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class HttpsUtils {
-    public static final String TAG = "HttpsUtils";
+    private static final String TAG = "HttpsUtils";
     public static OnUploadCallback mOnUploadCallback;
     static CreateSSL mCreateSSL = new CreateSSL();
 
@@ -51,7 +51,7 @@ public class HttpsUtils {
         MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
         Request request = new Request.Builder()
                 .url(url)
-                .addHeader("dataType", dataType)    //取值有 upload  download failure
+                .addHeader("dataType", dataType)    //取值有 upload download failure
                 .addHeader("transactionId", transactionId)
                 .addHeader("isEnd", isEnd)      //取值有 true false 用于指示测速是否结束
                 .post(RequestBody.create(mediaType, content))
@@ -59,12 +59,14 @@ public class HttpsUtils {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "onFailure: " + e.getMessage());
+                LogUtils.e(TAG, "uploadSpeedData onFailure: " + e.getMessage());
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                Log.d(TAG, response.protocol() + " " + response.code() + " " + response.message());
+                LogUtils.d(TAG, "uploadSpeedData protocol: " + response.protocol()
+                        + ", code: " + response.code()
+                        + ", message: " + response.message());
             }
         });
     }
@@ -83,7 +85,7 @@ public class HttpsUtils {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "uploadLog onFailure: " + e.getMessage());
+                LogUtils.e(TAG, "uploadLog onFailure: " + e.getMessage());
             }
 
             @Override
@@ -93,10 +95,10 @@ public class HttpsUtils {
                 LogResponseBean logResponseBean = gson.fromJson(response.body().string(),
                         LogResponseBean.class);
                 if (logResponseBean.getCode() != 0) {
-                    Log.e(TAG, "uploadLog response code: " + logResponseBean.getCode() + ", stop upload log");
+                    LogUtils.e(TAG, "uploadLog response code: " + logResponseBean.getCode() + ", stop upload log");
                     LogManager.getInstance().stopLog();
                 }
-                Log.d(TAG, "protocol: " + response.protocol()
+                LogUtils.d(TAG, "uploadLog protocol: " + response.protocol()
                         + ", code: " + response.code()
                         + ", message: " + response.message());
             }
@@ -120,7 +122,7 @@ public class HttpsUtils {
         param.put("confirmCode", String.valueOf(status));
         param.put("transactionId", transactionId);
         String wholeUrl = buildUrl(url, param);
-        Log.d(TAG, "uploadScreenshotAllowStatus wholeUrl: " + wholeUrl);
+        LogUtils.d(TAG, "uploadScreenshotAllowStatus wholeUrl: " + wholeUrl);
         requestAndCallback(wholeUrl);
     }
 
@@ -131,34 +133,34 @@ public class HttpsUtils {
         param.put("confirmMessage", confirmMessage);
         param.put("transactionId", transactionId);
         String wholeUrl = buildUrl(url, param);
-        Log.d(TAG, "uploadAllowStatus wholeUrl: " + wholeUrl);
+        LogUtils.d(TAG, "uploadAllowStatus wholeUrl: " + wholeUrl);
         requestAndCallback(wholeUrl);
     }
 
     public static void uploadStandbyStatus(int status) {
         String url = StandbyBean.getInstance().getUpdateUrl();
         if (TextUtils.isEmpty(url)) {
-            Log.e(TAG, "uploadStandbyStatus: The upload URL is empty!");
+            LogUtils.e(TAG, "uploadStandbyStatus: The upload URL is empty!");
             return;
         }
         HashMap<String, String> param = new HashMap<>();
         param.put("deviceId", DeviceInfoUtils.getSerialNumber());
         param.put("confirmCode", String.valueOf(status));
         String wholeUrl = buildUrl(url, param);
-        Log.d(TAG, "uploadStandbyStatus wholeUrl: " + wholeUrl);
+        LogUtils.d(TAG, "uploadStandbyStatus wholeUrl: " + wholeUrl);
         requestAndCallback(wholeUrl);
     }
 
     public static void uploadNotificationStatus(boolean isCompleted) {
         String url = NotificationBean.getInstance().getUrl();
         if (TextUtils.isEmpty(url)) {
-            Log.e(TAG, "uploadNotificationStatus: The upload URL is empty!");
+            LogUtils.e(TAG, "uploadNotificationStatus: The upload URL is empty!");
             return;
         }
         HashMap<String, String> param = new HashMap<>();
         param.put("status", String.valueOf(isCompleted));
         String wholeUrl = buildUrl(url, param);
-        Log.d(TAG, "uploadNotificationStatus wholeUrl: " + wholeUrl);
+        LogUtils.d(TAG, "uploadNotificationStatus wholeUrl: " + wholeUrl);
         requestAndCallback(wholeUrl);
     }
 
@@ -172,12 +174,12 @@ public class HttpsUtils {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "requestAndCallback onFailure: " + e.getMessage());
+                LogUtils.e(TAG, "requestAndCallback onFailure: " + e.getMessage());
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                Log.d(TAG, "requestAndCallback onResponse: " + response.protocol()
+                LogUtils.d(TAG, "requestAndCallback onResponse: " + response.protocol()
                         + ", code: " + response.code()
                         + ", message: " + response.message());
             }
@@ -188,7 +190,7 @@ public class HttpsUtils {
         CreateSSL createSSL = new CreateSSL();
         OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
         String wholeUrl = buildUrl(url, param);
-        Log.d(TAG, "######### Outis ### noticeResponse url: " + url + ", wholeUrl: " + wholeUrl);
+        LogUtils.d(TAG, "noticeResponse url: " + url + ", wholeUrl: " + wholeUrl);
         Request request = new Request.Builder()
                 .url(wholeUrl)
                 .get()
@@ -196,12 +198,12 @@ public class HttpsUtils {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "noticeResponse onFailure: " + e.getMessage());
+                LogUtils.e(TAG, "noticeResponse onFailure: " + e.getMessage());
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                Log.d(TAG, "noticeResponse onResponse: " + response.protocol()
+                LogUtils.d(TAG, "noticeResponse onResponse: " + response.protocol()
                         + ", code: " + response.code()
                         + ", message: " + response.message());
             }

@@ -7,10 +7,10 @@ import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.util.Log;
 
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.SpeedTestBean;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.skyworthdigital.speedtest.ui.SpeedTestService;
 
@@ -20,6 +20,7 @@ import com.skyworthdigital.speedtest.ui.SpeedTestService;
  * @CreateDate: 2021/8/18 16:51
  */
 public class DiagnoseServiceManager {
+    private static final String TAG = "DiagnoseServiceManager";
     private static DiagnoseServiceManager instance = null;
     public SpeedTestService service;
     private final Context mContext;
@@ -59,17 +60,23 @@ public class DiagnoseServiceManager {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
+                            String url = SpeedTestBean.getInstance().getUrl();
+                            LogUtils.d(TAG, "setResult url: " + url);
+                            if (!url.startsWith("https")) {
+                                LogUtils.e(TAG, "The URL set for network speed test is invalid. Please use the HTTPS protocol.");
+                                return;
+                            }
                             if (Double.parseDouble(mDownloadSpeed) <= 0
                                     || Double.parseDouble(mUploadSpeed) <= 0) {
                                 HttpsUtils.uploadSpeedData(
-                                        SpeedTestBean.getInstance().getUrl(),
+                                        url,
                                         mDownloadSpeed,
                                         "failure",
                                         SpeedTestBean.getInstance().getTransactionId(),
                                         "true");
                             } else {
                                 HttpsUtils.uploadSpeedData(
-                                        SpeedTestBean.getInstance().getUrl(),
+                                        url,
                                         mUploadSpeed,
                                         "upload",
                                         SpeedTestBean.getInstance().getTransactionId(),
@@ -78,7 +85,7 @@ public class DiagnoseServiceManager {
                             SpeedTestBean.getInstance().setUrl("");
                             SpeedTestBean.getInstance().setTransactionId("");
                             SpeedTestBean.getInstance().setEnable("0");
-                            Log.e("TAG", "unbindService");
+                            LogUtils.d(TAG, "unbindService");
                             mContext.unbindService(serviceConnection);
                         }
                     });
@@ -90,8 +97,14 @@ public class DiagnoseServiceManager {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
+                                String url = SpeedTestBean.getInstance().getUrl();
+                                LogUtils.d(TAG, "setDownloadSpeed url: " + url);
+                                if (!url.startsWith("https")) {
+                                    LogUtils.e(TAG, "The URL set for network speed test is invalid. Please use the HTTPS protocol.");
+                                    return;
+                                }
                                 HttpsUtils.uploadSpeedData(
-                                        SpeedTestBean.getInstance().getUrl(),
+                                        url,
                                         mDownloadSpeed,
                                         "download",
                                         SpeedTestBean.getInstance().getTransactionId(),
@@ -107,8 +120,14 @@ public class DiagnoseServiceManager {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
+                                String url = SpeedTestBean.getInstance().getUrl();
+                                LogUtils.d(TAG, "setUploadSpeed url: " + url);
+                                if (!url.startsWith("https")) {
+                                    LogUtils.e(TAG, "The URL set for network speed test is invalid. Please use the HTTPS protocol.");
+                                    return;
+                                }
                                 HttpsUtils.uploadSpeedData(
-                                        SpeedTestBean.getInstance().getUrl(),
+                                        url,
                                         mUploadSpeed,
                                         "upload",
                                         SpeedTestBean.getInstance().getTransactionId(),
@@ -122,7 +141,6 @@ public class DiagnoseServiceManager {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-
         }
     };
 

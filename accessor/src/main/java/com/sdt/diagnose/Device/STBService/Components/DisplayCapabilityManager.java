@@ -2,12 +2,12 @@ package com.sdt.diagnose.Device.STBService.Components;
 
 import android.content.Context;
 import android.hardware.display.DisplayManager;
-import android.util.Log;
 import android.view.Display;
 
 import com.droidlogic.app.OutputModeManager;
 import com.droidlogic.app.SystemControlManager;
 import com.google.common.collect.ImmutableMap;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -72,7 +72,7 @@ public class DisplayCapabilityManager {
         }
 
         Display.Mode[] frameworkSupportedModes = mDisplayManager.getDisplay(0).getSupportedModes();
-        Log.d(TAG, "framework support mode: " + Arrays.toString(frameworkSupportedModes));
+        LogUtils.d(TAG, "framework support mode: " + Arrays.toString(frameworkSupportedModes));
         Map<String, Display.Mode> modeMapTmp = USER_PREFERRED_MODE_BY_MODE;
 
         boolean matched = false;
@@ -87,7 +87,7 @@ public class DisplayCapabilityManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to process framework support mode, " + e.getMessage());
+            LogUtils.e(TAG, "Failed to process framework support mode, " + e.getMessage());
         }
 
         return matched;
@@ -101,18 +101,18 @@ public class DisplayCapabilityManager {
                 sysHdmiModeIterator.remove();
             }
         }
-        Log.d(TAG, "filterNoSupportModeList: " + systemControlModeList);
+        LogUtils.d(TAG, "filterNoSupportModeList: " + systemControlModeList);
     }
 
     private String filterHdmiModes(String filterHdmiMode) {
-        Log.d(TAG, "filterHdmiMode: " + filterHdmiMode);
+        LogUtils.d(TAG, "filterHdmiMode: " + filterHdmiMode);
         try {
             if (!OutputModeManager.getInstance(mContext).getFrameRateOffset().contains("1")
                     || filterHdmiMode == null) {
                 return filterHdmiMode;
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "filterHdmiModes: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "filterHdmiModes: OutputModeManager call failed, " + e.getMessage());
             return filterHdmiMode;
         }
 
@@ -131,7 +131,7 @@ public class DisplayCapabilityManager {
             filterHdmiModeStr = filterHdmiMode.replace("24hz", "23.976hz");
         }
 
-        Log.d(TAG, "filterHdmiModeStr: " + filterHdmiModeStr);
+        LogUtils.d(TAG, "filterHdmiModeStr: " + filterHdmiModeStr);
         return filterHdmiModeStr;
     }
 
@@ -140,7 +140,7 @@ public class DisplayCapabilityManager {
         try {
             outputMode = OutputModeManager.getInstance(mContext).getCurrentOutputMode();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "isCvbsMode: OutputModeManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "isCvbsMode: OutputModeManager call failed, " + e.getMessage());
         }
         return outputMode.contains("cvbs");
     }
@@ -185,12 +185,12 @@ public class DisplayCapabilityManager {
             }
             setUserPreferredDisplayMode(mode);
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "setResolutionAndRefreshRateByMode: SystemControlManager call failed, " + e.getMessage());
+            LogUtils.e(TAG, "setResolutionAndRefreshRateByMode: SystemControlManager call failed, " + e.getMessage());
         }
     }
 
     private void setUserPreferredDisplayMode(String userSetMode) {
-        Log.d(TAG, "userSetMode = " + userSetMode);
+        LogUtils.d(TAG, "userSetMode: " + userSetMode);
         String mode = filterHdmiModes(userSetMode);
 
         // The framework filters when the system is at the current resolution, so use SystemControl to set it.
@@ -198,11 +198,11 @@ public class DisplayCapabilityManager {
         boolean isSystemHdmiDispMode =
                 checkSysCurrentMode(mDisplayManager.getDisplay(0).getMode(), getPreferredByMode(mode));
         if (isSystemHdmiDispMode) {
-            Log.d(TAG, "setMboxOutputMode");
+            LogUtils.d(TAG, "setMboxOutputMode");
             try {
                 SystemControlManager.getInstance().setMboxOutputMode(userSetMode);
             } catch (NoClassDefFoundError e) {
-                Log.e(TAG, "setUserPreferredDisplayMode: SystemControlManager call failed, " + e.getMessage());
+                LogUtils.e(TAG, "setUserPreferredDisplayMode: SystemControlManager call failed, " + e.getMessage());
             }
             return;
         }
@@ -211,14 +211,14 @@ public class DisplayCapabilityManager {
         Display.Mode matcherMode = checkUserPreferredMode(supportedModes, USER_PREFERRED_MODE_BY_MODE.get(mode));
         Display.Mode userPreferredDisplayMode = mDisplayManager.getUserPreferredDisplayMode();
         if (userPreferredDisplayMode != null) {
-            Log.d(TAG, "userPreferredDisplayMode: " + userPreferredDisplayMode);
+            LogUtils.d(TAG, "userPreferredDisplayMode: " + userPreferredDisplayMode);
             if (checkSysCurrentMode(userPreferredDisplayMode, matcherMode)) {
                 mDisplayManager.clearUserPreferredDisplayMode();
             }
         }
 
         // set resolution
-        Log.d(TAG, "matcherMode: " + matcherMode);
+        LogUtils.d(TAG, "matcherMode: " + matcherMode);
         mDisplayManager.setUserPreferredDisplayMode(matcherMode);
     }
 }

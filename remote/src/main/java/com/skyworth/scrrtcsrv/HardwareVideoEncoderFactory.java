@@ -19,6 +19,7 @@ import java.util.List;
 import androidx.annotation.Nullable;
 
 class HardwareVideoEncoderFactory implements VideoEncoderFactory {
+    private static final String TAG = "TR369 HardwareVideoEncoderFactory";
     private static final List<String> H264_HW_EXCEPTION_MODELS = Arrays.asList("SAMSUNG-SGH-I337", "Nexus 7", "Nexus 4");
 
     @Nullable
@@ -29,14 +30,14 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
     private final Predicate<MediaCodecInfo> codecAllowedPredicate;
 
     public HardwareVideoEncoderFactory(EglBase.Context sharedContext, boolean enableIntelVp8Encoder, boolean enableH264HighProfile) {
-        this(sharedContext, enableIntelVp8Encoder, enableH264HighProfile, (Predicate)null);
+        this(sharedContext, enableIntelVp8Encoder, enableH264HighProfile, (Predicate) null);
     }
 
     public HardwareVideoEncoderFactory(EglBase.Context sharedContext, boolean enableIntelVp8Encoder, boolean enableH264HighProfile, @Nullable Predicate<MediaCodecInfo> codecAllowedPredicate) {
         if (sharedContext instanceof EglBase14.Context) {
-            this.sharedContext = (EglBase14.Context)sharedContext;
+            this.sharedContext = (EglBase14.Context) sharedContext;
         } else {
-            Log.w("HardwareVideoEncoderFactory", "No shared EglBase.Context.  Encoders will not use texture mode.");
+            Log.w(TAG, "No shared EglBase.Context. Encoders will not use texture mode.");
             this.sharedContext = null;
         }
 
@@ -47,9 +48,6 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
 
     @Nullable
     public VideoEncoder createEncoder(VideoCodecInfo input) {
-        if (Build.VERSION.SDK_INT < 19) {
-            return null;
-        }
         VideoCodecMimeType type = VideoCodecMimeType.valueOf(input.name);
         MediaCodecInfo info = this.findCodecForType(type);
         if (info == null) {
@@ -75,15 +73,12 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
     }
 
     public VideoCodecInfo[] getSupportedCodecs() {
-        if (Build.VERSION.SDK_INT < 19) {
-            return new VideoCodecInfo[0];
-        }
 
         List<VideoCodecInfo> supportedCodecInfos = new ArrayList<>();
         VideoCodecMimeType[] mimeTypes = new VideoCodecMimeType[]{VideoCodecMimeType.VP8, VideoCodecMimeType.VP9, VideoCodecMimeType.H264};
         int length = mimeTypes.length;
 
-        for(int i = 0; i < length; ++i) {
+        for (int i = 0; i < length; ++i) {
             VideoCodecMimeType type = mimeTypes[i];
             MediaCodecInfo codec = this.findCodecForType(type);
             if (codec != null) {
@@ -101,7 +96,7 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
 
     @Nullable
     private MediaCodecInfo findCodecForType(VideoCodecMimeType type) {
-        for(int i = 0; i < MediaCodecList.getCodecCount(); ++i) {
+        for (int i = 0; i < MediaCodecList.getCodecCount(); ++i) {
             MediaCodecInfo info = null;
 
             try {
@@ -129,29 +124,29 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
     }
 
     private boolean isHardwareSupportedInCurrentSdk(MediaCodecInfo info, VideoCodecMimeType type) {
-        switch(type) {
-        case VP8:
-            return this.isHardwareSupportedInCurrentSdkVp8(info);
-        case VP9:
-            return this.isHardwareSupportedInCurrentSdkVp9(info);
-        case H264:
-            return this.isHardwareSupportedInCurrentSdkH264(info);
-        default:
-            return false;
+        switch (type) {
+            case VP8:
+                return this.isHardwareSupportedInCurrentSdkVp8(info);
+            case VP9:
+                return this.isHardwareSupportedInCurrentSdkVp9(info);
+            case H264:
+                return this.isHardwareSupportedInCurrentSdkH264(info);
+            default:
+                return false;
         }
     }
 
     private boolean isHardwareSupportedInCurrentSdkVp8(MediaCodecInfo info) {
         String name = info.getName();
-        return name.startsWith(MediaCodecUtils.QCOM_PREFIX) && Build.VERSION.SDK_INT >= 19 ||
-            name.startsWith(MediaCodecUtils.EXYNOS_PREFIX) && Build.VERSION.SDK_INT >= 23 ||
-            name.startsWith(MediaCodecUtils.INTEL_PREFIX) && Build.VERSION.SDK_INT >= 21 && this.enableIntelVp8Encoder;
+        return name.startsWith(MediaCodecUtils.QCOM_PREFIX)
+                || name.startsWith(MediaCodecUtils.EXYNOS_PREFIX)
+                || name.startsWith(MediaCodecUtils.INTEL_PREFIX) && this.enableIntelVp8Encoder;
     }
 
     private boolean isHardwareSupportedInCurrentSdkVp9(MediaCodecInfo info) {
         String name = info.getName();
-        return (name.startsWith(MediaCodecUtils.QCOM_PREFIX) ||
-            name.startsWith(MediaCodecUtils.EXYNOS_PREFIX)) && Build.VERSION.SDK_INT >= 24;
+        return name.startsWith(MediaCodecUtils.QCOM_PREFIX)
+                || name.startsWith(MediaCodecUtils.EXYNOS_PREFIX);
     }
 
     private boolean isHardwareSupportedInCurrentSdkH264(MediaCodecInfo info) {
@@ -159,43 +154,32 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
             return false;
         } else {
             String name = info.getName();
-            return name.startsWith(MediaCodecUtils.QCOM_PREFIX) && Build.VERSION.SDK_INT >= 19 ||
-                name.startsWith(MediaCodecUtils.EXYNOS_PREFIX) && Build.VERSION.SDK_INT >= 21 ||
-                name.startsWith(MediaCodecUtils.AML_PREFIX) && Build.VERSION.SDK_INT >= 26;
+            return name.startsWith(MediaCodecUtils.QCOM_PREFIX)
+                    || name.startsWith(MediaCodecUtils.EXYNOS_PREFIX)
+                    || name.startsWith(MediaCodecUtils.AML_PREFIX);
         }
     }
 
     private boolean isMediaCodecAllowed(MediaCodecInfo info) {
-        return this.codecAllowedPredicate == null ? true : this.codecAllowedPredicate.test(info);
+        return this.codecAllowedPredicate == null || this.codecAllowedPredicate.test(info);
     }
 
     private int getKeyFrameIntervalSec(VideoCodecMimeType type) {
-        switch(type) {
-        case VP8:
-        case VP9:
-            return 100;
-        case H264:
-            return 20;
-        default:
-            throw new IllegalArgumentException("Unsupported VideoCodecMimeType " + type);
+        switch (type) {
+            case VP8:
+            case VP9:
+                return 100;
+            case H264:
+                return 20;
+            default:
+                throw new IllegalArgumentException("Unsupported VideoCodecMimeType " + type);
         }
     }
 
     private int getForcedKeyFrameIntervalMs(VideoCodecMimeType type, String codecName) {
         if (type == VideoCodecMimeType.VP8 && codecName.startsWith(MediaCodecUtils.QCOM_PREFIX)) {
-            if (Build.VERSION.SDK_INT == 21 || Build.VERSION.SDK_INT == 22) {
-                return 15000;
-            }
-
-            if (Build.VERSION.SDK_INT == 23) {
-                return 20000;
-            }
-
-            if (Build.VERSION.SDK_INT > 23) {
-                return 15000;
-            }
+            return 15000;
         }
-
         return 0;
     }
 
@@ -208,8 +192,8 @@ class HardwareVideoEncoderFactory implements VideoEncoderFactory {
     }
 
     private boolean isH264HighProfileSupported(MediaCodecInfo info) {
-        return this.enableH264HighProfile && Build.VERSION.SDK_INT > 23 &&
-            (info.getName().startsWith(MediaCodecUtils.EXYNOS_PREFIX) ||
-            (info.getName().startsWith(MediaCodecUtils.AML_PREFIX) && Build.VERSION.SDK_INT >= 26));
+        return this.enableH264HighProfile
+                && (info.getName().startsWith(MediaCodecUtils.EXYNOS_PREFIX)
+                || info.getName().startsWith(MediaCodecUtils.AML_PREFIX));
     }
 }

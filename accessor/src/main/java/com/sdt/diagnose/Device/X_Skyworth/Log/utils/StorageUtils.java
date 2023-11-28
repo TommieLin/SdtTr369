@@ -2,9 +2,9 @@ package com.sdt.diagnose.Device.X_Skyworth.Log.utils;
 
 import android.annotation.SuppressLint;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.Property;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,7 +45,7 @@ public final class StorageUtils {
             properties.add(property);
             writeInternal(file, properties);
         } catch (Exception e) {
-            Log.e(TAG, "writeProperty error:" + e.getMessage());
+            LogUtils.e(TAG, "writeProperty error: " + e.getMessage());
         }
     }
 
@@ -78,14 +78,14 @@ public final class StorageUtils {
                 f.setExecutable(true, false);
             }
         } catch (Exception e) {
-            Log.e(TAG, "writeInternal file error:" + e.getMessage());
+            LogUtils.e(TAG, "writeInternal file error: " + e.getMessage());
         }
         try (FileOutputStream outStream = new FileOutputStream(file)) {
             for (Property property : properties) {
                 outStream.write((property.formatString() + "\n").getBytes());
             }
         } catch (Exception e) {
-            Log.e(TAG, "writeInternal FileOutputStream error:" + e.getMessage());
+            LogUtils.e(TAG, "writeInternal FileOutputStream error: " + e.getMessage());
         }
     }
 
@@ -97,7 +97,7 @@ public final class StorageUtils {
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
         } catch (Exception e) {
-            Log.e(TAG, "readInternal error:" + e.getMessage());
+            LogUtils.e(TAG, "readInternal error: " + e.getMessage());
             return Collections.emptySet();
         }
     }

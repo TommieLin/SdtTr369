@@ -5,13 +5,9 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public final class ControlMessageReader {
+    private static final String TAG = "TR369 ControlMessageReader";
 
     private ControlMessageReader() {
     }
@@ -21,7 +17,7 @@ public final class ControlMessageReader {
             JSONObject obj = new JSONObject(message);
             return parse(obj);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parse error, " + e.getMessage());
         }
         return null;
     }
@@ -30,40 +26,40 @@ public final class ControlMessageReader {
         ControlMessage msg;
         int type = obj.optInt("type");
         switch (type) {
-        case ControlMessage.TYPE_INJECT_KEYCODE:
-            msg = parseInjectKeycode(obj);
-            break;
-        case ControlMessage.TYPE_INJECT_TEXT:
-            msg = parseInjectText(obj);
-            break;
-        case ControlMessage.TYPE_INJECT_TOUCH_EVENT:
-            msg = parseInjectTouchEvent(obj);
-            break;
-        case ControlMessage.TYPE_INJECT_SCROLL_EVENT:
-            msg = parseInjectScrollEvent(obj);
-            break;
-        case ControlMessage.TYPE_BACK_OR_SCREEN_ON:
-            msg = parseBackOrScreenOnEvent(obj);
-            break;
-        case ControlMessage.TYPE_GET_CLIPBOARD:
-            msg = parseGetClipboard(obj);
-            break;
-        case ControlMessage.TYPE_SET_CLIPBOARD:
-            msg = parseSetClipboard(obj);
-            break;
-        case ControlMessage.TYPE_SET_SCREEN_POWER_MODE:
-            msg = parseSetScreenPowerMode(obj);
-            break;
-        case ControlMessage.TYPE_EXPAND_NOTIFICATION_PANEL:
-        case ControlMessage.TYPE_EXPAND_SETTINGS_PANEL:
-        case ControlMessage.TYPE_COLLAPSE_PANELS:
-        case ControlMessage.TYPE_ROTATE_DEVICE:
-            msg = ControlMessage.createEmpty(type);
-            break;
-        default:
-            Ln.w("Unknown event type: " + type);
-            msg = null;
-            break;
+            case ControlMessage.TYPE_INJECT_KEYCODE:
+                msg = parseInjectKeycode(obj);
+                break;
+            case ControlMessage.TYPE_INJECT_TEXT:
+                msg = parseInjectText(obj);
+                break;
+            case ControlMessage.TYPE_INJECT_TOUCH_EVENT:
+                msg = parseInjectTouchEvent(obj);
+                break;
+            case ControlMessage.TYPE_INJECT_SCROLL_EVENT:
+                msg = parseInjectScrollEvent(obj);
+                break;
+            case ControlMessage.TYPE_BACK_OR_SCREEN_ON:
+                msg = parseBackOrScreenOnEvent(obj);
+                break;
+            case ControlMessage.TYPE_GET_CLIPBOARD:
+                msg = parseGetClipboard(obj);
+                break;
+            case ControlMessage.TYPE_SET_CLIPBOARD:
+                msg = parseSetClipboard(obj);
+                break;
+            case ControlMessage.TYPE_SET_SCREEN_POWER_MODE:
+                msg = parseSetScreenPowerMode(obj);
+                break;
+            case ControlMessage.TYPE_EXPAND_NOTIFICATION_PANEL:
+            case ControlMessage.TYPE_EXPAND_SETTINGS_PANEL:
+            case ControlMessage.TYPE_COLLAPSE_PANELS:
+            case ControlMessage.TYPE_ROTATE_DEVICE:
+                msg = ControlMessage.createEmpty(type);
+                break;
+            default:
+                Ln.w("Unknown event type: " + type);
+                msg = null;
+                break;
         }
 
         return msg;
@@ -77,7 +73,7 @@ public final class ControlMessageReader {
             int metaState = obj.getInt("metaState");
             return ControlMessage.createInjectKeycode(action, keycode, repeat, metaState);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseInjectKeycode error, " + e.getMessage());
         }
         return null;
     }
@@ -90,7 +86,7 @@ public final class ControlMessageReader {
             }
             return ControlMessage.createInjectText(text);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseInjectText error, " + e.getMessage());
         }
         return null;
     }
@@ -104,7 +100,7 @@ public final class ControlMessageReader {
             int buttons = obj.getInt("buttons");
             return ControlMessage.createInjectTouchEvent(action, pointerId, position, pressure, buttons);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseInjectTouchEvent error, " + e.getMessage());
         }
         return null;
     }
@@ -117,7 +113,7 @@ public final class ControlMessageReader {
             int buttons = obj.getInt("buttons");
             return ControlMessage.createInjectScrollEvent(position, hScroll, vScroll, buttons);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseInjectScrollEvent error, " + e.getMessage());
         }
         return null;
     }
@@ -127,7 +123,7 @@ public final class ControlMessageReader {
             int action = obj.getInt("action");
             return ControlMessage.createBackOrScreenOn(action);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseBackOrScreenOnEvent error, " + e.getMessage());
         }
         return null;
     }
@@ -137,7 +133,7 @@ public final class ControlMessageReader {
             int copyKey = obj.getInt("copyKey");
             return ControlMessage.createGetClipboard(copyKey);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseGetClipboard error, " + e.getMessage());
         }
         return null;
     }
@@ -152,7 +148,7 @@ public final class ControlMessageReader {
             }
             return ControlMessage.createSetClipboard(sequence, text, paste);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseSetClipboard error, " + e.getMessage());
         }
         return null;
     }
@@ -162,7 +158,7 @@ public final class ControlMessageReader {
             int mode = obj.getInt("mode");
             return ControlMessage.createSetScreenPowerMode(mode);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, "ControlMessage parseSetScreenPowerMode error, " + e.getMessage());
         }
         return null;
     }

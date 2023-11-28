@@ -9,6 +9,7 @@ import android.media.MediaCodec.BufferInfo;
 import android.opengl.GLES20;
 import android.os.Bundle;
 import android.view.Surface;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -122,7 +123,7 @@ class HardwareVideoEncoder implements VideoEncoder {
 
         this.adjustedBitrate = this.bitrateAdjuster.getAdjustedBitrateBps();
         Logging.d(TAG, "initEncode: " + this.width + " x " + this.height + ". @ " +
-            settings.startBitrate + "kbps. Fps: " + settings.maxFramerate + " Use surface mode: " + this.useSurfaceMode);
+                settings.startBitrate + "kbps. Fps: " + settings.maxFramerate + " Use surface mode: " + this.useSurfaceMode);
         return this.initEncodeInternal();
     }
 
@@ -158,31 +159,31 @@ class HardwareVideoEncoder implements VideoEncoder {
                 }
 
                 byte var5 = -1;
-                switch(profileLevelId.hashCode()) {
-                case 1537948542:
-                    if (profileLevelId.equals(H264Utils.H264_CONSTRAINED_BASELINE_3_1)) {
-                        var5 = 1;
-                    }
-                    break;
-                case 1595523974:
-                    if (profileLevelId.equals(H264Utils.H264_CONSTRAINED_HIGH_3_1)) {
-                        var5 = 0;
-                    }
+                switch (profileLevelId.hashCode()) {
+                    case 1537948542:
+                        if (profileLevelId.equals(H264Utils.H264_CONSTRAINED_BASELINE_3_1)) {
+                            var5 = 1;
+                        }
+                        break;
+                    case 1595523974:
+                        if (profileLevelId.equals(H264Utils.H264_CONSTRAINED_HIGH_3_1)) {
+                            var5 = 0;
+                        }
                 }
 
-                switch(var5) {
-                case 0:
-                    format.setInteger(MediaFormat.KEY_PROFILE, VIDEO_AVC_PROFILE_HIGH);
-                    format.setInteger(MediaFormat.KEY_LEVEL, VIDEO_AVC_LEVEL_3);
-                case 1:
-                    break;
-                default:
-                    Logging.w(TAG, "Unknown profile level id: " + profileLevelId);
+                switch (var5) {
+                    case 0:
+                        format.setInteger(MediaFormat.KEY_PROFILE, VIDEO_AVC_PROFILE_HIGH);
+                        format.setInteger(MediaFormat.KEY_LEVEL, VIDEO_AVC_LEVEL_3);
+                    case 1:
+                        break;
+                    default:
+                        Logging.w(TAG, "Unknown profile level id: " + profileLevelId);
                 }
             }
 
             Logging.d(TAG, "Format: " + format);
-            this.codec.configure(format, (Surface)null, (MediaCrypto)null, MediaCodec.CONFIGURE_FLAG_ENCODE);
+            this.codec.configure(format, (Surface) null, (MediaCrypto) null, MediaCodec.CONFIGURE_FLAG_ENCODE);
             if (this.useSurfaceMode) {
                 this.textureEglBase = EglBase.createEgl14(this.sharedContext, EglBase.CONFIG_RECORDABLE);
                 this.textureInputSurface = this.codec.createInputSurface();
@@ -268,7 +269,7 @@ class HardwareVideoEncoder implements VideoEncoder {
                 FrameType[] var9 = encodeInfo.frameTypes;
                 int var10 = var9.length;
 
-                for(int var11 = 0; var11 < var10; ++var11) {
+                for (int var11 = 0; var11 < var10; ++var11) {
                     FrameType frameType = var9[var11];
                     if (frameType == FrameType.VideoFrameKey) {
                         requestedKeyFrame = true;
@@ -304,7 +305,7 @@ class HardwareVideoEncoder implements VideoEncoder {
         try {
             GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
             VideoFrame derotatedFrame = new VideoFrame(videoFrame.getBuffer(), 0, videoFrame.getTimestampNs());
-            this.videoFrameDrawer.drawFrame(derotatedFrame, this.textureDrawer, (Matrix)null);
+            this.videoFrameDrawer.drawFrame(derotatedFrame, this.textureDrawer, (Matrix) null);
             if (this.textureEglBase == null) {
                 Logging.e(TAG, "encodeTextureBuffer textureEglBase null pointer");
                 return VideoCodecStatus.ERROR;
@@ -434,7 +435,7 @@ class HardwareVideoEncoder implements VideoEncoder {
     private Thread createOutputThread() {
         return new Thread() {
             public void run() {
-                while(HardwareVideoEncoder.this.running) {
+                while (HardwareVideoEncoder.this.running) {
                     HardwareVideoEncoder.this.deliverEncodedImage();
                 }
 
@@ -491,7 +492,7 @@ class HardwareVideoEncoder implements VideoEncoder {
                         return;
                     }
                     Logging.d(TAG, "Prepending config frame of size " + this.configBuffer.capacity() +
-                        " to output buffer with offset " + info.offset + ", size " + info.size);
+                            " to output buffer with offset " + info.offset + ", size " + info.size);
                     frameBuffer = ByteBuffer.allocateDirect(info.size + this.configBuffer.capacity());
                     this.configBuffer.rewind();
                     frameBuffer.put(this.configBuffer);
@@ -503,7 +504,7 @@ class HardwareVideoEncoder implements VideoEncoder {
 
                 FrameType frameType = isKeyFrame ? FrameType.VideoFrameKey : FrameType.VideoFrameDelta;
                 this.outputBuffersBusyCount.increment();
-                Builder builder = (Builder)this.outputBuilders.poll();
+                Builder builder = (Builder) this.outputBuilders.poll();
                 if (builder == null) {
                     Logging.e(TAG, "deliverEncodedImage builder null pointer");
                     return;
@@ -584,7 +585,7 @@ class HardwareVideoEncoder implements VideoEncoder {
             void fillBuffer(ByteBuffer dstBuffer, Buffer srcBuffer) {
                 I420Buffer i420 = srcBuffer.toI420();
                 YuvHelper.I420Copy(i420.getDataY(), i420.getStrideY(), i420.getDataU(),
-                    i420.getStrideU(), i420.getDataV(), i420.getStrideV(), dstBuffer, i420.getWidth(), i420.getHeight());
+                        i420.getStrideU(), i420.getDataV(), i420.getStrideV(), dstBuffer, i420.getWidth(), i420.getHeight());
                 i420.release();
             }
         },
@@ -592,7 +593,7 @@ class HardwareVideoEncoder implements VideoEncoder {
             void fillBuffer(ByteBuffer dstBuffer, Buffer srcBuffer) {
                 I420Buffer i420 = srcBuffer.toI420();
                 YuvHelper.I420ToNV12(i420.getDataY(), i420.getStrideY(), i420.getDataU(),
-                    i420.getStrideU(), i420.getDataV(), i420.getStrideV(), dstBuffer, i420.getWidth(), i420.getHeight());
+                        i420.getStrideU(), i420.getDataV(), i420.getStrideV(), dstBuffer, i420.getWidth(), i420.getHeight());
                 i420.release();
             }
         };
@@ -603,15 +604,15 @@ class HardwareVideoEncoder implements VideoEncoder {
         abstract void fillBuffer(ByteBuffer var1, Buffer var2);
 
         static HardwareVideoEncoder.YuvFormat valueOf(int colorFormat) {
-            switch(colorFormat) {
-            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
-                return I420;
-            case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
-            case MediaCodecInfo.CodecCapabilities.COLOR_QCOM_FormatYUV420SemiPlanar:
-            case MediaCodecUtils.COLOR_QCOM_FORMATYUV420PackedSemiPlanar32m:
-                return NV12;
-            default:
-                throw new IllegalArgumentException("Unsupported colorFormat: " + colorFormat);
+            switch (colorFormat) {
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar:
+                    return I420;
+                case MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar:
+                case MediaCodecInfo.CodecCapabilities.COLOR_QCOM_FormatYUV420SemiPlanar:
+                case MediaCodecUtils.COLOR_QCOM_FORMATYUV420PackedSemiPlanar32m:
+                    return NV12;
+                default:
+                    throw new IllegalArgumentException("Unsupported colorFormat: " + colorFormat);
             }
         }
     }
@@ -625,13 +626,13 @@ class HardwareVideoEncoder implements VideoEncoder {
         }
 
         public void increment() {
-            synchronized(this.countLock) {
+            synchronized (this.countLock) {
                 ++this.count;
             }
         }
 
         public void decrement() {
-            synchronized(this.countLock) {
+            synchronized (this.countLock) {
                 --this.count;
                 if (this.count == 0) {
                     this.countLock.notifyAll();
@@ -642,8 +643,8 @@ class HardwareVideoEncoder implements VideoEncoder {
 
         public void waitForZero() {
             boolean wasInterrupted = false;
-            synchronized(this.countLock) {
-                while(this.count > 0) {
+            synchronized (this.countLock) {
+                while (this.count > 0) {
                     try {
                         this.countLock.wait();
                     } catch (InterruptedException var5) {

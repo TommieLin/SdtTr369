@@ -8,12 +8,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.AppUpgradeResponseBean;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
 
@@ -58,12 +58,12 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Log.d(TAG, "Get action: " + action);
+        LogUtils.d(TAG, "onReceive action: " + action);
         if (ACTION_BOOT_DIAGNOSE_APP_DOWNLOAD.equals(action)) {
-            Log.e(TAG, " @@@@@@@@@ Outis @@@ ACTION_BOOT_DIAGNOSE_APP_DOWNLOAD");
+            LogUtils.d(TAG, "ACTION_BOOT_DIAGNOSE_APP_DOWNLOAD");
             if (checkPackageNameValidity(intent)) handleExternalAppDownloadStatus(intent);
         } else if (ACTION_BOOT_DIAGNOSE_APP_UPGRADE.equals(action)) {
-            Log.e(TAG, " @@@@@@@@@ Outis @@@ ACTION_BOOT_DIAGNOSE_APP_UPGRADE");
+            LogUtils.d(TAG, "ACTION_BOOT_DIAGNOSE_APP_UPGRADE");
             if (checkPackageNameValidity(intent)) handleExternalAppUpgradeStatus(intent);
         } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
             if (isConnected(context.getApplicationContext())) {
@@ -93,13 +93,13 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         // 将下载状态通知http
         AppUpgradeResponseBean requestBean = new AppUpgradeResponseBean(input);
         HashMap<String, String> hashMap = requestBean.toHashMap();
-        Log.d(TAG, "execute POST download request, params: " + hashMap);
+        LogUtils.d(TAG, "execute POST download request, params: " + hashMap);
 
         String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
         if (!url.isEmpty()) {
             HttpsUtils.noticeResponse(url + URL_DOWNLOAD_RESULT_REPORT, hashMap);
         } else {
-            Log.e(TAG, "The URL of the download result report is illegal");
+            LogUtils.e(TAG, "The URL of the download result report is illegal");
         }
     }
 
@@ -107,11 +107,11 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         // 将安装状态通知http
         AppUpgradeResponseBean requestBean = new AppUpgradeResponseBean(intent);
         HashMap<String, String> hashMap = requestBean.toHashMap();
-        Log.d(TAG, "execute POST install request, params: " + hashMap);
+        LogUtils.d(TAG, "execute POST install request, params: " + hashMap);
 
         String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
         if (url.isEmpty()) {
-            Log.e(TAG, "The URL of the install result report is illegal");
+            LogUtils.e(TAG, "The URL of the install result report is illegal");
             return;
         }
 
@@ -119,7 +119,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         HttpsUtils.requestAppUpdateStatus(reportUrl, hashMap, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "Failed to report installation status");
+                LogUtils.e(TAG, "Failed to report installation status");
                 DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "1");
                 requestBean.setResponseEnableDBParam();
                 retryRequestUpdateStatus();
@@ -127,7 +127,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                Log.d(TAG, "requestAppUpdateStatus Protocol: " + response.protocol()
+                LogUtils.d(TAG, "requestAppUpdateStatus Protocol: " + response.protocol()
                         + " ,Code: " + response.code());
                 if (response.code() == 200) {
                     DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "0");
@@ -142,11 +142,11 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
 
     private static void handleRequest() {
         final HashMap<String, String> hashMap = AppUpgradeResponseBean.getResponseEnableDBParam();
-        Log.d(TAG, "execute POST install request, params: " + hashMap);
+        LogUtils.d(TAG, "execute POST install request, params: " + hashMap);
 
         String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
         if (url.isEmpty()) {
-            Log.e(TAG, "The URL of the install result report is illegal");
+            LogUtils.e(TAG, "The URL of the install result report is illegal");
             return;
         }
 
@@ -155,12 +155,12 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
                 new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        Log.e(TAG, "Reporting the installation status failed again");
+                        LogUtils.e(TAG, "Reporting the installation status failed again");
                     }
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        Log.d(TAG, "requestAppUpdateStatus Protocol: " + response.protocol()
+                        LogUtils.d(TAG, "requestAppUpdateStatus Protocol: " + response.protocol()
                                 + " ,Code: " + response.code());
                         if (response.code() == 200) {
                             DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "0");

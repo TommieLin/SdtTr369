@@ -9,9 +9,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageStats;
 import android.os.UserHandle;
 import android.text.format.Formatter;
-import android.util.Log;
 
 import com.sdt.diagnose.common.bean.AppInfo;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.IOException;
 import java.text.Collator;
@@ -32,12 +32,12 @@ public class AppsManager extends AbstractCachedArray<AppInfo> {
 
         // 获取所有带<activity>的应用
         List<PackageInfo> packlist = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES);
-        Log.d(TAG, "InstalledPackages size =" + packlist.size());
+        LogUtils.d(TAG, "InstalledPackages size: " + packlist.size());
         for (int i = 0; i < packlist.size(); i++) {
             PackageInfo pkgInfo = packlist.get(i);
             final ApplicationInfo info = pkgInfo.applicationInfo;
             if (info == null) {
-                Log.d(TAG, "PackageInfo is null.");
+                LogUtils.d(TAG, "PackageInfo is null.");
                 continue;
             }
             boolean disable = ApplicationUtils.isDisable(pm, info.packageName);
@@ -78,10 +78,10 @@ public class AppsManager extends AbstractCachedArray<AppInfo> {
                 appInfo.setStorageUsed(storageStats.getAppBytes());
 
             } catch (PackageManager.NameNotFoundException | IOException e) {
-                Log.e(TAG, "Build APP list error, " + e.getMessage());
+                LogUtils.e(TAG, "Build APP list error, " + e.getMessage());
             }
             add(appInfo);
-            Log.d(TAG, "AppInfo: " + appInfo);
+            LogUtils.d(TAG, "AppInfo: " + appInfo);
         }
 
         if (mList != null) {
@@ -126,7 +126,6 @@ public class AppsManager extends AbstractCachedArray<AppInfo> {
             if (compareResult != 0) {
                 return compareResult;
             }
-
             return object1.getUid() - object2.getUid();
         }
     };

@@ -1,7 +1,8 @@
 package com.sdt.diagnose.common;
 
 import android.net.NetworkUtils;
-import android.util.Log;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.net.Inet4Address;
 import java.util.regex.Pattern;
@@ -22,7 +23,7 @@ public class NetUtils {
          */
         Pattern pattern = Pattern.compile("(^((\\d|[01]?\\d\\d|2[0-4]\\d|25[0-5])\\.){3}(\\d|[01]?\\d\\d|2[0-4]\\d|25[0-5])$)|^(\\d|[1-2]\\d|3[0-2])$");
         if (!pattern.matcher(maskStr).matches()) {
-            Log.e(TAG, "subMask is error");
+            LogUtils.e(TAG, "subMask is error");
             return 0;
         }
 
@@ -47,7 +48,7 @@ public class NetUtils {
         try {
             return (Inet4Address) NetworkUtils.numericToInetAddress(text);
         } catch (IllegalArgumentException | ClassCastException e) {
-
+            LogUtils.e(TAG, "getInet4Address error, " + e.getMessage());
             return null;
         }
     }

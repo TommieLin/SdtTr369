@@ -4,10 +4,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.text.format.Formatter;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -15,6 +13,7 @@ import com.sdt.diagnose.Device.X_Skyworth.Log.utils.StorageUtils;
 import com.sdt.diagnose.Device.X_Skyworth.Log.utils.SystemUtils;
 import com.sdt.diagnose.command.Event;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 
 import java.io.File;
@@ -110,7 +109,7 @@ public class LogRepository {
         long remainingMillis = nextHourInMillis - currentTimeInMillis;
 
         // 输出剩余毫秒数
-        Log.d(TAG, "Time remaining until the next whole hour: " + remainingMillis + "ms");
+        LogUtils.d(TAG, "Time remaining until the next whole hour: " + remainingMillis + "ms");
         return remainingMillis;
     }
 
@@ -164,7 +163,7 @@ public class LogRepository {
 
     private void autoUploadLogFile() {
         if (mUploadUrl == null || mUploadUrl.isEmpty()) {
-            Log.e(TAG, "The upload URL in the database is empty.");
+            LogUtils.e(TAG, "The upload URL in the database is empty.");
             return;
         }
 
@@ -188,7 +187,7 @@ public class LogRepository {
             int fileCounts = logFiles.size();
             if (fileCounts > 0) {
                 for (String logFile : logFiles) {
-                    Log.d(TAG, "Waiting for automatic upload of file: " + logFile);
+                    LogUtils.d(TAG, "Waiting for automatic upload of file: " + logFile);
                     Event.uploadLogFile(mUploadUrl, logFile, fileCounts);
                     fileCounts--;
                 }
@@ -233,13 +232,13 @@ public class LogRepository {
         try {
             Runtime.getRuntime().exec("logcat -c");
         } catch (IOException e) {
-            Log.e(TAG, "Command exec failed, " + e.getMessage());
+            LogUtils.e(TAG, "Command exec failed, " + e.getMessage());
         }
         startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
     }
 
     public void copyLogFile(String sourceFilePath, String destinationFilePath) {
-        Log.d(TAG, "Preparing to copy file " + sourceFilePath + " to " + destinationFilePath);
+        LogUtils.d(TAG, "Preparing to copy file " + sourceFilePath + " to " + destinationFilePath);
         File sourceFile = new File(sourceFilePath);
         File destinationFile = new File(destinationFilePath);
 
@@ -257,9 +256,9 @@ public class LogRepository {
             }
 
             // 拷贝完成
-            Log.d(TAG, "File copy completely!");
+            LogUtils.d(TAG, "File copy completely!");
         } catch (IOException e) {
-            Log.e(TAG, "File copy failed, " + e.getMessage());
+            LogUtils.e(TAG, "File copy failed, " + e.getMessage());
         } finally {
             // 关闭输入输出流
             try {
@@ -270,7 +269,7 @@ public class LogRepository {
                     fileOutputStream.close();
                 }
             } catch (IOException e) {
-                Log.e(TAG, "Stream close failed, " + e.getMessage());
+                LogUtils.e(TAG, "Stream close failed, " + e.getMessage());
             }
         }
     }
@@ -347,14 +346,14 @@ public class LogRepository {
 
         File[] files = folder.listFiles();
         if (files != null) {
-            Log.d(TAG, "Preparing to delete all files between " + startTime + " and " + endTime);
+            LogUtils.d(TAG, "Preparing to delete all files between " + startTime + " and " + endTime);
             for (File file : files) {
                 if (file.isFile()) {
                     String fileName = file.getName();
                     if (fileName.contains("logcat_tr369_")
                             && fileName.contains(".txt")
                             && isFileNeedToBeDeleted(fileName, startTime, endTime)) {
-                        Log.d(TAG, "deleteLogFiles: Wait to delete file: " + fileName);
+                        LogUtils.d(TAG, "deleteLogFiles: Wait to delete file: " + fileName);
                         file.delete();
                     }
                 }
@@ -378,7 +377,7 @@ public class LogRepository {
     public void startCommand(LogCmd cmd, String param) {
         String enable = DbManager.getDBParam("Device.X_Skyworth.Logcat.Background.Enable");
         if (!("1".equals(enable) || "true".equals(enable))) {
-            Log.i(TAG, "logcat background task is prohibited from being executed.");
+            LogUtils.i(TAG, "logcat background task is prohibited from being executed.");
             return;
         }
         StorageUtils.writeProperty(FILE_LOG_COMMAND, KEY_COMMAND_NAME, cmd.getCmdName());

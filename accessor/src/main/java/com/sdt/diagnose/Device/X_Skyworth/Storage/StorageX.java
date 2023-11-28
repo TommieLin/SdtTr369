@@ -12,7 +12,6 @@ import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.text.TextUtils;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 
@@ -22,6 +21,7 @@ import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.ApplicationUtils;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class StorageX {
                 }
             }
         } else {
-            Log.w(TAG, "MeasurementDetails mediaSize array does not have key for current user " +
+            LogUtils.e(TAG, "MeasurementDetails mediaSize array does not have key for current user " +
                     ActivityManager.getCurrentUser());
         }
         return total;
@@ -155,7 +155,7 @@ public class StorageX {
             details.availSize = sm.getAllocatableBytes(StorageManager.convert(volume.fsUuid));
         } catch (IOException e) {
             // The storage volume became null while we were measuring it.
-            Log.e(TAG, "Failed to get total bytes and free bytes. " + e.getMessage());
+            LogUtils.e(TAG, "Failed to get total bytes and free bytes. " + e.getMessage());
             return details;
         }
 
@@ -167,7 +167,7 @@ public class StorageX {
             try {
                 stats = ssm.queryExternalStatsForUser(volume.fsUuid, UserHandle.of(userId));
             } catch (IOException e) {
-                Log.e(TAG, "Failed to execute queryExternalStatsForUser. " + e.getMessage());
+                LogUtils.e(TAG, "Failed to execute queryExternalStatsForUser. " + e.getMessage());
                 return details;
             }
 
@@ -188,7 +188,7 @@ public class StorageX {
             try {
                 stats = ssm.queryStatsForUser(volume.fsUuid, UserHandle.of(userId));
             } catch (IOException e) {
-                Log.e(TAG, "Failed to execute queryStatsForUser. " + e.getMessage());
+                LogUtils.e(TAG, "Failed to execute queryStatsForUser. " + e.getMessage());
                 return details;
             }
 
@@ -205,7 +205,7 @@ public class StorageX {
     @Tr369Get("Device.X_Skyworth.Storage.Info")
     public String SK_TR369_GetStorageInfo() {
         MeasurementDetails details = measureExactStorage();
-        Log.d(TAG, "Get storage details: " + details);
+        LogUtils.d(TAG, "Get storage details: " + details);
 
         final int currentUser = ActivityManager.getCurrentUser();
         final long dcimSize = totalValues(details.mediaSize.get(currentUser),
@@ -258,7 +258,7 @@ public class StorageX {
                 long storageUsed = storageStats.getAppBytes();
                 appsInfo.add(setAppsInfoMap(name, pkgName, (data + cache + storageUsed)));
             } catch (Exception e) {
-                Log.e(TAG, "Failed to execute queryStatsForPackage. " + e.getMessage());
+                LogUtils.e(TAG, "Failed to execute queryStatsForPackage. " + e.getMessage());
             }
         }
 
@@ -272,7 +272,7 @@ public class StorageX {
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             final List<PackageInfo> infos = pm.getInstalledPackages(0);
             for (PackageInfo info : infos) {
-                Log.d(TAG, "handleClearStorageCache pkgName: " + info.packageName);
+                LogUtils.d(TAG, "handleClearStorageCache pkgName: " + info.packageName);
                 pm.deleteApplicationCacheFiles(info.packageName, null);
             }
             return true;
@@ -286,19 +286,19 @@ public class StorageX {
 
         try {
             List<String> packageNames = ApplicationUtils.parseStringList(value);
-            Log.d(TAG, "Waiting to handle apps: " + packageNames);
+            LogUtils.d(TAG, "Waiting to handle apps: " + packageNames);
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             final List<PackageInfo> infos = pm.getInstalledPackages(0);
             for (PackageInfo info : infos) {
                 final String pkgName = info.packageName;
                 if (packageNames.contains(pkgName)) {
-                    Log.d(TAG, "Waiting to clear app data: " + pkgName);
+                    LogUtils.d(TAG, "Waiting to clear app data: " + pkgName);
                     ApplicationUtils.clearData(pkgName);
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to execute handleClearAppsData. " + e.getMessage());
+            LogUtils.e(TAG, "Failed to execute handleClearAppsData. " + e.getMessage());
             return false;
         }
 
@@ -311,19 +311,19 @@ public class StorageX {
 
         try {
             List<String> packageNames = ApplicationUtils.parseStringList(value);
-            Log.d(TAG, "Waiting to handle apps: " + packageNames);
+            LogUtils.d(TAG, "Waiting to handle apps: " + packageNames);
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             final List<PackageInfo> infos = pm.getInstalledPackages(0);
             for (PackageInfo info : infos) {
                 String pkgName = info.packageName;
                 if (packageNames.contains(pkgName)) {
-                    Log.d(TAG, "Waiting to clear app cache: " + pkgName);
+                    LogUtils.d(TAG, "Waiting to clear app cache: " + pkgName);
                     pm.deleteApplicationCacheFiles(pkgName, null);
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to execute handleClearAppsCache. " + e.getMessage());
+            LogUtils.e(TAG, "Failed to execute handleClearAppsCache. " + e.getMessage());
             return false;
         }
 

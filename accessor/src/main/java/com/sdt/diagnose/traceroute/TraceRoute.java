@@ -26,9 +26,9 @@ import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.sdt.accessor.R;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 
 import java.io.BufferedReader;
@@ -129,17 +129,17 @@ public class TraceRoute {
         hostToPing = getHost();
         lock = new CountDownLatch(1);
         pingAsyncTask = new ExecutePingAsyncTask();
-        Log.d(TAG, "isTerminated: " + mExecutorService.isTerminated());
+        LogUtils.d(TAG, "isTerminated: " + mExecutorService.isTerminated());
         if (mExecutorService == null || mExecutorService.isTerminated()) {
             mExecutorService = null;
             mExecutorService = Executors.newFixedThreadPool(1);
         }
         mExecutorService.execute(pingAsyncTask);
-        Log.d(TAG, "before lock.await: ");
+        LogUtils.d(TAG, "before lock.await.");
         long start = System.currentTimeMillis();
         this.await(15);
         long end = System.currentTimeMillis();
-        Log.d(TAG, "after lock.await() traces.size: " + traces.size());
+        LogUtils.d(TAG, "after lock.await() traces.size: " + traces.size());
         DbManager.setDBParam("Device.IP.Diagnostics.TraceRoute.ResponseTime", String.valueOf((end - start) / traces.size()));
     }
 
@@ -188,11 +188,11 @@ public class TraceRoute {
                         @Override
                         public void run() {
                             if (mPingAsyncTask != null) {
-                                Log.e(TAG, "Task: " + ttlTask + ", task.isFinished(): " + finishedTasks + ", flag: " + (ttlTask == finishedTasks));
+                                LogUtils.e(TAG, "Task: " + ttlTask + ", task.isFinished(): " + finishedTasks + ", flag: " + (ttlTask == finishedTasks));
                                 if (ttlTask == finishedTasks) {
-                                    Log.d(TAG, "timeoutRunnable: timeout");
+                                    LogUtils.d(TAG, "timeoutRunnable: timeout");
                                     lock.countDown();
-                                    Log.d(TAG, "timeoutRunnable sendEmptyMessage lock.countDown()");
+                                    LogUtils.d(TAG, "timeoutRunnable sendEmptyMessage lock.countDown()");
                                     mPingAsyncTask.setCancelled(true);
                                     timeoutExecutorService.shutdown();
                                 }
@@ -228,14 +228,14 @@ public class TraceRoute {
          * Launches the ping, launches InetAddress to retrieve url if there is one, store trace
          */
         protected void doInBackground() {
-            Log.d(TAG, "ExecutePingAsyncTask doInBackground");
+            LogUtils.d(TAG, "ExecutePingAsyncTask doInBackground");
             if (hasConnectivity()) {
                 try {
                     String pingResult = launchPing(hostToPing);
-                    Log.d(TAG, "ExecutePingAsyncTask pingResult: " + pingResult.replace("\n", " "));
+                    LogUtils.d(TAG, "ExecutePingAsyncTask pingResult: " + pingResult.replace("\n", " "));
                     TraceRouteContainer trace;
                     String ip = parseIpFromPing(pingResult);
-                    Log.d(TAG, "ExecutePingAsyncTask pingResult From: " + ip);
+                    LogUtils.d(TAG, "ExecutePingAsyncTask pingResult From: " + ip);
                     if (pingResult.contains(UNREACHABLE_PING) && !pingResult.contains(
                             EXCEED_PING)) {
                         // Create the TracerouteContainer object when ping
@@ -274,23 +274,23 @@ public class TraceRoute {
                         trace.setPosition(traces.size());
                         traces.add(trace);
                         DbManager.addMultiObject("Device.IP.Diagnostics.TraceRoute.RouteHops", 1);
-                        Log.d(TAG, "addMultiObject traces indexOf: " + traces.indexOf(trace));
+                        LogUtils.d(TAG, "addMultiObject traces indexOf: " + traces.indexOf(trace));
                         if (ip.equals(ipToPing)) {
                             DbManager.setDBParam("Device.IP.Diagnostics.TraceRoute.Status", "Complete");
                             mExecutorService.shutdownNow();
                             lock.countDown();
-                            Log.e(TAG, "ExecutePingAsyncTask doInBackground lock.countDown()");
+                            LogUtils.e(TAG, "ExecutePingAsyncTask doInBackground lock.countDown()");
                             return;
                         }
                     }
 
-                    Log.d(TAG, "ExecutePingAsyncTask ttl = " + ttl + ", maxTtl = " + maxTtl);
-                    Log.d(TAG, "latestTrace.getIp() = " + latestTrace.getIp()
-                            + ", ipToPing = " + ipToPing);
+                    LogUtils.d(TAG, "ExecutePingAsyncTask ttl: " + ttl + ", maxTtl: " + maxTtl);
+                    LogUtils.d(TAG, "latestTrace.getIp(): " + latestTrace.getIp()
+                            + ", ipToPing: " + ipToPing);
 
                     continueExecTraceroute();
                 } catch (final Exception e) {
-                    Log.e(TAG, "ExecutePingAsyncTask doInBackground error, " + e.getMessage());
+                    LogUtils.e(TAG, "ExecutePingAsyncTask doInBackground error, " + e.getMessage());
                 }
             } else {
                 DbManager.setDBParam("Device.IP.Diagnostics.TraceRoute.Status", "Error_Internal");
@@ -312,7 +312,7 @@ public class TraceRoute {
             String format = "ping -c 1 -t %d %s";
             String command = String.format(format, ttl, url);
 
-            Log.d(TAG, "Will launch : " + command);
+            LogUtils.d(TAG, "Will launch: " + command);
 
             long startTime = System.nanoTime();
             elapsedTime = 0;
@@ -364,7 +364,7 @@ public class TraceRoute {
                     DbManager.setDBParam("Device.IP.Diagnostics.TraceRoute.Status", "Complete");
                     mExecutorService.shutdownNow();
                     lock.countDown();
-                    Log.e(TAG, "ExecutePingAsyncTask continueExecTraceroute lock.countDown()");
+                    LogUtils.e(TAG, "ExecutePingAsyncTask continueExecTraceroute lock.countDown()");
                 }
                 finishedTasks++;
             }
@@ -377,12 +377,12 @@ public class TraceRoute {
          * @param e The exception thrown
          */
         private void onException(Exception e) {
-            Log.e(TAG, e.toString());
+            LogUtils.e(TAG, "onException: " + e.toString());
             if (e instanceof IllegalArgumentException) {
-                Log.e(TAG, "onException toast: " + mContext.getString(R.string.no_ping));
+                LogUtils.e(TAG, "onException toast: " + mContext.getString(R.string.no_ping));
                 DbManager.setDBParam("Device.IP.Diagnostics.TraceRoute.Status", "Error_CannotResolveHostName");
             } else {
-                Log.e(TAG, "onException: " + mContext.getString(R.string.error));
+                LogUtils.e(TAG, "onException: " + mContext.getString(R.string.error));
                 DbManager.setDBParam("Device.IP.Diagnostics.TraceRoute.Status", "Error");
             }
             finishedTasks++;
@@ -462,7 +462,7 @@ public class TraceRoute {
             index = time.indexOf(" ");
             time = time.substring(0, index);
         }
-        Log.d(TAG, "parseTimeFromPing time: " + time);
+        LogUtils.d(TAG, "parseTimeFromPing time: " + time);
         return time;
     }
 

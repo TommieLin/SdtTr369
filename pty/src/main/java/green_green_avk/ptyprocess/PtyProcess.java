@@ -175,9 +175,9 @@ public final class PtyProcess extends Process {
     public static final int SIGALRM = 14;
     public static final int SIGTERM = 15;
 
-    public static final int IS_ERROR = - 1;
-    public static final int IS_RUNNING = - 2;
-    public static final int IS_EINTR = - 3;
+    public static final int IS_ERROR = -1;
+    public static final int IS_RUNNING = -2;
+    public static final int IS_EINTR = -3;
 
     static {
         System.loadLibrary("ptyprocess");
@@ -228,7 +228,7 @@ public final class PtyProcess extends Process {
         int i = 0;
         for (final Map.Entry<String, String> elt : env.entrySet()) {
             _env[i] = elt.getKey() + "=" + elt.getValue();
-            ++ i;
+            ++i;
         }
         return execve(filename, args, _env);
     }
@@ -396,33 +396,33 @@ public final class PtyProcess extends Process {
         @Override
         public int read() throws IOException {
             try {
-                if (check()) return - 1;
+                if (check()) return -1;
                 return super.read();
             } catch (final IOException e) {
-                if (! closed) throw e;
-                return - 1;
+                if (!closed) throw e;
+                return -1;
             }
         }
 
         @Override
         public int read(final byte[] b) throws IOException {
-            if (check()) return - 1;
+            if (check()) return -1;
             try {
                 return super.read(b);
             } catch (final IOException e) {
-                if (! closed) throw e;
-                return - 1;
+                if (!closed) throw e;
+                return -1;
             }
         }
 
         @Override
         public int read(final byte[] b, final int off, final int len) throws IOException {
-            if (check()) return - 1;
+            if (check()) return -1;
             try {
                 return super.read(b, off, len);
             } catch (final IOException e) {
-                if (! closed) throw e;
-                return - 1;
+                if (!closed) throw e;
+                return -1;
             }
         }
     }
@@ -501,7 +501,7 @@ public final class PtyProcess extends Process {
     private static final String sCloseWaError = "Cannot close socket: workaround failed";
 
     public static void close(@Nullable final FileDescriptor fd) throws IOException {
-        if (fd == null || ! fd.valid())
+        if (fd == null || !fd.valid())
             throw new IOException("Bad FD");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Utils21.close(fd);

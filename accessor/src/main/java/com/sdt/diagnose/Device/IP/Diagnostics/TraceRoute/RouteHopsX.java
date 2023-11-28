@@ -1,10 +1,9 @@
 package com.sdt.diagnose.Device.IP.Diagnostics.TraceRoute;
 
-import android.util.Log;
-
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.common.IProtocolArray;
 import com.sdt.diagnose.common.ProtocolPathUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.traceroute.TraceRouteContainer;
 import com.sdt.diagnose.traceroute.TraceRouteManager;
 
@@ -24,19 +23,19 @@ public class RouteHopsX implements IProtocolArray<TraceRouteContainer> {
     }
 
     private String handleAppPath(String path) {
-        Log.d(TAG, "handleAppPath: " + path);
+        LogUtils.d(TAG, "handleAppPath: " + path);
         return ProtocolPathUtils.getInfoFromArray(REFIX, path, this);
     }
 
     @Override
     public List<TraceRouteContainer> getArray() {
-        Log.d(TAG, "getArray");
+        LogUtils.d(TAG, "getArray");
         return TraceRouteManager.getInstance().getTraces();
     }
 
     @Override
     public String getValue(TraceRouteContainer container, String[] paramsArr) {
-        Log.d(TAG, "getValue: " + container.toString());
+        LogUtils.d(TAG, "getValue: " + container.toString());
         if (paramsArr.length > 1) {
             String param = paramsArr[1];
             switch (param) {

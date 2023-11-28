@@ -24,13 +24,13 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
-import android.util.Log;
 import android.view.View;
 
 import androidx.core.text.BidiFormatter;
 import androidx.core.text.TextDirectionHeuristicsCompat;
 
 import com.android.internal.app.LocalePicker;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
 import java.io.BufferedReader;
@@ -74,7 +74,7 @@ public class DeviceInfoUtils {
             while (line != null) {
                 pos = line.indexOf(CONFIG_DEVICE_OPERATOR);
                 if (pos >= 0) {
-                    Log.d(TAG, "DeviceInfoUtils Read configuration file data: " + line);
+                    LogUtils.d(TAG, "Read configuration file data: " + line);
                     break;
                 }
                 line = reader.readLine();
@@ -84,10 +84,10 @@ public class DeviceInfoUtils {
 
             if (pos >= 0) {
                 operatorName = line.substring(pos + CONFIG_DEVICE_OPERATOR.length() + 1);
-                Log.d(TAG, "DeviceInfoUtils operatorName: " + operatorName);
+                LogUtils.d(TAG, "operatorName: " + operatorName);
             }
         } catch (Exception e) {
-            Log.e(TAG, "DeviceInfoUtils getOperatorName Exception error: " + e.getMessage());
+            LogUtils.e(TAG, "getOperatorName error: " + e.getMessage());
         }
 
         return operatorName;
@@ -180,11 +180,11 @@ public class DeviceInfoUtils {
                         result = ri.loadLabel(pm).toString();
                     }
                 } catch (PackageManager.NameNotFoundException exc) {
-                    Log.e(TAG, "Failed to get service info, " + exc.getMessage());
+                    LogUtils.e(TAG, "Failed to get service info, " + exc.getMessage());
                 }
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get default dream, " + e.getMessage());
+            LogUtils.e(TAG, "Failed to get default dream, " + e.getMessage());
         }
         return result;
     }
@@ -223,7 +223,7 @@ public class DeviceInfoUtils {
         ContentResolver cv = GlobalContext.getContext().getContentResolver();
         String strTimeFormat = android.provider.Settings.System.getString(cv,
                 android.provider.Settings.System.TIME_12_24);
-        Log.d(TAG, "is24Hour: " + strTimeFormat);
+        LogUtils.d(TAG, "is24Hour: " + strTimeFormat);
         return Objects.equals("24", strTimeFormat);
     }
 
@@ -383,7 +383,7 @@ public class DeviceInfoUtils {
             currentLocale = ActivityManager.getService().getConfiguration()
                     .getLocales().get(0);
         } catch (RemoteException e) {
-            Log.e(TAG, "Could not retrieve locale, " + e.getMessage());
+            LogUtils.e(TAG, "Could not retrieve locale, " + e.getMessage());
         }
         if (currentLocale == null) {
             return new Locale("en-US").getDisplayName();
@@ -405,7 +405,7 @@ public class DeviceInfoUtils {
         }
         try {
             String[] arr = language.split("-");
-            Log.d(TAG, "changeSystemLanguage: language = " + language);
+            LogUtils.d(TAG, "changeSystemLanguage: " + language);
             Locale mLocale = new Locale(arr[0], arr[1]);
             Class iActivityManager = Class.forName("android.app.IActivityManager");
             Class activityManagerNative = Class.forName("android.app.ActivityManagerNative");
@@ -424,7 +424,7 @@ public class DeviceInfoUtils {
             BackupManager.dataChanged("com.android.providers.settings");
             return true;
         } catch (Exception e) {
-            Log.e(TAG, "changeSystemLanguage call failed, " + e.getMessage());
+            LogUtils.e(TAG, "changeSystemLanguage call failed, " + e.getMessage());
         }
         return false;
     }

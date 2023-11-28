@@ -3,9 +3,9 @@ package com.sdt.android.tr369.Receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.sdt.diagnose.Device.X_Skyworth.App.AppX;
+import com.sdt.diagnose.common.log.LogUtils;
 
 /**
  * @Description: 监听应用安装
@@ -18,7 +18,7 @@ public class PackageReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String packageName = intent.getDataString();
         String action = intent.getAction();
-        Log.d(TAG, "packageName: " + packageName + ", action: " + action);
+        LogUtils.d(TAG, "packageName: " + packageName + ", action: " + action);
         // 安装
         if (("android.intent.action.PACKAGE_ADDED").equals(action)) {
             AppX.updateAppList();

@@ -1,9 +1,8 @@
 package com.sdt.diagnose.common.net;
 
-import android.util.Log;
-
 import com.sdt.diagnose.Device.X_Skyworth.LogManager;
 import com.sdt.diagnose.common.FileUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,9 +32,9 @@ public class HttpUtils {
                 public void log(String message) {
                     try {
                         String text = URLDecoder.decode(message, "utf-8");
-                        Log.d(TAG, "HttpLoggingInterceptor text: " + text);
+                        LogUtils.d(TAG, "HttpLoggingInterceptor text: " + text);
                     } catch (UnsupportedEncodingException e) {
-                        Log.e(TAG, "HttpLoggingInterceptor error: " + e.getMessage());
+                        LogUtils.e(TAG, "HttpLoggingInterceptor error: " + e.getMessage());
                     }
                 }
             });
@@ -62,7 +61,7 @@ public class HttpUtils {
             }
         } catch (Exception ex) {
             // Handle the error
-            ex.printStackTrace();
+            LogUtils.e(TAG, "uploadLog error: " + ex.getMessage());
         }
     }
 
@@ -77,16 +76,16 @@ public class HttpUtils {
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Log.e(TAG, "uploadLog onFailure: " + e.getMessage());
+                LogUtils.e(TAG, "uploadLog onFailure: " + e.getMessage());
             }
 
             @Override
             public void onResponse(@NotNull Call call, @NotNull Response response) {
                 if (response.code() != 200) {
                     LogManager.getInstance().stopLog();
-                    Log.e(TAG, "The response code is not 200, so stop uploading logs");
+                    LogUtils.e(TAG, "The response code is not 200, so stop uploading logs");
                 }
-                Log.d(TAG, "uploadLog onResponse: " + response);
+                LogUtils.d(TAG, "uploadLog onResponse: " + response);
             }
         });
     }

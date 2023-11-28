@@ -3,7 +3,6 @@ package com.sdt.diagnose.Device.STBService.Components;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
@@ -12,6 +11,7 @@ import com.realtek.hardware.OutputFormat;
 import com.realtek.hardware.RtkHDMIManager2;
 import com.realtek.hardware.RtkTVSystem;
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ public class RtkHdmiX {
         try {
             isPlugged = RtkHDMIManager2.getRtkHDMIManager(mContext).checkIfHDMIPlugged();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "isHDMIPluggedByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "isHDMIPluggedByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return isPlugged;
     }
@@ -58,7 +58,7 @@ public class RtkHdmiX {
             boolean isEnabled = RtkHDMIManager2.getRtkHDMIManager(mContext).hdmiIsEnabled();
             status = Boolean.toString(isEnabled);
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiEnableByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiEnableByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return status;
     }
@@ -67,7 +67,7 @@ public class RtkHdmiX {
         try {
             RtkHDMIManager2.getRtkHDMIManager(mContext).setHDMIEnable(isEnable);
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "setHdmiEnableByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "setHdmiEnableByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
     }
 
@@ -82,7 +82,7 @@ public class RtkHdmiX {
                 isBest = true;
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiResolutionModeByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiResolutionModeByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return isBest;
     }
@@ -92,7 +92,7 @@ public class RtkHdmiX {
         try {
             name = RtkHDMIManager2.getRtkHDMIManager(mContext).getHDMIProductInfo();
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiNameByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiNameByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return name;
     }
@@ -102,7 +102,7 @@ public class RtkHdmiX {
         try {
             OutputFormat curOutputFormat =
                     RtkHDMIManager2.getRtkHDMIManager(mContext).getCurrentOutputFormat();
-            Log.d(TAG, "getHdmiResolutionValueByRtk curOutputFormat"
+            LogUtils.d(TAG, "getHdmiResolutionValueByRtk curOutputFormat"
                     + ": mVIC: " + curOutputFormat.mVIC
                     + ", mFreqShift: " + curOutputFormat.mFreqShift
                     + ", mColor: " + curOutputFormat.mColor
@@ -133,14 +133,14 @@ public class RtkHdmiX {
                 }
             }
         } catch (NoClassDefFoundError e) {
-            Log.e(TAG, "getHdmiResolutionValueByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getHdmiResolutionValueByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
         }
         return mode;
     }
 
     public boolean setHdmiResolutionValueByRtk(String mode) {
         int value = getTVSystemValueViaString(mode);
-        Log.d(TAG, "setHdmiResolutionValueByRtk value: " + value);
+        LogUtils.d(TAG, "setHdmiResolutionValueByRtk value: " + value);
         if (value >= 0) setHDMITVSystem(value);
         return true;
     }
@@ -164,7 +164,7 @@ public class RtkHdmiX {
             }
             fps = Integer.parseInt(mode.split("@ ")[1].split("Hz")[0]);
         } catch (Exception e) {
-            Log.e(TAG, "getTVSystemValueViaString execute failed, " + e.getMessage());
+            LogUtils.e(TAG, "getTVSystemValueViaString execute failed, " + e.getMessage());
             return -1;
         }
 
@@ -172,7 +172,7 @@ public class RtkHdmiX {
             fps += 1;
             freqShift = 1;
         }
-        Log.d(TAG, "getTVSystemValueViaString height: " + height
+        LogUtils.d(TAG, "getTVSystemValueViaString height: " + height
                 + ", width: " + width
                 + ", fps: " + fps
                 + ", freqShift: " + freqShift
@@ -213,12 +213,12 @@ public class RtkHdmiX {
             /* check existing user preferred display mode */
             Display.Mode currentMode = displayManager.getUserPreferredDisplayMode();
             if (currentMode != null) {
-                Log.d(TAG, "current mode: " + currentMode);
+                LogUtils.d(TAG, "current mode: " + currentMode);
             }
-            Log.d(TAG, "updateUserPreferredDisplayMode mode: " + mode);
+            LogUtils.d(TAG, "updateUserPreferredDisplayMode mode: " + mode);
             displayManager.setUserPreferredDisplayMode(mode);
         } else {
-            Log.d(TAG, "updateUserPreferredDisplayMode clear mode");
+            LogUtils.d(TAG, "updateUserPreferredDisplayMode clear mode");
             displayManager.clearUserPreferredDisplayMode();
         }
     }
@@ -258,10 +258,10 @@ public class RtkHdmiX {
 
                 boolean useRtkAPI = checkTargetTVSystem(info);
                 if (useRtkAPI) {
-                    Log.d(TAG, "useRtkAPI to switch to " + fmt.mVIC + " fs: " + fmt.mFreqShift);
+                    LogUtils.d(TAG, "useRtkAPI to switch to " + fmt.mVIC + " fs: " + fmt.mFreqShift);
                     RtkHDMIManager2.getRtkHDMIManager(mContext).setOutputFormat2(fmt);
                 } else {
-                    Log.d(TAG, "Not using the Rtk API.");
+                    LogUtils.d(TAG, "Not using the Rtk API.");
                     if (!progressive) {
                         RtkHDMIManager2.getRtkHDMIManager(mContext).setupInterlaceFlag();
                     }
@@ -273,7 +273,7 @@ public class RtkHdmiX {
             /* none auto detect mode, resolve vic via value */
             RtkHDMIManager2.TVSystemInfo info =
                     RtkHDMIManager2.getRtkHDMIManager(mContext).findTVSystemInfo(value);
-            Log.d(TAG, "setHDMITVSystem info: " + info);
+            LogUtils.d(TAG, "setHDMITVSystem info: " + info);
             if (info != null) {
                 int w = info.mWidth;
                 int h = info.mHeight;
@@ -291,7 +291,7 @@ public class RtkHdmiX {
 
                 boolean useRtkAPI = checkTargetTVSystem(info);
                 if (useRtkAPI) {
-                    Log.d(TAG, "Requires the use of the Rtk API.");
+                    LogUtils.d(TAG, "Requires the use of the Rtk API.");
                     OutputFormat cfmt =
                             RtkHDMIManager2.getRtkHDMIManager(mContext).getCurrentOutputFormat();
                     int hdr = cfmt.mHDR;
@@ -302,7 +302,7 @@ public class RtkHdmiX {
                     int flags = RtkHDMIManager2.EXTRA_IGNORE_CURRENT
                             | RtkHDMIManager2.EXTRA_SAVE_TO_FACTORY;
 
-                    Log.d(TAG, "useRtkAPI setOutputFormat"
+                    LogUtils.d(TAG, "useRtkAPI setOutputFormat"
                             + " vic: " + vic
                             + " fs: " + fs
                             + " color: " + color
@@ -320,7 +320,7 @@ public class RtkHdmiX {
                             flags);
 
                 } else {
-                    Log.d(TAG, "Not using the Rtk API.");
+                    LogUtils.d(TAG, "Not using the Rtk API.");
                     if (!progressive) {
                         RtkHDMIManager2.getRtkHDMIManager(mContext).setupInterlaceFlag();
                     }
@@ -356,7 +356,7 @@ public class RtkHdmiX {
 
     public List<String> getHdmiSupportListByRtk() {
         int TvSystemSize = sTVSystemInfos.size();
-        Log.d(TAG, "getHdmiSupportListByRtk TvSystemSize: " + TvSystemSize);
+        LogUtils.d(TAG, "getHdmiSupportListByRtk TvSystemSize: " + TvSystemSize);
         String[][] availableTvSystems = new String[TvSystemSize + 1][2];
         availableTvSystems[TvSystemSize][0] = "AUTO";
         availableTvSystems[TvSystemSize][1] = "0";
@@ -384,7 +384,7 @@ public class RtkHdmiX {
                 }
             }
             availableTvSystems[i][1] = String.valueOf(info.mSettingValue);
-            Log.d(TAG, "@@ availableTvSystems[" + i + "][0]: " + availableTvSystems[i][0]
+            LogUtils.d(TAG, "@@ availableTvSystems[" + i + "][0]: " + availableTvSystems[i][0]
                     + ", availableTvSystems[" + i + "][1]: " + availableTvSystems[i][1]);
         }
         for (int i = 0; i < availableTvSystems.length; i++) {
@@ -395,21 +395,21 @@ public class RtkHdmiX {
         }
 
         for (int i = 0; i < TvSystemSize; i++) {
-            Log.d(TAG, "&& availableTvSystems[" + i + "][0]: " + availableTvSystems[i][0]
+            LogUtils.d(TAG, "&& availableTvSystems[" + i + "][0]: " + availableTvSystems[i][0]
                     + ", availableTvSystems[" + i + "][1]: " + availableTvSystems[i][1]);
         }
 
         int[] supportVideoFormats = RtkHDMIManager2.getRtkHDMIManager(mContext).getVideoFormat();
         int numSupportVideoFormat = 0;
 
-        Log.d(TAG, "supportVideoFormat: " + supportVideoFormats.length
+        LogUtils.d(TAG, "supportVideoFormat: " + supportVideoFormats.length
                 + ", numSupportVideoFormat: " + numSupportVideoFormat);
 
         for (int supportVideoFormat : supportVideoFormats) {
             if (supportVideoFormat == 1)
                 numSupportVideoFormat++;
         }
-        Log.d(TAG, "Num of SupoortVideoFormat: " + numSupportVideoFormat);
+        LogUtils.d(TAG, "Num of SupoortVideoFormat: " + numSupportVideoFormat);
 
         final List<String> listHdmiMode = new ArrayList<>();
         final List<String> listHdmiModeValues = new ArrayList<>();
@@ -433,7 +433,7 @@ public class RtkHdmiX {
         }
 
         for (int i = 0; i < listHdmiMode.size(); i++) {
-            Log.d(TAG, "**** " + listHdmiMode.get(i) + " : " + listHdmiModeValues.get(i) + " ****");
+            LogUtils.d(TAG, "**** " + listHdmiMode.get(i) + " : " + listHdmiModeValues.get(i) + " ****");
         }
         return listHdmiMode;
     }

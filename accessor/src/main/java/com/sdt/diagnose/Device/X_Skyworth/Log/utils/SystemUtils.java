@@ -2,7 +2,8 @@ package com.sdt.diagnose.Device.X_Skyworth.Log.utils;
 
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Log;
+
+import com.sdt.diagnose.common.log.LogUtils;
 
 
 /**
@@ -33,9 +34,9 @@ public final class SystemUtils {
     public static void startScriptService() {
         try {
             SystemProperties.set("ctl.start", SKY_SCRIPT_NAME);
-            Log.i(TAG, "set property ctl.start." + SKY_SCRIPT_NAME + " success");
+            LogUtils.i(TAG, "set property ctl.start. " + SKY_SCRIPT_NAME + " success");
         } catch (Exception e) {
-            Log.e(TAG, "set property ctl.start." + SKY_SCRIPT_NAME + " error: " + e.getMessage());
+            LogUtils.e(TAG, "set property ctl.start. " + SKY_SCRIPT_NAME + " error: " + e.getMessage());
         }
     }
 
@@ -45,9 +46,9 @@ public final class SystemUtils {
     public static void stopScriptService() {
         try {
             SystemProperties.set("ctl.stop", SKY_SCRIPT_NAME);
-            Log.i(TAG, "set property ctl.stop." + SKY_SCRIPT_NAME + " success");
+            LogUtils.i(TAG, "set property ctl.stop. " + SKY_SCRIPT_NAME + " success");
         } catch (Exception e) {
-            Log.e(TAG, "set property ctl.stop." + SKY_SCRIPT_NAME + " error: " + e.getMessage());
+            LogUtils.e(TAG, "set property ctl.stop. " + SKY_SCRIPT_NAME + " error: " + e.getMessage());
         }
     }
 

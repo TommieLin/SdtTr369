@@ -14,12 +14,12 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 
 import com.sdt.accessor.R;
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
@@ -109,7 +109,7 @@ public class ScreenRecordService extends Service {
         try {
             mMediaRecorder.start();
         } catch (Exception e) {
-            Log.e(TAG, "MediaRecorder start error, " + e.getMessage());
+            LogUtils.e(TAG, "MediaRecorder start error, " + e.getMessage());
         }
 
         TimerTask timeoutTask = new TimerTask() {
@@ -128,7 +128,7 @@ public class ScreenRecordService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        LogUtils.d(TAG, "onDestroy");
         if (mVirtualDisplay != null) {
             mVirtualDisplay.release();
             mVirtualDisplay = null;
@@ -141,7 +141,7 @@ public class ScreenRecordService extends Service {
                 mMediaRecorder.setPreviewDisplay(null);
                 mMediaRecorder.stop();
             } catch (Exception e) {
-                Log.e(TAG, "MediaRecorder stop error, " + e.getMessage());
+                LogUtils.e(TAG, "MediaRecorder stop error, " + e.getMessage());
             }
             mMediaRecorder.release();
             mMediaRecorder = null;
@@ -158,14 +158,14 @@ public class ScreenRecordService extends Service {
             return;
         }
         long fileSize = file.length();
-        Log.w(TAG, "Record video file size: " + fileSize);
+        LogUtils.w(TAG, "Record video file size: " + fileSize);
         String maxUplaodFileSize = DbManager.getDBParam("Device.X_Skyworth.MaxScreenRecordFileSize");
         long maxFileSize = 10 * 1024 * 1024;
         if (maxUplaodFileSize.length() != 0 && Long.parseLong(maxUplaodFileSize) > 0) {
             maxFileSize = Long.parseLong(maxUplaodFileSize);
         }
         if (fileSize >= maxFileSize) {
-            Log.e(TAG, "The size of the file to be uploaded exceeds the limit."
+            LogUtils.e(TAG, "The size of the file to be uploaded exceeds the limit."
                     + " File size: " + fileSize + " > Max Size: " + maxFileSize);
             file.delete();
             return;
@@ -220,7 +220,7 @@ public class ScreenRecordService extends Service {
         try {
             mediaRecorder.prepare();
         } catch (IllegalStateException | IOException e) {
-            Log.e(TAG, "MediaRecorder prepare error, " + e.getMessage());
+            LogUtils.e(TAG, "MediaRecorder prepare error, " + e.getMessage());
         }
 
         return mediaRecorder;
@@ -249,7 +249,7 @@ public class ScreenRecordService extends Service {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 File file = new File(recordFilePath);
                 file.delete();
-                Log.e(TAG, "Failed to upload video. Failure Message: " + e.getMessage());
+                LogUtils.e(TAG, "Failed to upload video. Failure Message: " + e.getMessage());
                 synchronized (SYNC_OBJ) {
                     SYNC_OBJ.notify();
                 }
@@ -260,7 +260,7 @@ public class ScreenRecordService extends Service {
                     throws IOException {
                 File file = new File(recordFilePath);
                 file.delete();
-                Log.i(TAG, "Successfully uploaded video. Protocol: " + response.protocol()
+                LogUtils.i(TAG, "Successfully uploaded video. Protocol: " + response.protocol()
                         + ", Code: " + response.code());
                 synchronized (SYNC_OBJ) {
                     SYNC_OBJ.notify();

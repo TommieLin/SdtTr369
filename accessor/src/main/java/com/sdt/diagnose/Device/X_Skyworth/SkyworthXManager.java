@@ -12,9 +12,9 @@ import android.net.wifi.WifiManager;
 import android.os.HardwarePropertiesManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.util.Log;
 
 import com.sdt.diagnose.common.GlobalContext;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -66,7 +66,7 @@ public class SkyworthXManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getInternalDataStorageFree error, " + e.getMessage());
+            LogUtils.e(TAG, "getInternalDataStorageFree error, " + e.getMessage());
         }
 
         return "";
@@ -87,7 +87,7 @@ public class SkyworthXManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getInternalDataStorageTotal error, " + e.getMessage());
+            LogUtils.e(TAG, "getInternalDataStorageTotal error, " + e.getMessage());
         }
         return "";
     }
@@ -109,7 +109,7 @@ public class SkyworthXManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getInternalDataStorageUtilisation error, " + e.getMessage());
+            LogUtils.e(TAG, "getInternalDataStorageUtilisation error, " + e.getMessage());
         }
 
         return "";
@@ -126,7 +126,7 @@ public class SkyworthXManager {
             double utilisation = usage * 100f / mi.totalMem;
             result = String.format("%.2f", utilisation);
         } catch (Exception e) {
-            Log.e(TAG, "getMemoryUtilisation error, " + e.getMessage());
+            LogUtils.e(TAG, "getMemoryUtilisation error, " + e.getMessage());
         }
         return result;
     }
@@ -134,10 +134,10 @@ public class SkyworthXManager {
     public boolean mute() {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         if (audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
-            Log.d(TAG, "The device has been muted");
+            LogUtils.d(TAG, "The device has been muted.");
             return false;
         }
-        Log.d(TAG, "Mute now");
+        LogUtils.d(TAG, "Mute now.");
         int flags = AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI;
         audioManager.adjustSuggestedStreamVolume(
                 AudioManager.ADJUST_TOGGLE_MUTE, AudioManager.STREAM_MUSIC, flags);
@@ -147,10 +147,10 @@ public class SkyworthXManager {
     public boolean unmute() {
         AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         if (!audioManager.isStreamMute(AudioManager.STREAM_MUSIC)) {
-            Log.d(TAG, "The device has been unmute");
+            LogUtils.d(TAG, "The device has been unmute.");
             return false;
         }
-        Log.d(TAG, "Unmute now");
+        LogUtils.d(TAG, "Unmute now.");
         // int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND;
         int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND;
         audioManager.adjustSuggestedStreamVolume(
@@ -159,7 +159,7 @@ public class SkyworthXManager {
     }
 
     public boolean uninstall(String packageName) {
-        Log.d(TAG, "UninstallApp pkg: " + packageName);
+        LogUtils.d(TAG, "UninstallApp pkg: " + packageName);
         Intent intent = new Intent();
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent sender = PendingIntent.getActivity(mContext, 0, intent, 0);
@@ -182,14 +182,14 @@ public class SkyworthXManager {
             is = Files.newInputStream(Paths.get("/proc/net/rtl88x2cs/wlan0/rx_signal"));
             reader = new BufferedReader(new InputStreamReader(is));
             line = reader.readLine(); // 读取第一行
-            Log.d(TAG, "SNR line: " + line);
+            LogUtils.d(TAG, "SNR line: " + line);
             while (line != null) { // 如果 line 为空说明读完了
                 pos = line.indexOf(targetStr);
                 if (pos >= 0) {
                     break;
                 }
                 line = reader.readLine(); // 读取下一行
-                Log.d(TAG, "SNR line: " + line);
+                LogUtils.d(TAG, "SNR line: " + line);
             }
             reader.close();
             is.close();
@@ -209,7 +209,7 @@ public class SkyworthXManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getWiFiRFSNR error, " + e.getMessage());
+            LogUtils.e(TAG, "getWiFiRFSNR error, " + e.getMessage());
         }
 
         return String.valueOf(snrInt);
@@ -255,14 +255,14 @@ public class SkyworthXManager {
             is = Files.newInputStream(Paths.get("/proc/net/rtl88x2cs/wlan0/trx_info_debug"));
             reader = new BufferedReader(new InputStreamReader(is));
             line = reader.readLine(); // 读取第一行
-            Log.d(TAG, "HYType line: " + line);
+            LogUtils.d(TAG, "HYType line: " + line);
             while (line != null) { // 如果 line 为空说明读完了
                 pos = line.indexOf(targetStr);
                 if (pos >= 0) {
                     break;
                 }
                 line = reader.readLine(); // 读取下一行
-                Log.d(TAG, "HYType line: " + line);
+                LogUtils.d(TAG, "HYType line: " + line);
             }
             reader.close();
             is.close();
@@ -281,7 +281,7 @@ public class SkyworthXManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getWifiPHYType error, " + e.getMessage());
+            LogUtils.e(TAG, "getWifiPHYType error, " + e.getMessage());
         }
 
         return phyStr;
@@ -326,7 +326,7 @@ public class SkyworthXManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getWiFiMIMOMode error, " + e.getMessage());
+            LogUtils.e(TAG, "getWiFiMIMOMode error, " + e.getMessage());
         }
 
         mimoStr = ConvertMimoTypeIntToString_rtl88x2cs(mimo_type);

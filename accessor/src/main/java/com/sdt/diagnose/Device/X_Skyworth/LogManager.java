@@ -4,8 +4,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
 import java.io.InputStream;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @Version 1.0
  */
 public class LogManager {
-    public static final String TAG = "LogManager";
+    private static final String TAG = "LogManager";
     public int enable = 0;
     public String url = "";
     public static String logLevel = "Info";
@@ -195,7 +195,7 @@ public class LogManager {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "getRealtimeLog call failed, " + e.getMessage());
+            LogUtils.e(TAG, "getRealtimeLog call failed, " + e.getMessage());
         }
     }
 
