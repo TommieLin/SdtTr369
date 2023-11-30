@@ -27,7 +27,6 @@ import com.sdt.android.tr369.Receiver.PackageReceiver;
 import com.sdt.android.tr369.Receiver.ShutdownReceiver;
 import com.sdt.android.tr369.Receiver.StandbyModeReceiver;
 import com.sdt.diagnose.Device.LanX;
-import com.sdt.diagnose.Device.SkyworthX;
 import com.sdt.diagnose.Device.X_Skyworth.App.AppX;
 import com.sdt.diagnose.Device.X_Skyworth.Bluetooth.BluetoothDeviceX;
 import com.sdt.diagnose.Device.X_Skyworth.FTIMonitor;
@@ -230,8 +229,7 @@ public class SdtTr369Service extends Service {
         }
         // 开机同步STB Lock状态
         if (DbManager.getDBParam("Device.X_Skyworth.Lock.Enable").equals("1")) {
-            SkyworthX skyworthX = new SkyworthX();
-            skyworthX.SK_TR369_SetLockEnable(null, "1");
+            Tr369PathInvoke.getInstance().setString("Device.X_Skyworth.Lock.Enable", "1");
         }
         // 重新上传APP安装结果
         if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {

@@ -26,6 +26,8 @@ import android.util.ArrayMap;
 import com.sdt.accessor.R;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
+import com.sdt.diagnose.Device.X_Skyworth.BoxAllowActivity;
+import com.sdt.diagnose.Device.X_Skyworth.BoxControlBean;
 import com.sdt.diagnose.Device.X_Skyworth.LockUnlockActivity;
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogCmd;
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogRepository;
@@ -350,8 +352,13 @@ public class SkyworthX {
     public static String REMOTE_CONTROL_DPI_HEIGHT_SP_KEY = "Device.X_Skyworth.RemoteControl.DPI.Height";
 
     public boolean setRemoteControlEnable(String path, String val) {
+        LogUtils.d(TAG, "setRemoteControlEnable flag: " + BoxControlBean.getInstance().isAllow);
         if (Boolean.getBoolean(val) || Integer.parseInt(val) == 1) {
             if (checkRemoteControlParam()) {
+                if (!BoxControlBean.getInstance().isAllow) {
+                    getUserAllow();
+                }
+
                 HashMap<String, String> params = new HashMap<>();
                 params.put(GlobalContext.getContext().getString(R.string.socketio_url),
                         SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_UPLOAD_URL_SP_KEY));
@@ -365,7 +372,12 @@ public class SkyworthX {
                                 SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_HEIGHT_SP_KEY)));
                 params.put(GlobalContext.getContext().getString(R.string.dev_name),
                         DeviceInfoUtils.getSerialNumber());
-                RemoteControlAPI.start(GlobalContext.getContext(), params);
+
+                LogUtils.d(TAG, "setRemoteControlEnable isAllow: " + BoxControlBean.getInstance().isAllow());
+                if (BoxControlBean.getInstance().isAllow()) {
+                    RemoteControlAPI.start(GlobalContext.getContext(), params);
+                    BoxControlBean.getInstance().setAllow(false);
+                }
                 SPUtils.getInstance(GlobalContext.getContext()).put(path, "1");
                 return true;
             }
@@ -397,10 +409,22 @@ public class SkyworthX {
         return SPUtils.getInstance(GlobalContext.getContext()).getString(path);
     }
 
+    private void getUserAllow() {
+        LogUtils.d(TAG, "RemoteControl getUserAllow ...");
+        Intent intent = new Intent(GlobalContext.getContext(), BoxAllowActivity.class);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP);
+        GlobalContext.getContext().startActivity(intent);
+    }
+
     @Tr369Set("Device.X_Skyworth.RemoteControl.")
     public boolean SK_TR369_SetRemoteControlInfo(String path, String val) {
-        if (path.endsWith(".Enable")) {
+        LogUtils.d(TAG, "setRemoteControlInfo path: " + path + ", value: " + val);
+        if (path.contains("Enable")) {
             return setRemoteControlEnable(path, val);
+        } else if (path.contains("ConfirmResultUrl")) {
+            BoxControlBean.getInstance().setConfirmResultUrl(val);
+        } else if (path.contains("TransactionId")) {
+            BoxControlBean.getInstance().setTransactionId(val);
         } else {
             SPUtils.getInstance(GlobalContext.getContext()).put(path, val);
         }

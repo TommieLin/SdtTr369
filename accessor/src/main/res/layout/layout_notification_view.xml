@@ -23,7 +23,7 @@
             android:layout_height="1dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
-            android:background="@color/button_background" />
+            android:background="@color/gray_button_shortmsg" />
 
         <TextView
             android:id="@+id/no_content"

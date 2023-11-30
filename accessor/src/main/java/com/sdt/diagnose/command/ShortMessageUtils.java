@@ -1,6 +1,7 @@
 package com.sdt.diagnose.command;
 
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
+import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -44,7 +45,8 @@ public class ShortMessageUtils {
     public static final String KEY_ID = "noticeId";
     public static final String SHOW_TIME = "showTime";
     public static final String KEY_POSITION = "position";
-    private static final String CHANNEL_ID = "tr369_message";
+    private static final String CHANNEL_ID = "TR369 Message";
+    private static final CharSequence CHANNEL_NAME = "TR369 Channel";
     public static final String TYPE_TEXT = "01";
     public static final String TYPE_URL = "02";
     public static final String TYPE_IMAGE = "03";
@@ -98,8 +100,11 @@ public class ShortMessageUtils {
     private static void notifyNotification(String title, String content) {
         NotificationManager manager =
                 (NotificationManager) GlobalContext.getContext().getSystemService(NOTIFICATION_SERVICE);
+//        // 禁止Notification在Launcher右上角弹出窗口
+//        NotificationChannel channel =
+//                new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, IMPORTANCE_LOW);
         NotificationChannel channel =
-                new NotificationChannel(CHANNEL_ID, "message", IMPORTANCE_HIGH);
+                new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, IMPORTANCE_HIGH);
         manager.createNotificationChannel(channel);
 
         Intent emptyIntent = new Intent();
@@ -119,6 +124,7 @@ public class ShortMessageUtils {
                         .extend((Notification.Extender) new Notification.TvExtender())
                         .setContentIntent(pendingIntent) // Set the empty pending intent
                         .setAutoCancel(true) // Automatically cancel the notification when it's clicked
+//                        .setPriority(Notification.PRIORITY_LOW) // Set priority to low
                         .build();
 
         manager.notify(NOTIFICATION_TR369_ID, notification);

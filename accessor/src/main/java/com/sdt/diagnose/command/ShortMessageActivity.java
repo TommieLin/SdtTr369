@@ -166,7 +166,7 @@ public class ShortMessageActivity extends Activity {
                 buttonLP.gravity = Gravity.CENTER_HORIZONTAL;
                 button.setLayoutParams(buttonLP);
                 //button.setTextColor(Color.GREEN);
-                button.setBackgroundResource(R.drawable.button_background);
+                button.setBackgroundResource(R.drawable.button_background_shortmsg);
                 //button.requestFocus();
                 ShortMessageUtils.responseServer(messageId);
             }

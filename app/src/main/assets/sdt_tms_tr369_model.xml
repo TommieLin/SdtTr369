@@ -619,6 +619,8 @@
                     <schema name="Width" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
                     <schema name="Height" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
                 </schema>
+                <schema name="ConfirmResultUrl" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="TransactionId" getter="diagnose" setter="diagnose" type="string" write="W" />
             </schema>
             <schema name="SpeedTest" type="object">
                 <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />

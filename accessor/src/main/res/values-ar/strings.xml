@@ -30,7 +30,7 @@
     <string name="error">An error occurred, please try again</string>
     <string name="timeout">Timeout</string>
 
-    <!-- remote -->
+    <!--    remoteControl-->
     <string name="socketio_url">socketio.url</string>
     <string name="ice_servers">ice.servers</string>
     <string name="video_size">video.size</string>
@@ -47,9 +47,13 @@
     <string name="app_suspend_dialog_title">APP POLICY</string>
     <string name="app_suspend_dialog_message">This application has been restricted and cannot be opened now. Please contact your vendor.</string>
 
-    <!-- RemoteControl -->
-    <string name="cms_control">Remote access request! \nPlease grant remote access to Ooredoo tv administrator? If not granted, request will be automatically refused after 30 seconds.</string>
-    <string name="cms_control_refuse">Grant</string>
-    <string name="cms_control_confirm">Deny</string>
-    <string name="cms_control_title">Remote Access Request</string>
+    <string name="cms_control" >طلب الوصول عن بعد! \n
+يرجى منح الوصول عن بعد إلى مسؤول Ooredoo tv ؟في حالة عدم الموافقة ، سيتم رفض الطلب تلقائيًا بعد 30 ثانية.</string>
+    <string name="cms_control_refuse" >منح</string>
+    <string name="cms_control_confirm" >رفض</string>
+    <string name="cms_control_title">طلب الوصول عن بعد</string>
+
+    <string name="screen_shot_control_title">طلب الوصول عن بعد!</string>
+    <string name="screen_shot_control">n\ يرجى منح الوصول عن بعد إلى مسؤول Ooredoo tv؟
+في حالة عدم الموافقة ، سيتم رفض الطلب تلقائيًا بعد 30 ثانية.</string>
 </resources>
