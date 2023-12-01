@@ -35,8 +35,8 @@ public class ApplicationUtils {
     public static boolean uninstall(String pkg) {
         if (mHandlerThread == null) {
             mHandlerThread = new HandlerThread("AppUtilsThread", Process.THREAD_PRIORITY_BACKGROUND);
+            mHandlerThread.start();
         }
-        mHandlerThread.start();
         if (mHandler == null) {
             mHandler = new Handler(mHandlerThread.getLooper());
         }
