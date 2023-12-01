@@ -12,6 +12,8 @@ import com.sdt.diagnose.common.log.LogUtils;
  * <p>ClassDescription: SystemUtils
  *
  * <p>Author: ZHX Date: 2022/9/7
+ *
+ * <p>Editor: Outis Data: 2023/11/30
  */
 public final class SystemUtils {
     private static final String TAG = "SystemUtils";

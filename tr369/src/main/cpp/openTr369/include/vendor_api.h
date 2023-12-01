@@ -47,8 +47,6 @@
 
 //---------------------------------------------------------------------
 // Vendor Global Parameters
-//extern SK_TR369_Setter sk_tr369_jni_setter;
-//extern SK_TR369_Getter sk_tr369_jni_getter;
 extern char *sk_tr369_model_xml;
 
 //---------------------------------------------------------------------
@@ -56,6 +54,9 @@ extern char *sk_tr369_model_xml;
 int VENDOR_Init(void);
 int VENDOR_Start(void);
 int VENDOR_Stop(void);
+
+int SK_TR369_InitCustomEvent(void);
+int SK_TR369_SetDefaultMultiObject(void);
 
 #ifdef INCLUDE_PROGRAMMATIC_FACTORY_RESET
 int VENDOR_GetFactoryResetParams(kv_vector_t *kvv);

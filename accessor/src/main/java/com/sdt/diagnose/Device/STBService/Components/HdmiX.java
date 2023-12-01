@@ -11,10 +11,7 @@ import com.sdt.diagnose.extra.CmsExtraServiceManager;
 
 import java.util.List;
 
-/**
- * @Description: java类作用描述
- * @CreateDate: 2021/8/12 19:40
- */
+
 public class HdmiX {
     private static final String TAG = "HdmiX";
     private static final int HDMI_NUMBER_ENTRIES = 1;

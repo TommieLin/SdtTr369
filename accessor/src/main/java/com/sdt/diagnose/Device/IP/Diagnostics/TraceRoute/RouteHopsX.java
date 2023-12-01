@@ -9,10 +9,7 @@ import com.sdt.diagnose.traceroute.TraceRouteManager;
 
 import java.util.List;
 
-/**
- * @Description: java类作用描述
- * @CreateDate: 2021/8/26 14:44
- */
+
 public class RouteHopsX implements IProtocolArray<TraceRouteContainer> {
     private static final String TAG = "RouteHopsX";
     private static final String REFIX = "Device.IP.Diagnostics.TraceRoute.RouteHops.";

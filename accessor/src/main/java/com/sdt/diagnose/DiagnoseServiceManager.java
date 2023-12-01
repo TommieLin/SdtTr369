@@ -15,10 +15,6 @@ import com.sdt.diagnose.common.net.HttpsUtils;
 import com.skyworthdigital.speedtest.ui.SpeedTestService;
 
 
-/**
- * @Description: java类作用描述
- * @CreateDate: 2021/8/18 16:51
- */
 public class DiagnoseServiceManager {
     private static final String TAG = "DiagnoseServiceManager";
     private static DiagnoseServiceManager instance = null;

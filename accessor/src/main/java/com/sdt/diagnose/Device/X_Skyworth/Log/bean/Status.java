@@ -9,6 +9,8 @@ import androidx.annotation.NonNull;
  * <p>ClassDescription: Status
  *
  * <p>Author: ZHX Date: 2022/10/26
+ *
+ * <p>Editor: Outis Data: 2023/11/30
  */
 public class Status {
     public static final int TERMINATE = 1;

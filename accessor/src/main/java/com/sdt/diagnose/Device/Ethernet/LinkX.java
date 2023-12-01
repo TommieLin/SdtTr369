@@ -6,9 +6,9 @@ import com.sdt.diagnose.common.NetworkUtils;
 
 /**
  * @ClassName: LinkX
- * @Description: Device.Ethernet.Link.{i}.
- * Enable/Status/Name/MACAddress
- * @CreateDate: 2021/8/12 14:01
+ * @Description: Device.Ethernet.Link.{i}.Enable/Status/Name/MACAddress
+ * @Author: Outis
+ * @CreateDate: 2023/11/30 14:01
  */
 public class LinkX {
 

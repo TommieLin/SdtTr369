@@ -2,7 +2,7 @@ package com.sdt.diagnose.Device.X_Skyworth.Tcpdump;
 
 /**
  * @Author Outis
- * @Date 2022/8/26 10:23
+ * @Date 2023/11/30 10:23
  * @Version 1.0
  */
 public class TcpdumpBean {
@@ -70,4 +70,16 @@ public class TcpdumpBean {
         this.netType = netType;
     }
 
+    @Override
+    public String toString() {
+        return "TcpdumpBean{" +
+                "enable='" + enable + '\'' +
+                ", ip='" + ip + '\'' +
+                ", port='" + port + '\'' +
+                ", netType='" + netType + '\'' +
+                ", duration='" + duration + '\'' +
+                ", url='" + url + '\'' +
+                ", fileSize=" + fileSize +
+                '}';
+    }
 }

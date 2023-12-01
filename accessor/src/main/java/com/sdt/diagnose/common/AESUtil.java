@@ -8,9 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 
 /**
- * @Description:
- * @Author: Outis
- * @Date: 2022-10-17 13:52
+ * @Author Outis
+ * @Date 2023/11/30 13:52
+ * @Version 1.0
  */
 public class AESUtil {
     private String aesKey;

@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 
 /**
  * @Author Outis
- * @Date 2022/2/16 17:50
+ * @Date 2023/11/30 17:50
  * @Version 1.0
  */
 public class ShortMessageBean {

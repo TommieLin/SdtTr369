@@ -285,7 +285,6 @@ int source_main(int argc, char *argv[])
 
     // Exit if unable to spawn off a thread to service the MTPs
 #ifndef DISABLE_STOMP
-    USP_LOG_Info(" ######### Outis @@@@ ifndef DISABLE_STOMP");
     err = OS_UTILS_CreateThread("MTP_STOMP", MTP_EXEC_StompMain, NULL);
     if (err != USP_ERR_OK)
     {
@@ -294,7 +293,6 @@ int source_main(int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_COAP
-    USP_LOG_Info(" ######### Outis @@@@ ifdef ENABLE_COAP");
     err = OS_UTILS_CreateThread("MTP_CoAP", MTP_EXEC_CoapMain, NULL);
     if (err != USP_ERR_OK)
     {
@@ -303,7 +301,6 @@ int source_main(int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_MQTT
-    USP_LOG_Info(" ######### Outis @@@@ ifdef ENABLE_MQTT");
     err = OS_UTILS_CreateThread("MTP_MQTT", MTP_EXEC_MqttMain, NULL);
     if (err != USP_ERR_OK)
     {
@@ -312,7 +309,6 @@ int source_main(int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_WEBSOCKETS
-    USP_LOG_Info(" ######### Outis @@@@ ifdef ENABLE_WEBSOCKETS");
     err = OS_UTILS_CreateThread("MTP_WSClient", WSCLIENT_Main, NULL);
     if (err != USP_ERR_OK)
     {
@@ -327,7 +323,6 @@ int source_main(int argc, char *argv[])
 #endif
 
     // Exit if unable to spawn off a thread to perform bulk data collection posts
-    USP_LOG_Info(" ######### Outis @@@@ OS_UTILS_CreateThread start");
     err = OS_UTILS_CreateThread("BulkDataColl", BDC_EXEC_Main, NULL);
     if (err != USP_ERR_OK)
     {
@@ -335,10 +330,7 @@ int source_main(int argc, char *argv[])
     }
 
     // Run the data model main loop of USP Agent (this function does not return)
-    USP_LOG_Info(" ######### Outis @@@@ DM_EXEC_Main start");
     DM_EXEC_Main(NULL);
-
-    USP_LOG_Info(" ######### Outis @@@@ main return");
 
 exit:
     // If the code gets here, an error occurred
@@ -393,8 +385,6 @@ int SK_TR369_Start(const char *const model_path)
     OS_UTILS_SetDataModelThread();
 
     // Exit if unable to initialise basic subsystems
-//    USP_LOG_Init();
-//    USP_ERR_Init();
     err = USP_MEM_Init();
     if (err != USP_ERR_OK)
     {
@@ -451,7 +441,6 @@ int SK_TR369_Start(const char *const model_path)
 #endif
 
 #ifdef ENABLE_MQTT
-    USP_LOG_Info(" ######### Outis ### ENABLE_MQTT");
     err = OS_UTILS_CreateThread("MTP_MQTT", MTP_EXEC_MqttMain, NULL);
     if (err != USP_ERR_OK)
     {
@@ -542,13 +531,11 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     RETRY_WAIT_Init();
 
     // Exit if unable to add all schema paths to the data model
-    USP_LOG_Info(" ######### Outis @@@ Wait to call DATA_MODEL_Init");
     err = DATA_MODEL_Init();
     if (err != USP_ERR_OK)
     {
         return err;
     }
-    USP_LOG_Info(" ######### Outis @@@ DATA_MODEL_Init return: %d", err);
 
     // Start logging memory usage from now on (since the static data model schema allocations have completed)
     if (enable_mem_info)
@@ -557,7 +544,6 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     }
 
     // Exit if unable to start the datamodel objects
-    USP_LOG_Info(" ######### Outis @@@ Wait to call DATA_MODEL_Start");
     err = DATA_MODEL_Start();
     if (err != USP_ERR_OK)
     {
@@ -565,7 +551,6 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     }
 
 #ifndef DISABLE_STOMP
-    USP_LOG_Info(" ######### Outis @@@ ifndef DISABLE_STOMP");
     // Start the STOMP connections. This must be done here, before other parts of the data model that require stomp connections
     // to queue messages (eg object creation/deletion notifications)
     err = DEVICE_STOMP_StartAllConnections();
@@ -576,7 +561,6 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
 #endif
 
 #ifdef ENABLE_MQTT
-    USP_LOG_Info(" ######### Outis @@@ ENABLE_MQTT");
     // Start the MQTT connections. This must be done here, before other parts of the data model that require MQTT clients
     // to queue messages (eg object creation/deletion notifications)
     err = DEVICE_MQTT_StartAllClients();
@@ -584,10 +568,8 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     {
         return err;
     }
-    USP_LOG_Info(" ######### Outis @@@ DEVICE_MQTT_StartAllClients return");
 #endif
 
-    USP_LOG_Info(" @@@@@@@@@ Outis @@@ SK_TR369_API_StartServer");
     SK_TR369_API_StartServer();
 
     return USP_ERR_OK;

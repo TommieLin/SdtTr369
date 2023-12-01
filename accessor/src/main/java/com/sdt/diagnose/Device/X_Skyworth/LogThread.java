@@ -4,7 +4,7 @@ import com.sdt.diagnose.common.log.LogUtils;
 
 /**
  * @Author Outis
- * @Date 2022/2/22 10:32
+ * @Date 2023/11/30 10:32
  * @Version 1.0
  */
 public abstract class LogThread extends Thread {

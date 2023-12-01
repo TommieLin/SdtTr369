@@ -2,7 +2,7 @@ package com.sdt.diagnose.common.bean;
 
 /**
  * @Author Outis
- * @Date 2022/8/15 10:22
+ * @Date 2023/11/30 10:22
  * @Version 1.0
  */
 public class SpeedTestBean {

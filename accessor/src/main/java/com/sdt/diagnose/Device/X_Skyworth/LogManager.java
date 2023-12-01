@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @Author Outis
- * @Date 2022/1/10 16:15
+ * @Date 2023/11/30 16:15
  * @Version 1.0
  */
 public class LogManager {

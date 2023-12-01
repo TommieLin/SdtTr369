@@ -6,10 +6,7 @@ import com.sdt.diagnose.common.GlobalContext;
 
 import java.util.List;
 
-/**
- * @Description: java类作用描述
- * @CreateDate: 2021/8/26 16:26
- */
+
 public class TraceRouteManager {
 
     private static final String TAG = "TraceRouteManager";

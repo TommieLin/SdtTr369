@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  *
  * <p>Author: ZHX Date: 2022/9/7
  *
- * <p>Editor: Outis Data: 2023/7/10
+ * <p>Editor: Outis Data: 2023/11/30
  */
 public class LogRepository {
     private static final String TAG = "LogRepository";

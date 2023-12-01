@@ -86,7 +86,6 @@ int SK_TR369_Callback_Get(const int what, char *dst, int size, const char *str1,
         if (pStr) {
             memset(dst, 0, size);
             size_t len = strlen(pStr);
-            TX_ERR("Outis: SK_TR369_Callback_Get Len: %d, Size: %d", len, size);
             len = (len > size) ? size : len;
             memcpy(dst, pStr, len);
             env->ReleaseStringUTFChars(reply, pStr);

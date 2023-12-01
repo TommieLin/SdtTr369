@@ -13,16 +13,9 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 /**
- * @ProjectName: SkySystemServer
- * @Package: com.skyworthdigital.common
- * @ClassName: NetWorkSpeedUtils
- * @Description: java类作用描述
- * @Author: pengdeping
- * @CreateDate: 2020/12/30 12:11
- * @UpdateUser: pengdeping
- * @UpdateDate: 2020/12/30 12:11
- * @UpdateRemark: 更新说明：
- * @Version: 1.0
+ * @Author Outis
+ * @Date 2023/11/30 15:51
+ * @Version 1.0
  */
 public class NetWorkSpeedUtils {
     private static final String TAG = "NetWorkSpeedUtils";

@@ -30,7 +30,7 @@ import okhttp3.Response;
 public class HttpsUtils {
     private static final String TAG = "HttpsUtils";
     public static OnUploadCallback mOnUploadCallback;
-    static CreateSSL mCreateSSL = new CreateSSL();
+    private static final CreateSSL mCreateSSL = new CreateSSL();
 
     public static void uploadFile(String url, String fileFullPath, boolean isSyncRequest, Callback callback) {
         File file = new File(fileFullPath);
@@ -46,8 +46,7 @@ public class HttpsUtils {
     }
 
     public static void uploadSpeedData(String url, String content, String dataType, String transactionId, String isEnd) {
-        CreateSSL createSSL = new CreateSSL();
-        OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
+        OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
         Request request = new Request.Builder()
                 .url(url)
@@ -72,8 +71,7 @@ public class HttpsUtils {
     }
 
     public static void uploadLog(String url, String content, String transactionId) {
-        CreateSSL createSSL = new CreateSSL();
-        OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
+        OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         MediaType mediaType = MediaType.parse("text/x-markdown; charset=utf-8");
         Request request = new Request.Builder()
                 .header("transactionId", transactionId)
@@ -106,8 +104,7 @@ public class HttpsUtils {
     }
 
     public static void requestAppUpdateStatus(String url, HashMap<String, String> param, Callback callback) {
-        CreateSSL createSSL = new CreateSSL();
-        OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
+        OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         String wholeUrl = buildUrl(url, param);
         Request request = new Request.Builder()
                 .url(wholeUrl)
@@ -165,8 +162,7 @@ public class HttpsUtils {
     }
 
     private static void requestAndCallback(String wholeUrl) {
-        CreateSSL createSSL = new CreateSSL();
-        OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
+        OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         Request request = new Request.Builder()
                 .url(wholeUrl)
                 .get()
@@ -187,8 +183,7 @@ public class HttpsUtils {
     }
 
     public static void noticeResponse(String url, HashMap<String, String> param) {
-        CreateSSL createSSL = new CreateSSL();
-        OkHttpClient okHttpClient = createSSL.getCheckedOkHttpClient();
+        OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         String wholeUrl = buildUrl(url, param);
         LogUtils.d(TAG, "noticeResponse url: " + url + ", wholeUrl: " + wholeUrl);
         Request request = new Request.Builder()

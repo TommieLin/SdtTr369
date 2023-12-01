@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 /**
  * @Author Outis
- * @Date 2022/12/23 18:32
+ * @Date 2023/11/30 18:32
  * @Version 1.0
  */
 public class AppUpgradeResponseBean {

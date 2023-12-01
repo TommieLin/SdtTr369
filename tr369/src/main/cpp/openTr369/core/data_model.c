@@ -160,13 +160,11 @@ int DATA_MODEL_Init(void)
     root_internal_node = CreateNode(INTERNAL_NODE_NAME, kDMNodeType_Object_SingleInstance, INTERNAL_NODE_NAME);
 
 #ifdef ENABLE_COAP
-    USP_LOG_Info(" ######### Outis ### ifdef ENABLE_COAP");
     // Initialise CoAP protocol layer
     COAP_Init();
 #endif
 
 #ifdef ENABLE_WEBSOCKETS
-    USP_LOG_Info(" ######### Outis ### ifdef ENABLE_WEBSOCKETS");
     // Initialise WebSockets protocol layer
     WSCLIENT_Init();
     WSSERVER_Init();
@@ -184,29 +182,21 @@ int DATA_MODEL_Init(void)
     err |= DEVICE_MTP_Init();
 
 #ifndef DISABLE_STOMP
-    USP_LOG_Info(" ######### Outis ### ifndef DISABLE_STOMP");
     err |= DEVICE_STOMP_Init();
 #endif
 
 #ifdef ENABLE_MQTT
-    USP_LOG_Info(" ######### Outis ### ifdef ENABLE_MQTT");
     err |= DEVICE_MQTT_Init();
-    USP_LOG_Info(" ######### Outis ### DEVICE_MQTT_Init return");
 #endif
     err |= DEVICE_SUBSCRIPTION_Init();
     err |= DEVICE_CTRUST_Init();
     err |= DEVICE_REQUEST_Init();
     err |= DEVICE_BULKDATA_Init();
 
-    USP_LOG_Info(" ######### Outis ### ---- test 1 ----");
-
-
 #ifndef REMOVE_SELF_TEST_DIAG_EXAMPLE
     // Register data model parameters used by the Self Test Diagnostics example code
-    USP_LOG_Info(" ######### Outis ### ifndef REMOVE_SELF_TEST_DIAG_EXAMPLE");
     err |= DEVICE_SELF_TEST_Init();
 #endif
-
 
     // Exit if an error has occurred
     if (err != USP_ERR_OK)
@@ -214,16 +204,12 @@ int DATA_MODEL_Init(void)
         return err;
     }
 
-    USP_LOG_Info(" ######### Outis ### ---- test 2 ----");
-
     // Register vendor nodes in the schema
     err = VENDOR_Init();
     if (err != USP_ERR_OK)
     {
         return err;
     }
-
-    USP_LOG_Info(" ######### Outis ### ---- test 3 ----");
 
     // Exit if unable to potentially perform a programmatic factory reset of the parameters in the database
     // NOTE: This must be performed before DEVICE_LOCAL_AGENT_SetDefaults(), but after VENDOR_Init()
@@ -233,8 +219,6 @@ int DATA_MODEL_Init(void)
         return err;
     }
 
-    USP_LOG_Info(" ######### Outis ### ---- test 4 ----");
-
     // Set the default values of OUI, Serial Number and (LocalAgent) EndpointID, and cache EndpointID
     err = DEVICE_LOCAL_AGENT_SetDefaults();
     if (err != USP_ERR_OK)
@@ -243,17 +227,13 @@ int DATA_MODEL_Init(void)
     }
 
 #ifdef ENABLE_MQTT
-    USP_LOG_Info(" ######### Outis ### ifdef ENABLE_MQTT");
     // Set the default values of ResponseTopicConfigured and ClientID
     err = DEVICE_MQTT_SetDefaults();
     if (err != USP_ERR_OK)
     {
         return err;
     }
-    USP_LOG_Info(" ######### Outis ### DEVICE_MQTT_Init return");
 #endif
-
-    USP_LOG_Info(" ######### Outis ### ---- test 5 ----");
 
     is_executing_within_dm_init = false;
 
@@ -262,8 +242,6 @@ int DATA_MODEL_Init(void)
     {
         return err;
     }
-
-    USP_LOG_Info(" ######### Outis ### ---- test 6 ----");
 
     // If the code gets here, then all of the data model components initialised successfully
     return USP_ERR_OK;
@@ -355,10 +333,6 @@ int DATA_MODEL_Start(void)
     err |= DEVICE_SUBSCRIPTION_Start();   // NOTE: This must come after DEVICE_LOCAL_AGENT_Start(), as it calls DEVICE_LOCAL_AGENT_GetRebootInfo()
     err |= DEVICE_CTRUST_Start();
     err |= DEVICE_BULKDATA_Start();
-
-
-
-
 
     // Always start the vendor last
     err |= VENDOR_Start();
@@ -3025,7 +2999,6 @@ dm_node_t *DM_PRIV_GetNodeFromPath(char *path, dm_instances_t *inst, bool *is_qu
     {
         return NULL;
     }
-//    USP_LOG_Info(" ######### Outis ### DM_PRIV_GetNodeFromPath hash 1: %d", hash);
 
     // If unable to find the node using the given path...
     node = FindNodeFromHash(hash);
@@ -3038,8 +3011,6 @@ dm_node_t *DM_PRIV_GetNodeFromPath(char *path, dm_instances_t *inst, bool *is_qu
         ADD_TO_HASH('{', hash);
         ADD_TO_HASH('i', hash);
         ADD_TO_HASH('}', hash);
-
-//        USP_LOG_Info(" ######### Outis ### DM_PRIV_GetNodeFromPath hash 2: %d", hash);
 
         // Exit if unable to find the node
         node = FindNodeFromHash(hash);

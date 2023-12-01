@@ -11,6 +11,8 @@ import java.util.Objects;
  * <p>ClassDescription: Property
  *
  * <p>Author: ZHX Date: 2022/10/28
+ *
+ * <p>Editor: Outis Data: 2023/11/30
  */
 public class Property {
     private String key;

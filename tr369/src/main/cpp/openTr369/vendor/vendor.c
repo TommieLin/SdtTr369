@@ -58,24 +58,42 @@
 #include "dm_trans.h"
 
 
+//------------------------------------------------------------------------------------
 // Skyworth Customized Content
 typedef struct
 {
     char name[MAX_PATH_SEGMENTS];   // 节点的名字
     char path[MAX_DM_PATH];         // 节点完整路径
     unsigned type;                  // 节点存储的数据类型
-//    int inform;
-//    int app_inform;
+#ifdef ENABLE_SK_INFORM_CONFIG
+    int inform;
+    int app_inform;
+#endif
 //    char write;
-    dm_get_value_cb_t getter;
-    dm_set_value_cb_t setter;
+    dm_get_value_cb_t getter;       // Get函数
+    dm_set_value_cb_t setter;       // Set函数
 //    dm_notify_set_cb_t notification;
-    char value[MAX_DM_SHORT_VALUE_LEN];   // 默认的值 对应default
+    char value[MAX_DM_SHORT_VALUE_LEN];   // 默认的值 对应xml中的default
 } sk_schema_node_t;
 
 char *sk_tr369_model_xml = NULL;
 
-
+/*********************************************************************//**
+**
+** SK_TR369_GetVendorParam
+**
+** Customized Get interface.
+**
+** Priority should be given to calling the API of the Java layer, and if the call fails,
+** read the data from the database.
+**
+** \param   req - pointer to structure identifying the parameter
+** \param   buf - pointer to buffer in which to return the value
+** \param   len - length of return buffer
+**
+** \return  Node
+**
+**************************************************************************/
 int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
 {
     int err = USP_ERR_OK;
@@ -90,7 +108,21 @@ int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
     return err;
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_SetVendorParam
+**
+** Customized Set interface.
+**
+** Priority should be given to calling the API of the Java layer, and if the call fails,
+** it should be written directly to the database.
+**
+** \param   req - pointer to structure identifying the parameter
+** \param   buf - pointer to buffer in which to return the value
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_SetVendorParam(dm_req_t *req, char *buf)
 {
     int err = USP_ERR_OK;
@@ -105,10 +137,20 @@ int SK_TR369_SetVendorParam(dm_req_t *req, char *buf)
     return err;
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_GetNodeFullName
+**
+** Retrieve the complete path of the node in the XML and return it as its name.
+**
+** \param   node - The pointer to a node in XML.
+** \param   name - The pointer to return the full name.
+**
+** \return  Node
+**
+**************************************************************************/
 void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
 {
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetNodeFullName start");
     xmlNodePtr current = node;
     if (node == NULL || name == NULL)
     {
@@ -118,10 +160,8 @@ void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
     while (current != NULL)
     {
         xmlChar *node_name = xmlGetProp(current, (const xmlChar *)"name");
-        USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName nodeName: %s", node_name);
         if (node_name == NULL)
         {
-            USP_LOG_Info(" ######### Outis ~~~ nodeName == NULL");
             break;
         }
 
@@ -129,7 +169,6 @@ void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
         if (name[0] != '\0')
         {
             sprintf((char *)fullName, "%s.%s", node_name, name);
-            USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName fullName: %s", fullName);
         }
         else
         {
@@ -137,14 +176,25 @@ void SK_TR369_GetNodeFullName(xmlNodePtr node, char *name)
         }
 
         sprintf(name, "%s", fullName);
-        USP_LOG_Info(" ######### Outis ~~~ GetNodeFullName Name: %s", name);
+        USP_LOG_Debug("%s: The complete path of the node: %s", __FUNCTION__, name);
 
         xmlFree(node_name);
         current = current->parent;
     }
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_ParseNode
+**
+** Parse the specific information of the node, including name, getter, setter, and default.
+**
+** \param   xml_node - The pointer to a node in XML.
+** \param   schema_node - The specific content of the node to be parsed.
+**
+** \return  Node
+**
+**************************************************************************/
 void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
 {
     if (schema_node == NULL)
@@ -157,7 +207,6 @@ void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
     xmlChar *name = xmlGetProp(xml_node, (const xmlChar *)"name");
     xmlChar *getter = xmlGetProp(xml_node, (const xmlChar *)"getter");
     xmlChar *setter = xmlGetProp(xml_node, (const xmlChar *)"setter");
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Getter: %s, Setter: %s", schema_node->path, name, getter, setter);
 
     if (name != NULL) sprintf(schema_node->name, "%s", name);
     schema_node->getter = (getter != NULL && (xmlStrcmp(getter, (const xmlChar *)"diagnose") == 0)) ? SK_TR369_GetVendorParam : NULL;
@@ -165,25 +214,37 @@ void SK_TR369_ParseNode(xmlNodePtr xml_node, sk_schema_node_t *schema_node)
 
     xmlChar *default_value = xmlGetProp(xml_node, (const xmlChar *)"default");
     if (default_value != NULL) sprintf(schema_node->value, "%s", default_value);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode Path: %s, Name: %s, Default_Value: %s", schema_node->path, name, schema_node->value);
 
-//    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
-//    if (inform != NULL)
-//    {
-//        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform != NULL");
-//        if (xmlStrcmp(inform, (const xmlChar *)"true") == 0)
-//        {
-//            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseNode inform == true");
-//            schema_node->inform = 1;
-//        }
-//    }
-//    xmlFree(inform);
+    USP_LOG_Debug("%s: Path: %s, Name: %s, Getter: %s, Setter: %s, Default: %s",
+            __FUNCTION__, schema_node->path, name, getter, setter, default_value);
+
+#ifdef ENABLE_SK_INFORM_CONFIG
+    // 判断该节点是否需要放到启动参数里上报(该判断交由服务端决定，即由服务端下发指令设置BootParameter)
+    xmlChar *inform = xmlGetProp(xml_node, (const xmlChar *)"inform");
+    if (inform != NULL && !xmlStrcmp(inform, (const xmlChar *)"true"))
+    {
+        USP_LOG_Debug("%s: schema_node->inform true", __FUNCTION__);
+        schema_node->inform = 1;
+    }
+    xmlFree(inform);
+#endif
     xmlFree(name);
     xmlFree(getter);
     xmlFree(setter);
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_ParseType
+**
+** Parse the type of the node and convert it to the corresponding format supported by USP.
+**
+** \param   type - The type of node in the XML file.
+** \param   schema_node - The specific content of the node to be parsed.
+**
+** \return  None
+**
+**************************************************************************/
 void SK_TR369_ParseType(xmlChar *type, sk_schema_node_t *schema_node)
 {
     if (schema_node == NULL)
@@ -192,43 +253,47 @@ void SK_TR369_ParseType(xmlChar *type, sk_schema_node_t *schema_node)
         return;
     }
 
-    if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"string"))
+    if (type == NULL)
     {
         schema_node->type = DM_STRING;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"boolean"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"string"))
+    {
+        schema_node->type = DM_STRING;
+    }
+    else if (!xmlStrcmp(type, (const xmlChar *)"boolean"))
     {
         schema_node->type = DM_BOOL;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"dateTime"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"dateTime"))
     {
         schema_node->type = DM_DATETIME;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"int"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"int"))
     {
         schema_node->type = DM_INT;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"unsignedInt"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"unsignedInt"))
     {
         schema_node->type = DM_UINT;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"long"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"long"))
     {
         schema_node->type = DM_LONG;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"unsignedLong"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"unsignedLong"))
     {
         schema_node->type = DM_ULONG;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"base64"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"base64"))
     {
         schema_node->type = DM_BASE64;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"hex"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"hex"))
     {
         schema_node->type = DM_HEXBIN;
     }
-    else if (type != NULL && !xmlStrcmp(type, (const xmlChar *)"decimal"))
+    else if (!xmlStrcmp(type, (const xmlChar *)"decimal"))
     {
         schema_node->type = DM_DECIMAL;
     }
@@ -238,7 +303,17 @@ void SK_TR369_ParseType(xmlChar *type, sk_schema_node_t *schema_node)
     }
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_AddNodeToUspDataModel
+**
+** Register the nodes parsed from the XML file onto the USP.
+**
+** \param   schema_node - The specific content of the node to be added.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_AddNodeToUspDataModel(sk_schema_node_t *schema_node)
 {
     int err = USP_ERR_OK;
@@ -251,31 +326,45 @@ int SK_TR369_AddNodeToUspDataModel(sk_schema_node_t *schema_node)
 
     if (schema_node->setter != NULL)
     {
+        USP_LOG_Debug("%s: USP_REGISTER_VendorParam_ReadWrite(%s...)", __FUNCTION__, schema_node->path);
         if (schema_node->getter != NULL)
         {
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter != NULL, setter != NULL", schema_node->path);
-            err |= USP_REGISTER_VendorParam_ReadWrite(schema_node->path, schema_node->getter, schema_node->setter, NULL, DM_STRING);
+            err |= USP_REGISTER_VendorParam_ReadWrite(
+                    schema_node->path,
+                    schema_node->getter,
+                    schema_node->setter,
+                    NULL,
+                    DM_STRING);
         }
         else
         {
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter == NULL, setter != NULL", schema_node->path);
-            err |= USP_REGISTER_VendorParam_ReadWrite(schema_node->path, SK_TR369_GetVendorParam, schema_node->setter, NULL, DM_STRING);
+            err |= USP_REGISTER_VendorParam_ReadWrite(
+                    schema_node->path,
+                    SK_TR369_GetVendorParam,
+                    schema_node->setter,
+                    NULL,
+                    DM_STRING);
         }
     }
     else
     {
         if (schema_node->getter != NULL)
         {
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter != NULL, setter == NULL", schema_node->path);
-            err |= USP_REGISTER_VendorParam_ReadOnly(schema_node->path, schema_node->getter, DM_STRING);
+            USP_LOG_Debug("%s: USP_REGISTER_VendorParam_ReadOnly(%s...)", __FUNCTION__, schema_node->path);
+            err |= USP_REGISTER_VendorParam_ReadOnly(
+                    schema_node->path,
+                    schema_node->getter,
+                    DM_STRING);
         }
         else
         {
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, getter == NULL, setter == NULL", schema_node->path);
             if (strlen(schema_node->value) != 0)
             {
-                USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddNodeToUspDataModel Path: %s, value: %s, type: 0x%08X", schema_node->path, schema_node->value, schema_node->type);
-                err |= USP_REGISTER_DBParam_ReadOnly(schema_node->path, schema_node->value, schema_node->type);
+                USP_LOG_Debug("%s: USP_REGISTER_DBParam_ReadOnly(%s...)", __FUNCTION__, schema_node->path);
+                err |= USP_REGISTER_DBParam_ReadOnly(
+                        schema_node->path,
+                        schema_node->value,
+                        schema_node->type);
             }
         }
     }
@@ -283,8 +372,20 @@ int SK_TR369_AddNodeToUspDataModel(sk_schema_node_t *schema_node)
     return err;
 }
 
-
-int SK_TR369_AddNodeToBootParameter(sk_schema_node_t *schema_node, int num)
+#ifdef ENABLE_SK_INFORM_CONFIG
+/*********************************************************************//**
+**
+** SK_TR369_AddNodeToBootParameter
+**
+** Add the node to the BootParameter startup parameter list.
+**
+** \param   schema_node - The specific content of the node to be added.
+** \param   index - The index that needs to be added to the list.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_AddNodeToBootParameter(sk_schema_node_t *schema_node, int index)
 {
     int err = USP_ERR_OK;
     char enable_path[MAX_DM_PATH], param_path[MAX_DM_PATH];
@@ -295,20 +396,28 @@ int SK_TR369_AddNodeToBootParameter(sk_schema_node_t *schema_node, int num)
         return USP_ERR_INTERNAL_ERROR;
     }
 
-    USP_SNPRINTF(enable_path, sizeof(enable_path), "Device.LocalAgent.Controller.1.BootParameter.%d.Enable", num);
-    USP_SNPRINTF(param_path, sizeof(param_path), "Device.LocalAgent.Controller.1.BootParameter.%d.ParameterName", num);
+    USP_SNPRINTF(enable_path, sizeof(enable_path), "Device.LocalAgent.Controller.1.BootParameter.%d.Enable", index);
+    USP_SNPRINTF(param_path, sizeof(param_path), "Device.LocalAgent.Controller.1.BootParameter.%d.ParameterName", index);
+    USP_LOG_Debug("%s: %s: %s", __FUNCTION__, param_path, schema_node->path);
 
-    USP_LOG_Info(" ######### Outis *** enable_path: %s", enable_path);
     err |= DATA_MODEL_SetParameterInDatabase(enable_path, "true");
-    USP_LOG_Info(" ######### Outis *** param_path: %s, schema_node->path: %s", param_path, schema_node->path);
     err |= DATA_MODEL_SetParameterInDatabase(param_path, schema_node->path);
-
-    USP_LOG_Info(" ######### Outis *** SK_TR369_AddNodeToBootParameter return: %d", err);
+    USP_LOG_Debug("%s: The result of setting parameters is: %d", __FUNCTION__, err);
     return err;
 }
+#endif
 
-//static int boot_param_number = 0;
-
+/*********************************************************************//**
+**
+** SK_TR369_ParseSchema
+**
+** Parse the architecture from the root node, and then recursively parse the child nodes in sequence.
+**
+** \param   node - Root node
+**
+** \return  None
+**
+**************************************************************************/
 void SK_TR369_ParseSchema(xmlNodePtr node)
 {
     xmlNodePtr current = node;
@@ -318,15 +427,7 @@ void SK_TR369_ParseSchema(xmlNodePtr node)
         {
             xmlChar *type = xmlGetProp(current, (const xmlChar *)"type");
 
-            if (!xmlStrcmp(type, (const xmlChar *)"multipleObject"))
-            {
-                USP_LOG_Info(" ************ Outis *** multipleObject find!!!");
-                char node_path[MAX_DM_PATH] = {0};
-                SK_TR369_GetNodeFullName(current, node_path);
-                USP_LOG_Info(" ######### Outis *** multipleObject node_path: %s", node_path);
-                USP_REGISTER_Object(node_path, NULL, NULL, NULL, NULL, NULL, NULL);
-            }
-            else if (!xmlStrcmp(type, (const xmlChar *)"multipleNumber"))
+            if (!xmlStrcmp(type, (const xmlChar *)"multipleNumber"))
             {
                 xmlChar *table = xmlGetProp(current, (const xmlChar *)"table");
                 if (table != NULL)
@@ -335,35 +436,60 @@ void SK_TR369_ParseSchema(xmlNodePtr node)
                     char table_path[MAX_DM_PATH] = {0};
                     sprintf(table_path, "%s", table);
                     SK_TR369_GetNodeFullName(current, node_path);
-                    USP_LOG_Info(" ######### Outis *** multipleNumber node_path: %s, table_path: %s", node_path, table_path);
+                    USP_LOG_Debug("%s: MultipleNumber: %s (%s)", __FUNCTION__, node_path, table_path);
                     USP_REGISTER_Param_NumEntries(node_path, table_path);
                     free(table);
                 }
             }
+            else if (!xmlStrcmp(type, (const xmlChar *)"multipleObject"))
+            {
+                char node_path[MAX_DM_PATH] = {0};
+                SK_TR369_GetNodeFullName(current, node_path);
+                USP_LOG_Debug("%s: MultipleObject: %s", __FUNCTION__, node_path);
+                USP_REGISTER_Object(node_path, NULL, NULL, NULL, NULL, NULL, NULL);
+            }
             else if (xmlStrcmp(type, (const xmlChar *)"object")
                     && xmlStrcmp(type, (const xmlChar *)"unknown"))
             {
+                // 真正需要处理的部分：object类型的节点
                 sk_schema_node_t schema_node = {0};
+                // 解析出该节点的具体信息，包括name、getter、setter、default
                 SK_TR369_ParseNode(current, &schema_node);
+                // 解析出该节点的type，并将起转换为usp支持的对应格式
                 SK_TR369_ParseType(type, &schema_node);
+                // 将节点登记至usp上
                 SK_TR369_AddNodeToUspDataModel(&schema_node);
 
-//                // 判断该节点是否需要放到启动参数里上报(该判断交由服务端决定，即由服务端下发指令设置BootParameter)
-//                if (schema_node.inform == 1)
-//                {
-//                    boot_param_number++;
-//                    SK_TR369_AddNodeToBootParameter(&schema_node, boot_param_number);
-//                }
+#ifdef ENABLE_SK_INFORM_CONFIG
+                // 判断该节点是否需要放到启动参数里上报(该判断交由服务端决定，即由服务端下发指令设置BootParameter)
+                static int boot_param_number = 0;
+                if (schema_node.inform == 1)
+                {
+                    boot_param_number++;
+                    SK_TR369_AddNodeToBootParameter(&schema_node, boot_param_number);
+                }
+#endif
             }
 
             xmlFree(type);
         }
+        // 继续递归调用所有子节点
         SK_TR369_ParseSchema(current->children);
         current = current->next;
     }
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_ParseModelFile
+**
+** Parse the XML file and register each node for USP.
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_ParseModelFile(void)
 {
     if (sk_tr369_model_xml == NULL)
@@ -371,515 +497,25 @@ int SK_TR369_ParseModelFile(void)
         USP_LOG_Error("%s: Model file path not initialized.", __FUNCTION__);
         return USP_ERR_SK_INIT_FAILURE;
     }
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ParseModelFile sk_tr369_model_xml: %s", sk_tr369_model_xml);
-
+    USP_LOG_Debug("%s: Model file path: %s", __FUNCTION__, sk_tr369_model_xml);
+    // 打开xml文件
     xmlDocPtr doc = xmlReadFile(sk_tr369_model_xml, "UTF-8", XML_PARSE_RECOVER);
     if (doc == NULL)
     {
         USP_LOG_Error("%s: Failed to read tr369 model file (%s)", __FUNCTION__, sk_tr369_model_xml);
         return USP_ERR_INTERNAL_ERROR;
     }
-    USP_LOG_Info(" ######### Outis ~~~~~~~~~ 1 ~~~~~~~~~~~ ");
-
+    // 获取根节点
     xmlNodePtr root = xmlDocGetRootElement(doc);
-    USP_LOG_Info(" ######### Outis ~~~~~~~~~ 2 ~~~~~~~~~~~ ");
-
+    // 从根节点解析架构
     SK_TR369_ParseSchema(root);
-    USP_LOG_Info(" ######### Outis ~~~~~~~~~ 3 ~~~~~~~~~~~ ");
-
+    // 释放空间
     xmlFreeDoc(doc);
     xmlCleanupParser();
 
     return USP_ERR_OK;
 }
 
-//------------------------------------------------------------------------------------
-// Array of valid input arguments
-static char *upload_file_input_args[] =
-{
-    "FileType",
-    "DelaySeconds",
-    "Url",
-};
-
-static char *upgrade_file_input_args[] =
-{
-    "TargetFile",
-    "FileSize",
-    "Url",
-};
-
-static char *download_file_input_args[] =
-{
-    "FileType",
-    "Url",
-};
-
-//------------------------------------------------------------------------------------
-// Array of valid output arguments
-static char *x_event_output_args[] =
-{
-    "Status",
-};
-
-int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
-{
-    int err = USP_ERR_OK;
-    char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile start");
-    // Input variables
-    char *input_file_type, *input_delay_seconds, *input_url;
-
-    // Extract the input arguments using KV_VECTOR_ functions
-    input_file_type = USP_ARG_Get(input_args, "FileType", "");
-    input_delay_seconds = USP_ARG_Get(input_args, "DelaySeconds", "");
-    input_url = USP_ARG_Get(input_args, "Url", "");
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile FileType: %s, DelaySeconds: %s, Url: %s",
-            input_file_type, input_delay_seconds, input_url);
-
-    if (strcmp(input_file_type, "") == 0
-            || strcmp(input_delay_seconds, "") == 0
-            || strcmp(input_url, "") == 0)
-    {
-        // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for uploading files are empty.", __FUNCTION__);
-        err = USP_ERR_INVALID_VALUE;
-        goto exit;
-    }
-
-    strcpy(param, "UploadFile###");
-    strcat(param, input_file_type);
-    strcat(param, "###");
-    strcat(param, input_delay_seconds);
-    strcat(param, "###");
-    strcat(param, input_url);
-
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile SendEvent res: %d", res);
-
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    USP_ARG_Add(output_args, "Status", "Complete");
-
-exit:
-    return err;
-}
-
-
-int SK_TR369_Start_UpgradeFile(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
-{
-    int err = USP_ERR_OK;
-    char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UpgradeFile start");
-    // Input variables
-    char *input_target_file, *input_file_size, *input_url;
-
-    // Extract the input arguments using KV_VECTOR_ functions
-    input_target_file = USP_ARG_Get(input_args, "TargetFile", "");
-    input_file_size = USP_ARG_Get(input_args, "FileSize", "");
-    input_url = USP_ARG_Get(input_args, "Url", "");
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UpgradeFile TargetFile: %s, FileSize: %s, Url: %s",
-                 input_target_file, input_file_size, input_url);
-
-    if (strcmp(input_target_file, "") == 0
-            || strcmp(input_file_size, "") == 0
-            || strcmp(input_url, "") == 0)
-    {
-        // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for upgrading files are empty.", __FUNCTION__);
-        err = USP_ERR_INVALID_VALUE;
-        goto exit;
-    }
-
-    strcpy(param, "UpgradeFile###");
-    strcat(param, input_url);
-    strcat(param, "###");
-    strcat(param, input_target_file);
-    strcat(param, "###");
-    strcat(param, input_file_size);
-
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UpgradeFile SendEvent res: %d", res);
-
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    USP_ARG_Add(output_args, "Status", "Complete");
-
-exit:
-    return err;
-}
-
-int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
-{
-    int err = USP_ERR_OK;
-    char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadFile start");
-    // Input variables
-    char *input_file_type, *input_url;
-
-    // Extract the input arguments using KV_VECTOR_ functions
-    input_file_type = USP_ARG_Get(input_args, "FileType", "");
-    input_url = USP_ARG_Get(input_args, "Url", "");
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile CommandKey: %s, FileType: %s, Url: %s",
-            input_file_type, input_url);
-
-    if (strcmp(input_file_type, "") == 0
-            || strcmp(input_url, "") == 0)
-    {
-        // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for downloading files are empty.", __FUNCTION__);
-        err = USP_ERR_INVALID_VALUE;
-        goto exit;
-    }
-
-//    if (strcmp(input_file_type, "3 Vendor Configuration File") != 0)
-//    {
-//        USP_ERR_SetMessage("%s: The file type (%s) does not match.", __FUNCTION__, input_file_type);
-//        err = USP_ERR_INVALID_VALUE;
-//        goto exit;
-//    }
-
-    strcpy(param, "DownloadFile###");
-    strcat(param, input_url);
-    strcat(param, "###");
-    strcat(param, input_file_type);
-
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadFile SendEvent res: %d", res);
-
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    USP_ARG_Add(output_args, "Status", "Complete");
-
-exit:
-    return err;
-}
-
-//------------------------------------------------------------------------------------
-// Array of valid input arguments
-static char *ip_ping_input_args[] =
-{
-    "Host",
-    "DataBlockSize",
-    "NumberOfRepetitions",
-    "Timeout",      // 单位毫秒
-    // Not used.
-    "DSCP",
-    "Interface",
-    "ProtocolVersion",
-};
-
-//------------------------------------------------------------------------------------
-// Array of valid output arguments
-static char *ip_ping_output_args[] =
-{
-    "Status",
-    "SuccessCount",
-    "FailureCount",
-    "AverageResponseTime",
-    "MinimumResponseTime",
-    "MaximumResponseTime",
-    "AverageResponseTimeDetailed",
-    "MinimumResponseTimeDetailed",
-    "MaximumResponseTimeDetailed",
-    "IPAddressUsed",
-};
-
-int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
-{
-    int err = USP_ERR_OK;
-    char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_IPPing start");
-    // Input variables
-    char *input_host, *input_size, *input_count, *input_timeout_ms;
-
-    // Extract the input arguments using KV_VECTOR_ functions
-    input_host = USP_ARG_Get(input_args, "Host", "");
-    input_size = USP_ARG_Get(input_args, "DataBlockSize", "");
-    input_count = USP_ARG_Get(input_args, "NumberOfRepetitions", "");
-    input_timeout_ms = USP_ARG_Get(input_args, "Timeout", "");
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_IPPing Host: %s, DataBlockSize: %s, NumberOfRepetitions: %s, Timeout: %s",
-                 input_host, input_size, input_count, input_timeout_ms);
-
-    if (strcmp(input_host, "") == 0
-        || strcmp(input_size, "") == 0
-        || strcmp(input_count, "") == 0
-        || strcmp(input_timeout_ms, "") == 0)
-    {
-        // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for IPPing() are empty.", __FUNCTION__);
-        err = USP_ERR_INVALID_VALUE;
-        goto exit;
-    }
-
-    strcpy(param, "IPPing###");
-    strcat(param, input_host);
-    strcat(param, "###");
-    strcat(param, input_size);
-    strcat(param, "###");
-    strcat(param, input_count);
-    strcat(param, "###");
-    strcat(param, input_timeout_ms);
-
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_IPPing SendEvent res: %d", res);
-
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    char status[16], ipAddressUsed[16], successCount[8], failureCount[8], avg[8], min[8], max[8], avg_ns[8], min_ns[8], max_ns[8];
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.Status", status);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.IPAddressUsed", ipAddressUsed);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.SuccessCount", successCount);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.FailureCount", failureCount);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTime", avg);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTime", min);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTime", max);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.AverageResponseTimeDetailed", avg_ns);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.MinimumResponseTimeDetailed", min_ns);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.MaximumResponseTimeDetailed", max_ns);
-
-    USP_ARG_Add(output_args, "Status", status);
-    USP_ARG_Add(output_args, "SuccessCount", successCount);
-    USP_ARG_Add(output_args, "FailureCount", failureCount);
-    USP_ARG_Add(output_args, "AverageResponseTime", avg);
-    USP_ARG_Add(output_args, "MinimumResponseTime", min);
-    USP_ARG_Add(output_args, "MaximumResponseTime", max);
-    USP_ARG_Add(output_args, "AverageResponseTimeDetailed", avg_ns);
-    USP_ARG_Add(output_args, "MinimumResponseTimeDetailed", min_ns);
-    USP_ARG_Add(output_args, "MaximumResponseTimeDetailed", max_ns);
-    USP_ARG_Add(output_args, "IPAddressUsed", ipAddressUsed);
-
-exit:
-    return err;
-}
-
-//------------------------------------------------------------------------------------
-// Array of valid input arguments
-static char *trace_route_input_args[] =
-{
-    "Host",
-    "Timeout",
-    "MaxHopCount",
-    // Not used.
-    "DSCP",
-    "DataBlockSize",
-    "Interface",
-    "ProtocolVersion",
-};
-
-//------------------------------------------------------------------------------------
-// Array of valid output arguments
-static char *trace_route_output_args[] =
-{
-    "Status",
-    "ResponseTime",
-    "RouteHops.",
-};
-
-int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
-{
-    int i, err = USP_ERR_OK;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute start");
-    // Input variables
-    char *input_host, *input_timeout, *input_max_hop_count, *input_size;
-
-    // Extract the input arguments using KV_VECTOR_ functions
-    input_host = USP_ARG_Get(input_args, "Host", "");
-    input_timeout = USP_ARG_Get(input_args, "Timeout", "");
-    input_max_hop_count = USP_ARG_Get(input_args, "MaxHopCount", "");
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute Host: %s, Timeout: %s, MaxHopCount: %s",
-                 input_host, input_timeout, input_max_hop_count);
-
-    if (strcmp(input_host, "") == 0
-        || strcmp(input_timeout, "") == 0
-        || strcmp(input_max_hop_count, "") == 0)
-    {
-        // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for TraceRoute() are empty.", __FUNCTION__);
-        err = USP_ERR_INVALID_VALUE;
-        goto exit;
-    }
-
-    SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.Host", input_host);
-    SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.Timeout", input_timeout);
-    SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.MaxHopCount", input_max_hop_count);
-    SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.DataBlockSize", input_size);
-
-    int res = SK_TR369_API_SendEvent("TraceRoute");
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute SendEvent res: %d", res);
-
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    char status[32], responseTime[8];
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.TraceRoute.Status", status);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.TraceRoute.ResponseTime", responseTime);
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute Status: %s, ResponseTime: %s", status, responseTime);
-
-    USP_ARG_Add(output_args, "Status", status);
-    USP_ARG_Add(output_args, "ResponseTime", responseTime);
-
-    int_vector_t iv;
-    INT_VECTOR_Init(&iv);
-    err = DATA_MODEL_GetInstances("Device.IP.Diagnostics.TraceRoute.RouteHops", &iv);
-    if (err != USP_ERR_OK)
-    {
-        INT_VECTOR_Destroy(&iv);
-        goto exit;
-    }
-
-    for (i = 0; i < iv.num_entries; i++)
-    {
-        char output_host[32], output_host_path[32], host_path[MAX_DM_PATH] = {0};
-        USP_SNPRINTF(output_host_path, sizeof(output_host_path), "RouteHops.%d.Host", iv.vector[i]);
-        USP_SNPRINTF(host_path, sizeof(host_path), "Device.IP.Diagnostics.TraceRoute.%s", output_host_path);
-        SK_TR369_API_GetParams(host_path, output_host, sizeof(output_host));
-
-        char output_address[32], output_address_path[32], address_path[MAX_DM_PATH] = {0};
-        USP_SNPRINTF(output_address_path, sizeof(output_address_path), "RouteHops.%d.HostAddress", iv.vector[i]);
-        USP_SNPRINTF(address_path, sizeof(address_path), "Device.IP.Diagnostics.TraceRoute.%s", output_address_path);
-        SK_TR369_API_GetParams(address_path, output_address, sizeof(output_address));
-
-        char output_time[32], output_time_path[32], time_path[MAX_DM_PATH] = {0};
-        USP_SNPRINTF(output_time_path, sizeof(output_time_path), "RouteHops.%d.RTTimes", iv.vector[i]);
-        USP_SNPRINTF(time_path, sizeof(time_path), "Device.IP.Diagnostics.TraceRoute.%s", output_time_path);
-        SK_TR369_API_GetParams(time_path, output_time, sizeof(output_time));
-
-        USP_ARG_Add(output_args, output_host_path, output_host);
-        USP_ARG_Add(output_args, output_address_path, output_address);
-        USP_ARG_Add(output_args, output_time_path, output_time);
-
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute [%d] %s: %s, %s: %s, %s: %s",
-                     i, output_host_path, output_host, output_address_path, output_address, output_time_path, output_time);
-    }
-    INT_VECTOR_Destroy(&iv);
-
-exit:
-    return err;
-}
-
-
-//------------------------------------------------------------------------------------
-// Array of valid input arguments
-static char *download_diagnostics_input_args[] =
-{
-    "DownloadURL",
-    "TimeBasedTestDuration",
-        // Not used.
-    "Interface",
-    "DSCP",
-    "EthernetPriority",
-    "TimeBasedTestMeasurementInterval",
-    "TimeBasedTestMeasurementOffset",
-    "ProtocolVersion",
-    "NumberOfConnections",
-    "EnablePerConnectionResults",
-};
-
-//------------------------------------------------------------------------------------
-// Array of valid output arguments
-static char *download_diagnostics_output_args[] =
-{
-    "Status",
-    "BOMTime",
-    "EOMTime",
-    "TestBytesReceived",
-};
-
-int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
-{
-    int err = USP_ERR_OK;
-    char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics start");
-    // Input variables
-    char *input_download_url, *input_duration;
-
-    // Extract the input arguments using KV_VECTOR_ functions
-    input_download_url = USP_ARG_Get(input_args, "DownloadURL", "");
-    input_duration = USP_ARG_Get(input_args, "TimeBasedTestDuration", "");
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics DownloadURL: %s, TimeBasedTestDuration: %s",
-                 input_download_url, input_duration);
-
-    if (strcmp(input_download_url, "") == 0
-        || strcmp(input_duration, "") == 0)
-    {
-        // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for DownloadDiagnostics() are empty.", __FUNCTION__);
-        err = USP_ERR_INVALID_VALUE;
-        goto exit;
-    }
-
-    strcpy(param, "DownloadDiagnostics###");
-    strcat(param, input_download_url);
-    strcat(param, "###");
-    strcat(param, input_duration);
-
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics SendEvent res: %d", res);
-
-    // Save all results into the output arguments using KV_VECTOR_ functions
-    char status[32], BOMTime[32], EOMTime[32], testBytesReceived[8];
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", status);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.BOMTime", BOMTime);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.EOMTime", EOMTime);
-    SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.TestBytesReceived", testBytesReceived);
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics status: %s, BOMTime: %s, EOMTime: %s, testBytesReceived: %s",
-                 status, BOMTime, EOMTime, testBytesReceived);
-
-    USP_ARG_Add(output_args, "Status", status);
-    USP_ARG_Add(output_args, "BOMTime", BOMTime);
-    USP_ARG_Add(output_args, "EOMTime", EOMTime);
-    USP_ARG_Add(output_args, "TestBytesReceived", testBytesReceived);
-
-exit:
-    return err;
-}
-
-int SK_TR369_InitCustomEvent()
-{
-    int err = USP_ERR_OK;
-    // X_Skyworth.Upload()
-    err |= USP_REGISTER_SyncOperation("Device.X_Skyworth.UploadFile()", SK_TR369_Start_UploadFile);
-    err |= USP_REGISTER_OperationArguments("Device.X_Skyworth.UploadFile()",
-            upload_file_input_args, NUM_ELEM(upload_file_input_args),
-            x_event_output_args, NUM_ELEM(x_event_output_args));
-
-    // X_Skyworth.UpgradeFile()
-    err |= USP_REGISTER_SyncOperation("Device.X_Skyworth.UpgradeFile()", SK_TR369_Start_UpgradeFile);
-    err |= USP_REGISTER_OperationArguments("Device.X_Skyworth.UpgradeFile()",
-            upgrade_file_input_args, NUM_ELEM(upgrade_file_input_args),
-            x_event_output_args, NUM_ELEM(x_event_output_args));
-
-    // X_Skyworth.DownloadFile()
-    err |= USP_REGISTER_SyncOperation("Device.X_Skyworth.DownloadFile()", SK_TR369_Start_DownloadFile);
-    err |= USP_REGISTER_OperationArguments("Device.X_Skyworth.DownloadFile()",
-            download_file_input_args, NUM_ELEM(download_file_input_args),
-            x_event_output_args, NUM_ELEM(x_event_output_args));
-
-    // Device.IP.Diagnostics.IPPing()
-    err |= USP_REGISTER_SyncOperation("Device.IP.Diagnostics.IPPing()", SK_TR369_Start_IPPing);
-    err |= USP_REGISTER_OperationArguments("Device.IP.Diagnostics.IPPing()",
-            ip_ping_input_args, NUM_ELEM(ip_ping_input_args),
-            ip_ping_output_args, NUM_ELEM(ip_ping_output_args));
-
-    // Device.IP.Diagnostics.TraceRoute()
-    err |= USP_REGISTER_SyncOperation("Device.IP.Diagnostics.TraceRoute()", SK_TR369_Start_TraceRoute);
-    err |= USP_REGISTER_OperationArguments("Device.IP.Diagnostics.TraceRoute()",
-            trace_route_input_args, NUM_ELEM(trace_route_input_args),
-            trace_route_output_args, NUM_ELEM(trace_route_output_args));
-
-    // Device.IP.Diagnostics.DownloadDiagnostics()
-    err |= USP_REGISTER_SyncOperation("Device.IP.Diagnostics.DownloadDiagnostics()", SK_TR369_Start_DownloadDiagnostics);
-    err |= USP_REGISTER_OperationArguments("Device.IP.Diagnostics.DownloadDiagnostics()",
-            download_diagnostics_input_args, NUM_ELEM(download_diagnostics_input_args),
-            download_diagnostics_output_args, NUM_ELEM(download_diagnostics_output_args));
-
-
-    return err;
-}
 
 /*********************************************************************//**
 **
@@ -894,116 +530,12 @@ int SK_TR369_InitCustomEvent()
 **************************************************************************/
 int VENDOR_Init(void)
 {
-    int err = USP_ERR_OK;
-
+    // 解析Xml文件
     SK_TR369_ParseModelFile();
-    USP_LOG_Info(" ######### Outis ~~~ VENDOR_Init return");
+    // 初始化自定义事件
     SK_TR369_InitCustomEvent();
 
     return USP_ERR_OK;
-}
-
-char *sk_multi_object_map[] =
-{
-    "Device.DeviceInfo.TemperatureStatus.TemperatureSensor",
-    "Device.DeviceInfo.FirmwareImage",
-    "Device.Ethernet.Link",
-    "Device.IP.Interface",
-    "Device.IP.Interface.1.IPv4Address",
-    "Device.WiFi.Radio",
-    "Device.WiFi.SSID",
-    "Device.WiFi.EndPoint",
-    "Device.WiFi.EndPoint.1.Profile",
-    "Device.Services.STBService",
-    "Device.Services.STBService.1.AVPlayer",
-    "Device.Services.STBService.1.Components.HDMI",
-    "Device.Services.STBService.1.Components.AudioOutput",
-    "Device.Services.STBService.1.Components.AudioDecoder",
-    "Device.Services.STBService.1.Components.VideoOutput",
-    "Device.Services.STBService.1.Components.VideoDecoder",
-    "Device.Services.STBService.1.Capabilities.VideoDecoder.MPEG2Part2.ProfileLevel",
-    "Device.Services.STBService.1.Capabilities.VideoDecoder.MPEG4Part2.ProfileLevel",
-    "Device.Services.STBService.1.Capabilities.VideoDecoder.MPEG4Part10.ProfileLevel",
-    "Device.USB.USBHosts.Host",
-    "Device.USB.USBHosts.Host.1.Device"
-//    "Device.IP.Diagnostics.TraceRoute.RouteHops",       // 由RouteHops()事件触发更新
-//    "Device.DeviceInfo.ProcessStatus.Process",          // 该节点需要动态添加
-//    "Device.WiFi.NeighboringWiFiDiagnostic.Result",     // 该节点需要动态添加
-//    "Device.X_Skyworth.App",                    // 该节点需要动态添加
-//    "Device.X_Skyworth.App.1.Permissions",      // 该节点需要动态添加
-//    "Device.X_Skyworth.BluetoothDevice"         // 该节点需要动态添加
-};
-
-int SK_TR369_SetDefaultMultiObject()
-{
-    int i;
-    int err;
-    int instance = INVALID;
-    int_vector_t iv;
-
-    int map_size = sizeof(sk_multi_object_map) / sizeof(sk_multi_object_map[0]);
-    for (i = 0; i < map_size; i++)
-    {
-        INT_VECTOR_Init(&iv);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject path: %s", sk_multi_object_map[i]);
-        err = DATA_MODEL_GetInstances(sk_multi_object_map[i], &iv);
-        if (err != USP_ERR_OK)
-        {
-            INT_VECTOR_Destroy(&iv);
-            continue;
-        }
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject num_entries: %d", iv.num_entries);
-        if (iv.num_entries == 0)
-        {
-            err = DATA_MODEL_AddInstance(sk_multi_object_map[i], &instance, 0);
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject instance: %d", instance);
-            if (err != USP_ERR_OK)
-            {
-                INT_VECTOR_Destroy(&iv);
-                continue;
-            }
-        }
-        INT_VECTOR_Destroy(&iv);
-    }
-
-    // 初始化 ProcessStatus.Process.{i} MultiObject节点
-    char num_buf[MAX_DM_INSTANCE_ORDER] = {0};
-    err = SK_TR369_DelMultiObject("Device.DeviceInfo.ProcessStatus.Process");
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
-    SK_TR369_API_GetParams("Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries", num_buf, sizeof(num_buf));
-    int num = atoi(num_buf);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject ProcessNumberOfEntries: %s(%d)", num_buf, num);
-    if (num > 0)
-    {
-        err = SK_TR369_AddMultiObject("Device.DeviceInfo.ProcessStatus.Process", num);
-        if (err != USP_ERR_OK)
-        {
-            return err;
-        }
-    }
-
-    // 初始化 NeighboringWiFiDiagnostic.Result.{i} MultiObject节点
-    err = SK_TR369_DelMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result");
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
-    SK_TR369_API_GetParams("Device.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries", num_buf, sizeof(num_buf));
-    num = atoi(num_buf);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject ResultNumberOfEntries: %s(%d)", num_buf, num);
-    if (num > 0)
-    {
-        err = SK_TR369_AddMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result", num);
-        if (err != USP_ERR_OK)
-        {
-            return err;
-        }
-    }
-
-    return err;
 }
 
 #define CONFIG_FILE_PATH_DEFAULT            "/vendor/etc/skyconfig/config.properties"
@@ -1011,6 +543,17 @@ int SK_TR369_SetDefaultMultiObject()
 #define CONFIG_TMS_TR369_PORT               "tms_tr369_port"
 #define MAX_LINE_LENGTH                     128
 
+/*********************************************************************//**
+**
+** trim
+**
+** Remove whitespace at the beginning and end of the string.
+**
+** \param   str
+**
+** \return  None
+**
+**************************************************************************/
 void trim(char *str)
 {
     int len = strlen(str);
@@ -1041,9 +584,25 @@ void trim(char *str)
     str[trimmed_length] = '\0';
 }
 
-int SK_TR369_SetDefaultServerUrl()
+/*********************************************************************//**
+**
+** SK_TR369_SetDefaultServerUrl
+**
+** The interface used to set the default values for the "Device.X_Skyworth.ManagementServer." node.
+**
+** Read configuration information from the "/vendor/etc/skyconfig/config.properties" file.
+**
+** 1. Device.X_Skyworth.ManagementServer.Url: The value of the "tms_url" configuration item.
+** 2. Device.X_Skyworth.ManagementServer.Port: The value of the "tms_tr369_port" configuration item.
+** 3. Device.X_Skyworth.ManagementServer.Hostname: The host name section parsed from "tms_url".
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetDefaultServerUrl(void)
 {
-    // Set: Device.X_Skyworth.ManagementServer.
     FILE *input_file;
     int err = USP_ERR_OK;
     char *config_url = NULL;
@@ -1095,7 +654,8 @@ int SK_TR369_SetDefaultServerUrl()
 
     if (strlen(tms_url) * strlen(tms_tr369_port) == 0)
     {
-        USP_LOG_Error("%s: Length of configuration variable is 0. Url(%d), Port(%d)", __FUNCTION__, strlen(tms_url), strlen(tms_tr369_port));
+        USP_LOG_Error("%s: Length of configuration variable is 0. Url(%d), Port(%d)",
+                __FUNCTION__, strlen(tms_url), strlen(tms_tr369_port));
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -1118,11 +678,11 @@ int SK_TR369_SetDefaultServerUrl()
     sprintf(config_url, "%s:%s", tms_url, tms_tr369_port);
     config_url[url_len] = '\0';
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultServerUrl Url: %s, Hostname: %s, Port: %s",
-                 config_url, tms_tr369_hostname, tms_tr369_port);
     SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Url", config_url);
     SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Hostname", tms_tr369_hostname);
     SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Port", tms_tr369_port);
+    USP_LOG_Debug("%s: The default value setting result: Url: %s, Hostname: %s, Port: %s",
+            __FUNCTION__, config_url, tms_tr369_hostname, tms_tr369_port);
 
     free(config_url);
 
@@ -1144,7 +704,9 @@ int SK_TR369_SetDefaultServerUrl()
 **************************************************************************/
 int VENDOR_Start(void)
 {
+    // 设置默认MultiObject类型的节点
     SK_TR369_SetDefaultMultiObject();
+    // 设置Device.X_Skyworth.ManagementServer.节点的默认值
     SK_TR369_SetDefaultServerUrl();
 
     return USP_ERR_OK;
@@ -1164,18 +726,28 @@ int VENDOR_Start(void)
 **************************************************************************/
 int VENDOR_Stop(void)
 {
-
+    // TODO
     return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_GetDBParam
+**
+** The interface used to retrieve the value of a node from the database.
+**
+** \param   param - The name of the node to be get.
+** \param   value - The value of the node to be get.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_GetDBParam(const char *param, char *value)
 {
     int err;
     dm_hash_t hash;
     char instances[MAX_DM_PATH];
     unsigned path_flags;
-
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetDBParam param: %s", param);
 
     // Exit if parameter path is incorrect
     err = DM_PRIV_FormDB_FromPath(param, &hash, instances, sizeof(instances));
@@ -1202,28 +774,46 @@ int SK_TR369_GetDBParam(const char *param, char *value)
     }
 
 exit:
-    // Since successful, send back the value of the parameter
-    USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
+    USP_LOG_Info("%s: The data obtained from the database: %s -> %s", __FUNCTION__, param, value);
     return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_SetDBParam
+**
+** The interface used to set the values corresponding to nodes to the database.
+**
+** \param   param - The name of the node to be set.
+** \param   value - The value of the node to be set.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_SetDBParam(const char *param, const char *value)
 {
-    int err;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDBParam param: %s, value: %s", param, value);
-
+    USP_LOG_Info("%s: The parameters to be executed are: %s -> %s", __FUNCTION__, param, value);
     // Exit if unable to directly set the parameter in the database
-    err = DATA_MODEL_SetParameterInDatabase(param, value);
+    int err = DATA_MODEL_SetParameterInDatabase(param, value);
     if (err != USP_ERR_OK)
     {
-        return err;
+        USP_LOG_Error("%s: Failed to set parameter: \"%s\"", __FUNCTION__, param);
     }
-
-    // Since successful, send back the value of the parameter
-    USP_LOG_Info(" ######### Outis ~~~ %s => %s\n", param, value);
-    return USP_ERR_OK;
+    return err;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_AddInstance
+**
+** An interface provided for internal use to add nodes of MultiObject type.
+**
+** \param   param - Name of the MultiObject type node to be added.
+** \param   num - Number of MultiObject type nodes to be added.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_AddInstance(const char *param, int num)
 {
     int i, err;
@@ -1235,15 +825,13 @@ int SK_TR369_AddInstance(const char *param, int num)
 
     for (i = 0; i < num; i++)
     {
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddInstance for: %d", i);
         err = DATA_MODEL_AddInstance(param, &instance, 0);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddInstance instance: %d", instance);
         if (err != USP_ERR_OK)
         {
             goto exit;
         }
         USP_SNPRINTF(path, sizeof(path), "%s.%d", param, instance);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddInstance path: %s", path);
+        USP_LOG_Debug("%s: The node to be added is: %s", __FUNCTION__, path);
 
         // Exit if unable to retrieve the parameters used as unique keys for this object
         err = DATA_MODEL_GetUniqueKeyParams(path, &unique_key_params, INTERNAL_ROLE);
@@ -1265,12 +853,29 @@ exit:
     return err;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_AddMultiObject
+**
+** An interface provided for external use to add nodes of MultiObject type.
+**
+** \param   param - Name of the MultiObject type node to be added.
+** \param   num - Number of MultiObject type nodes to be added.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_AddMultiObject(const char *param, int num)
 {
     int err;
     dm_trans_vector_t trans;
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_AddMultiObject num: %d", num);
+    if (param == NULL)
+    {
+        USP_LOG_Error("%s: Parameters are empty, the command cannot be recognized.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Info("%s: The parameters to be executed are: %s (%d)", __FUNCTION__, param, num);
 
     // Exit if unable to start a transaction
     err = DM_TRANS_Start(&trans);
@@ -1295,6 +900,19 @@ int SK_TR369_AddMultiObject(const char *param, int num)
     return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_DeleteInstance
+**
+** An interface provided for internal use to delete nodes of MultiObject type.
+**
+** Note: This action will delete all data at once.
+**
+** \param   param - Name of the MultiObject type node to be deleted.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_DeleteInstance(const char *param)
 {
     int i, err;
@@ -1311,7 +929,7 @@ int SK_TR369_DeleteInstance(const char *param)
     {
         char path[MAX_DM_PATH] = {0};
         USP_SNPRINTF(path, sizeof(path), "%s.%d", param, iv.vector[i]);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_DeleteInstance path: %s", path);
+        USP_LOG_Debug("%s: The node to be deleted is: %s", __FUNCTION__, path);
         err = DATA_MODEL_DeleteInstance(path, 0);
         if (err != USP_ERR_OK)
         {
@@ -1324,11 +942,30 @@ exit:
     return err;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_DelMultiObject
+**
+** An interface provided for external use to delete nodes of MultiObject type.
+**
+** Note: This action will delete all data at once.
+**
+** \param   param - Name of the MultiObject type node to be deleted.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_DelMultiObject(const char *param)
 {
     int err;
     dm_trans_vector_t trans;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_DelMultiObject param: %s", param);
+
+    if (param == NULL)
+    {
+        USP_LOG_Error("%s: Parameters are empty, the command cannot be recognized.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Info("%s: The parameters to be executed are: \"%s\"", __FUNCTION__, param);
 
     // Exit if unable to start a transaction
     err = DM_TRANS_Start(&trans);
@@ -1354,9 +991,28 @@ int SK_TR369_DelMultiObject(const char *param)
     return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_ShowData
+**
+** Used for displaying all data content at once.
+**
+** \param   cmd - The executable parameters that can be processed are 'datamodel' and 'database'.
+**                'datamodel' displays all content in the data model,
+**                'database' displays all content in the database."
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_ShowData(const char *cmd)
 {
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_ShowData cmd: %s", cmd);
+    if (cmd == NULL)
+    {
+        USP_LOG_Error("%s: Parameters are empty, the command cannot be recognized.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    USP_LOG_Debug("%s: The parameters to be executed are: \"%s\"", __FUNCTION__, cmd);
     // Show the data model schema if required
     if (strcmp(cmd, "datamodel") == 0)
     {
@@ -1373,5 +1029,5 @@ int SK_TR369_ShowData(const char *cmd)
         return USP_ERR_OK;
     }
 
-    return USP_ERR_INVALID_ARGUMENTS;
+    return USP_ERR_INTERNAL_ERROR;
 }

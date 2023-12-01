@@ -258,17 +258,14 @@ public class Event {
     private void upgradeSw(String[] params) {
         int paramLen = params.length;
         String upgradeUrl;
-        String upgradeFileSize;
-        String upgradeFileName;
+        String upgradeFileType;
         LogUtils.d(TAG, "upgradeSw params.length: " + params.length);
 
-        if (paramLen > INDEX_PARAM_3) {
+        if (paramLen > INDEX_PARAM_2) {
             upgradeUrl = params[INDEX_PARAM_1];
-            upgradeFileName = params[INDEX_PARAM_2];
-            upgradeFileSize = params[INDEX_PARAM_3];
+            upgradeFileType = params[INDEX_PARAM_2];
             LogUtils.d(TAG, "upgradeSw: fileUrl: " + upgradeUrl
-                    + ", fileName: " + upgradeFileName
-                    + ", fileSize: " + upgradeFileSize);
+                    + ", fileType: " + upgradeFileType);
             Intent intent = new Intent();
             intent.setPackage("com.sdt.ota");
             //如果是.zip结尾表示是系统升级,.apk结尾表示是app升级
@@ -382,7 +379,8 @@ public class Event {
             con.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
-                    return hostname.equals(DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Hostname"));
+                    String val = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Hostname");
+                    return val.isEmpty() || hostname.equals(val);
                 }
             });
             con.setConnectTimeout(50000);

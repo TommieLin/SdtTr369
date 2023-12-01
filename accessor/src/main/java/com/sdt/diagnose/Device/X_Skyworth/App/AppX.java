@@ -83,7 +83,7 @@ public class AppX implements IProtocolArray<AppInfo> {
             DbManager.addMultiObject("Device.X_Skyworth.App", size);
             for (int i = 0; i < size; i++) {
                 AppInfo appInfo = mAppsManager.getList().get(i);
-                addPermission(appInfo, String.valueOf(i + 1));
+                addPermission(appInfo, String.valueOf(i + 1), false);
             }
         }
     }
@@ -105,7 +105,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         return mAppsManager.getList();
     }
 
-    public static void addPermission(AppInfo t, @NotNull String paramsArr) {
+    public static void addPermission(AppInfo t, @NotNull String paramsArr, boolean isAdded) {
         mPermissionNameToGroup.clear();
         mGroups = new ArrayList<>();
         PackageInfo packageInfo = t.getPackageInfo();
@@ -142,7 +142,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         }
         String path = "Device.X_Skyworth.App." + paramsArr + ".Permissions";
         LogUtils.d(TAG, "addPermission path: " + path + ", mGroups.size(): " + mGroups.size());
-        if (mGroups.size() > 0) {
+        if (mGroups.size() > 0 && !isAdded) {
             DbManager.addMultiObject(path, mGroups.size());
         }
     }
@@ -260,7 +260,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     @Tr369Set("Device.X_Skyworth.App.")
     public boolean SK_TR369_HandleAppInfoSetCmd(String path, String value) {
-        LogUtils.d(TAG, "Appx path = " + path);
+        LogUtils.d(TAG, "Set the path for app information: " + path);
         AppInfo appInfo = getAppByPath(path);
         if (appInfo == null) return false;
 
@@ -302,9 +302,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                                             appPermissionGroup.get(path.split("\\.")[3])).get(
                                             Integer.parseInt(paths[5]) - 1).getName(),
                                     Boolean.parseBoolean(value));
-                    addPermission(
-                            appInfo,
-                            paths[3]);
+                    addPermission(appInfo, paths[3], true);
                     return success;
                 } catch (Exception e) {
                     LogUtils.e(TAG, "Failed to set permission information. Error: " + e.getMessage());

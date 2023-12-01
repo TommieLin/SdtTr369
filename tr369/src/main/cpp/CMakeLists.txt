@@ -45,7 +45,8 @@ set(CMAKE_C_FLAGS
         -DDISABLE_STOMP \
         -DE2ESESSION_EXPERIMENTAL_USP_V_1_2 \
         -DREMOVE_DEVICE_INFO \
-        -DREMOVE_DEVICE_TIME")
+        -DREMOVE_DEVICE_TIME \
+        -DREMOVE_SELF_TEST_DIAG_EXAMPLE")
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this

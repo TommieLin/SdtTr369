@@ -45,8 +45,8 @@ public class ShortMessageUtils {
     public static final String KEY_ID = "noticeId";
     public static final String SHOW_TIME = "showTime";
     public static final String KEY_POSITION = "position";
-    private static final String CHANNEL_ID = "TR369 Message";
-    private static final CharSequence CHANNEL_NAME = "TR369 Channel";
+    private static final String CHANNEL_ID = "SdtTr369ShortMsgChannelId";
+    private static final CharSequence CHANNEL_NAME = "SdtTr369ShortMsgChannelName";
     public static final String TYPE_TEXT = "01";
     public static final String TYPE_URL = "02";
     public static final String TYPE_IMAGE = "03";

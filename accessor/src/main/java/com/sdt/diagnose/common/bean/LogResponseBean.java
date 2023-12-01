@@ -2,7 +2,7 @@ package com.sdt.diagnose.common.bean;
 
 /**
  * @Author Outis
- * @Date 2022/3/7 9:38
+ * @Date 2023/11/30 9:38
  * @Version 1.0
  */
 public class LogResponseBean {
