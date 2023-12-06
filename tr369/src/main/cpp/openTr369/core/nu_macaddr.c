@@ -136,7 +136,6 @@ int nu_macaddr_wan_macaddr(unsigned char *buf)
     }
 
     // Copy MAC address into return buffer
-    USP_LOG_Info("%s: nu_macaddr_wan_macaddr ifr.ifr_hwaddr.sa_data: %s", __FUNCTION__, ifr.ifr_hwaddr.sa_data);
     memcpy(buf, ifr.ifr_hwaddr.sa_data, MAC_ADDR_LEN);
 
     return USP_ERR_OK;

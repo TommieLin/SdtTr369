@@ -1375,7 +1375,6 @@ void StartStompConnection(stomp_connection_t *sc)
     }
 
     // Exit if connect was not successful
-    USP_LOG_Error("%s: getsockopt err: %d, so_err: %d", __FUNCTION__, err, so_err);
     if (so_err != 0)
     {
         USP_LOG_Error("%s: async connect failed", __FUNCTION__);

@@ -429,7 +429,6 @@ void ProcessBdcMessageQueueSocketActivity(socket_set_t *set)
 
     // Exit if unable to read the full message received
     bytes_read = recv(mq_rx_socket, &msg, sizeof(msg), 0);
-    USP_LOG_Info(" ######### Outis $$$ ProcessBdcMessageQueueSocketActivity recv mq_rx_socket");
     if (bytes_read != sizeof(msg))
     {
         USP_LOG_Error("%s: recv() did not return a full message", __FUNCTION__);

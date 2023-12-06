@@ -250,6 +250,7 @@ int DEVICE_MTP_Init(void)
     // Exit if any errors occurred
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: An internal error occurred(%d).", __FUNCTION__, err);
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -2277,7 +2278,6 @@ int NotifyChange_AgentMtpMqtt_ResponseTopicConfigured(dm_req_t *req, char *value
     // This is done before scheduling a reconnect, so that the reconnect is done with the new parameters
     USP_SAFE_FREE(mtp->mqtt_agent_topic);
     mtp->mqtt_agent_topic = USP_STRDUP(value);
-    USP_LOG_Info(" ######### Outis --- mqtt_agent_topic: %s, value: %s", mtp->mqtt_agent_topic, value);
 
     if (schedule_reconnect)
     {

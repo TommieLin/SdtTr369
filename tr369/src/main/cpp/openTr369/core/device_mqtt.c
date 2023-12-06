@@ -173,6 +173,7 @@ int DEVICE_MQTT_Init(void)
     err = MQTT_Init();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: MQTT_Init error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -270,7 +271,6 @@ int DEVICE_MQTT_SetDefaults(void)
     // Get the actual value of EndpointID
     // This may be the value in the USP DB or the default value (if not present in DB)
     err = DATA_MODEL_GetParameterValue(endpoint_id_path, endpoint_id, sizeof(endpoint_id), 0);
-    USP_LOG_Info(" ######### Outis ### DEVICE_MQTT_SetDefaults endpoint_id_path: %s", endpoint_id);
     if (err != USP_ERR_OK)
     {
         return err;
@@ -404,7 +404,6 @@ int DEVICE_MQTT_StartAllClients(void)
     int i;
 
     // Iterate over all MQTT clients, starting the ones that are enabled
-    USP_LOG_Info(" ######### Outis ### DEVICE_MQTT_StartAllClients start, ClientNumberOfEntries: %d", ClientNumberOfEntries());
     for (i = 0; i<ClientNumberOfEntries(); i++)
     {
         mqttclient = &mqtt_client_params[i];
@@ -864,7 +863,7 @@ int EnableMQTTClient(mqtt_conn_params_t *mp, mqtt_subscription_t subscriptions[M
     mp->response_topic = USP_STRDUP(DEVICE_MTP_GetAgentMqttResponseTopic(mp->instance));
     mp->publish_qos = DEVICE_MTP_GetAgentMqttPublishQos(mp->instance);
 
-    USP_LOG_Info(" ######### Outis ### EnableMQTTClient topic: %s, response_topic: %s, publish_qos: %d", mp->topic, mp->response_topic, mp->publish_qos);
+    USP_LOG_Debug("%s: topic: %s, response_topic: %s, publish_qos: %d", __FUNCTION__, mp->topic, mp->response_topic, mp->publish_qos);
 
     // Check the error condition
     err = MQTT_EnableClient(mp, subscriptions);
@@ -1375,7 +1374,6 @@ int NotifyChange_MQTTClientId(dm_req_t *req, char *value)
     // Set the new value. This must be done before scheduling a reconnect, so that the reconnect uses the correct values
     USP_SAFE_FREE(mp->client_id);
     mp->client_id = USP_STRDUP(value);
-    USP_LOG_Info(" ######### Outis --- NotifyChange_MQTTClientId client_id: %s, value: %s", mp->client_id, value);
 
     // Schedule a reconnect after the present response has been sent, if the value has changed
     if (schedule_reconnect)

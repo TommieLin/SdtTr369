@@ -97,13 +97,13 @@ char *sk_tr369_model_xml = NULL;
 int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
 {
     int err = USP_ERR_OK;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetVendorParam req->path: %s, req->schema_path: %s", req->path, req->schema_path);
+    USP_LOG_Info("%s: The requested path: %s", __FUNCTION__, req->path);
     err = SK_TR369_API_GetParams(req->path, buf, len);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_API_GetParams return: %d", err);
+    USP_LOG_Debug("%s: SK_TR369_API_GetParams return: %d", __FUNCTION__, err);
     if (err == -1)
     {
         err = SK_TR369_GetDBParam(req->path, buf);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_GetDBParam return: %d", err);
+        USP_LOG_Debug("%s: SK_TR369_GetDBParam return: %d", __FUNCTION__, err);
     }
     return err;
 }
@@ -126,13 +126,13 @@ int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
 int SK_TR369_SetVendorParam(dm_req_t *req, char *buf)
 {
     int err = USP_ERR_OK;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetVendorParam req->path: %s, req->schema_path: %s", req->path, req->schema_path);
+    USP_LOG_Info("%s: The requested path: %s", __FUNCTION__, req->path);
     err = SK_TR369_API_SetParams(req->path, buf);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_API_SetParams return: %d", err);
+    USP_LOG_Debug("%s: SK_TR369_API_SetParams return: %d", __FUNCTION__, err);
     if (err == -1)
     {
         err = SK_TR369_SetDBParam(req->path, buf);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDBParam return: %d", err);
+        USP_LOG_Debug("%s: SK_TR369_SetDBParam return: %d", __FUNCTION__, err);
     }
     return err;
 }

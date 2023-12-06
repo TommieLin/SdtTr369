@@ -163,7 +163,7 @@ int DATABASE_Init(char *db_file)
         }
 
         // Signal that factory reset initialisation should be performed later (when the data model has been fully registered)
-        USP_LOG_Info("%s: $$$ Outis $$$ schedule_factory_reset_init = true", __FUNCTION__);
+        USP_LOG_Debug("%s: Set the schedule_factory_reset_init flag to true.", __FUNCTION__);
         schedule_factory_reset_init = true;
     }
     else
@@ -200,8 +200,6 @@ int DATABASE_Start(void)
     int err;
     path_migrate_t *pm;
 
-    USP_LOG_Info(" ######### Outis ^^^ DATABASE_Start call");
-
     // Calculate the DB hash of each parameter that is to be migrated
     err = CalcPathMigrationHashes();
     if (err != USP_ERR_OK)
@@ -220,7 +218,6 @@ int DATABASE_Start(void)
             return err;
         }
 #endif
-        USP_LOG_Info(" ######### Outis ^^^ schedule_factory_reset_init == true");
         // Initialise using the factory reset text file
         if (sk_tr369_model_default != NULL)
         {
@@ -1133,7 +1130,6 @@ int ResetFactoryParametersFromFile(char *file)
     char *value;
     int line_number = 1;
 
-    USP_LOG_Info(" ######### Outis ^^^ ResetFactoryParametersFromFile start");
     USP_LOG_Info("%s: Setting factory reset parameters", __FUNCTION__);
 
     // Exit if unable to open the file containing factory reset parameters
@@ -1260,12 +1256,6 @@ int CalcPathMigrationHashes(void)
     dm_node_t *node;
     dm_hash_t old_hash;
     int err;
-
-#ifndef DISABLE_STOMP
-    USP_LOG_Info(" ######### Outis +++ ifndef DISABLE_STOMP NUM_ELEM(paths_to_migrate): %lu", NUM_ELEM(paths_to_migrate));
-#else
-    USP_LOG_Info(" ######### Outis --- ifdef DISABLE_STOMP NUM_ELEM(paths_to_migrate): %lu", NUM_ELEM(paths_to_migrate));
-#endif
 
     for (i=0; i < NUM_ELEM(paths_to_migrate); i++)
     {

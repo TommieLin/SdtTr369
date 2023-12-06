@@ -196,6 +196,7 @@ int DEVICE_LOCAL_AGENT_Init(void)
     err |= USP_REGISTER_DBParam_ReadWrite(dual_stack_preference_path, "IPv4", Validate_DualStackPreference, NotifyChange_DualStackPreference, DM_STRING);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: An internal error occurred(%d).", __FUNCTION__, err);
         return USP_ERR_INTERNAL_ERROR;
     }
 
@@ -228,7 +229,7 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     // ManufacturerOUI
     // Exit if unable to get the default value of ManufacturerOUI (ie the value if not overridden by the USP DB)
     GetDefaultOUI(default_value, sizeof(default_value));
-    USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultOUI: %s", default_value);
+    USP_LOG_Info("%s: GetDefaultOUI: %s", __FUNCTION__, default_value);
 
     // Register the default value of OUI (if DeviceInfo parameters are being registered by USP Agent core)
     err = DM_PRIV_ReRegister_DBParam_Default(manufacturer_oui_path, default_value);
@@ -241,7 +242,7 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     // Get the actual value of OUI
     // This may be the value in the USP DB, the default value (if not present in DB) or a value retrieved by vendor hook (if REMOVE_DEVICE_INFO is defined)
     err = DATA_MODEL_GetParameterValue(manufacturer_oui_path, oui, sizeof(oui), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue manufacturer_oui_path: %s", oui);
+    USP_LOG_Debug("%s: ManufacturerOUI: %s", __FUNCTION__, oui);
 
 #ifdef REMOVE_DEVICE_INFO
     // If vendor has not registered Device.DeviceInfo.ManufacturerOUI, then ignore the error, and use the default value
@@ -262,7 +263,7 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     // SERIAL NUMBER
     // Exit if unable to get the default value of Serial Number (ie the value if not overridden by the USP DB)
     GetDefaultSerialNumber(default_value, sizeof(default_value));
-    USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultSerialNumber: %s", default_value);
+    USP_LOG_Info("%s: GetDefaultSerialNumber: %s", __FUNCTION__, default_value);
 
     // Register the default value of SerialNumber (if DeviceInfo parameters are being registered by USP Agent core)
     err = DM_PRIV_ReRegister_DBParam_Default(serial_number_path, default_value);
@@ -275,7 +276,7 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     // Get the actual value of Serial Number
     // This may be the value in the USP DB, the default value (if not present in DB) or a value retrieved by vendor hook (if REMOVE_DEVICE_INFO is defined)
     err = DATA_MODEL_GetParameterValue(serial_number_path, serial_number, sizeof(serial_number), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue serial_number_path: %s", serial_number);
+    USP_LOG_Debug("%s: SerialNumber: %s", __FUNCTION__, serial_number);
 
 #ifdef REMOVE_DEVICE_INFO
     // If vendor has defined REMOVE_DEVICE_INFO but not registered Device.DeviceInfo.SerialNumber, then this is a configuration error
@@ -295,7 +296,6 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     // ENDPOINT_ID
     // Exit if unable to get the default value of EndpointID (ie the value if not overridden by the USP DB)
     err = GetDefaultEndpointID(default_value, sizeof(default_value), oui, serial_number);
-    USP_LOG_Info(" ######### Outis ### DEVICE_LOCAL_AGENT_SetDefaults GetDefaultEndpointID: %s", default_value);
     if (err != USP_ERR_OK)
     {
         return err;
@@ -311,7 +311,7 @@ int DEVICE_LOCAL_AGENT_SetDefaults(void)
     // Get the actual value of EndpointID
     // This may be the value in the USP DB or the default value (if not present in DB)
     err = DATA_MODEL_GetParameterValue(endpoint_id_path, agent_endpoint_id, sizeof(agent_endpoint_id), 0);
-    USP_LOG_Info(" ######### Outis ### DATA_MODEL_GetParameterValue endpoint_id_path: %s", agent_endpoint_id);
+    USP_LOG_Debug("%s: EndpointID: %s", __FUNCTION__, agent_endpoint_id);
     if (err != USP_ERR_OK)
     {
         return err;
@@ -557,7 +557,6 @@ int NotifyChange_DualStackPreference(dm_req_t *req, char *value)
 **************************************************************************/
 int GetAgentUpTime(dm_req_t *req, char *buf, int len)
 {
-    USP_LOG_Info(" ######### Outis ### GetAgentUpTime start");
     val_uint = (unsigned)tu_uptime_secs() - usp_agent_start_time;
 
     return USP_ERR_OK;
@@ -591,7 +590,6 @@ int GetKernelUpTime(dm_req_t *req, char *buf, int len)
     }
 
     val_uint = (unsigned)info.uptime;
-    USP_LOG_Info(" ######### Outis ### GetKernelUpTime uptime: %d", (unsigned)info.uptime);
 
     return USP_ERR_OK;
 }
@@ -693,10 +691,8 @@ int GetDefaultOUI(char *buf, int len)
 **************************************************************************/
 int GetDefaultSerialNumber(char *buf, int len)
 {
-    USP_LOG_Info(" ######### Outis ### GetDefaultSerialNumber start");
     SK_TR369_API_GetParams(serial_number_path, buf, len);
-    USP_LOG_Info(" ######### Outis ### GetDefaultSerialNumber serial_number: %s, len: %d", buf, len);
-
+    USP_LOG_Debug("%s: serial_number: %s, len: %d", __FUNCTION__, buf, len);
     return USP_ERR_OK;
 }
 
@@ -769,13 +765,13 @@ int GetDefaultEndpointID(char *buf, int len, char *oui, char *serial_number)
     #define SAFE_CHARS "-._"
     TEXT_UTILS_PercentEncodeString(oui, oui_encoded, sizeof(oui_encoded), SAFE_CHARS, USE_UPPERCASE_HEX_DIGITS);
     TEXT_UTILS_PercentEncodeString(serial_number, serial_number_encoded, sizeof(serial_number_encoded), SAFE_CHARS, USE_UPPERCASE_HEX_DIGITS);
-    USP_LOG_Info(" ######### Outis ### GetDefaultEndpointID oui: %s, oui_encoded: %s", oui, oui_encoded);
-    USP_LOG_Info(" ######### Outis ### GetDefaultEndpointID serial_number: %s, serial_number_encoded: %s", serial_number, serial_number_encoded);
+    USP_LOG_Debug("%s: oui: %s, encoded: %s", __FUNCTION__, oui, oui_encoded);
+    USP_LOG_Debug("%s: serial_number: %s, encoded: %s", __FUNCTION__, serial_number, serial_number_encoded);
 
     // Convert the input string to a 12-character hexadecimal string
     char serial_number_hex[13]; // 12 characters + null-terminator
     ConvertSerialNumberToHex(serial_number, serial_number_hex, sizeof(serial_number_hex));
-    USP_LOG_Info(" ######### Outis ### GetDefaultEndpointID serial_number_hex: %s", serial_number_hex);
+    USP_LOG_Debug("%s: After serial_number is converted to hex: %s", __FUNCTION__, serial_number_hex);
 
     // Form the final endpoint_id
     USP_SNPRINTF(buf, len, "os::%s-%s", oui_encoded, serial_number_hex);

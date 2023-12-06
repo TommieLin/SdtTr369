@@ -78,11 +78,24 @@ static char *x_event_output_args[] =
     "Status",
 };
 
+/*********************************************************************//**
+**
+** SK_TR369_Start_UploadFile
+**
+** Called when sync command Device.X_Skyworth.UploadFile() is executed
+**
+** \param   req - pointer to structure identifying the command
+** \param   command_key - not used, OnBoardRequest notification doesn't have a command key field
+** \param   input_args - not used, the command doesn't receive parameters
+** \param   output_args - not used, the command doesn't return values
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err = USP_ERR_OK;
     char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile start");
     // Input variables
     char *input_file_type, *input_delay_seconds, *input_url;
 
@@ -91,15 +104,15 @@ int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *inp
     input_delay_seconds = USP_ARG_Get(input_args, "DelaySeconds", "");
     input_url = USP_ARG_Get(input_args, "Url", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile FileType: %s, DelaySeconds: %s, Url: %s",
-                 input_file_type, input_delay_seconds, input_url);
+    USP_LOG_Debug("%s: FileType: %s, DelaySeconds: %s, Url: %s",
+                  __FUNCTION__, input_file_type, input_delay_seconds, input_url);
 
     if (strcmp(input_file_type, "") == 0
         || strcmp(input_delay_seconds, "") == 0
         || strcmp(input_url, "") == 0)
     {
         // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for uploading files are empty.", __FUNCTION__);
+        USP_ERR_SetMessage("%s: Invalid value - The parameters for UploadFile() are empty.", __FUNCTION__);
         err = USP_ERR_INVALID_VALUE;
         goto exit;
     }
@@ -111,22 +124,34 @@ int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *inp
     strcat(param, "###");
     strcat(param, input_url);
 
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile SendEvent res: %d", res);
+    SK_TR369_API_SendEvent(param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     USP_ARG_Add(output_args, "Status", "Complete");
+    USP_LOG_Info("%s function execution completed.", __FUNCTION__);
 
 exit:
     return err;
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_Start_UpgradeFile
+**
+** Called when sync command Device.X_Skyworth.UpgradeFile() is executed
+**
+** \param   req - pointer to structure identifying the command
+** \param   command_key - not used, OnBoardRequest notification doesn't have a command key field
+** \param   input_args - not used, the command doesn't receive parameters
+** \param   output_args - not used, the command doesn't return values
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start_UpgradeFile(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err = USP_ERR_OK;
     char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UpgradeFile start");
     // Input variables
     char *input_file_type, *input_url;
 
@@ -134,14 +159,13 @@ int SK_TR369_Start_UpgradeFile(dm_req_t *req, char *command_key, kv_vector_t *in
     input_file_type = USP_ARG_Get(input_args, "FileType", "");
     input_url = USP_ARG_Get(input_args, "Url", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UpgradeFile FileType: %s, Url: %s",
-                 input_file_type, input_url);
+    USP_LOG_Debug("%s: FileType: %s, Url: %s", __FUNCTION__, input_file_type, input_url);
 
     if (strcmp(input_file_type, "") == 0
         || strcmp(input_url, "") == 0)
     {
         // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for upgrading files are empty.", __FUNCTION__);
+        USP_ERR_SetMessage("%s: Invalid value - The parameters for UpgradeFile() are empty.", __FUNCTION__);
         err = USP_ERR_INVALID_VALUE;
         goto exit;
     }
@@ -158,21 +182,34 @@ int SK_TR369_Start_UpgradeFile(dm_req_t *req, char *command_key, kv_vector_t *in
     strcat(param, "###");
     strcat(param, input_file_type);
 
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UpgradeFile SendEvent res: %d", res);
+    SK_TR369_API_SendEvent(param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     USP_ARG_Add(output_args, "Status", "Complete");
+    USP_LOG_Info("%s function execution completed.", __FUNCTION__);
 
 exit:
     return err;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_Start_DownloadFile
+**
+** Called when sync command Device.X_Skyworth.DownloadFile() is executed
+**
+** \param   req - pointer to structure identifying the command
+** \param   command_key - not used, OnBoardRequest notification doesn't have a command key field
+** \param   input_args - not used, the command doesn't receive parameters
+** \param   output_args - not used, the command doesn't return values
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err = USP_ERR_OK;
     char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadFile start");
     // Input variables
     char *input_file_type, *input_url;
 
@@ -180,14 +217,13 @@ int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *i
     input_file_type = USP_ARG_Get(input_args, "FileType", "");
     input_url = USP_ARG_Get(input_args, "Url", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_UploadFile CommandKey: %s, FileType: %s, Url: %s",
-                 input_file_type, input_url);
+    USP_LOG_Debug("%s: FileType: %s, Url: %s", __FUNCTION__, input_file_type, input_url);
 
     if (strcmp(input_file_type, "") == 0
         || strcmp(input_url, "") == 0)
     {
         // if it doesn't, return invalid value
-        USP_ERR_SetMessage("%s: Invalid value - The parameters for downloading files are empty.", __FUNCTION__);
+        USP_ERR_SetMessage("%s: Invalid value - The parameters for DownloadFile() are empty.", __FUNCTION__);
         err = USP_ERR_INVALID_VALUE;
         goto exit;
     }
@@ -204,11 +240,11 @@ int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *i
     strcat(param, "###");
     strcat(param, input_file_type);
 
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadFile SendEvent res: %d", res);
+    SK_TR369_API_SendEvent(param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     USP_ARG_Add(output_args, "Status", "Complete");
+    USP_LOG_Info("%s function execution completed.", __FUNCTION__);
 
 exit:
     return err;
@@ -244,11 +280,24 @@ static char *ip_ping_output_args[] =
     "IPAddressUsed",
 };
 
+/*********************************************************************//**
+**
+** SK_TR369_Start_IPPing
+**
+** Called when sync command Device.IP.Diagnostics.IPPing() is executed
+**
+** \param   req - pointer to structure identifying the command
+** \param   command_key - not used, OnBoardRequest notification doesn't have a command key field
+** \param   input_args - not used, the command doesn't receive parameters
+** \param   output_args - not used, the command doesn't return values
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err = USP_ERR_OK;
     char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_IPPing start");
     // Input variables
     char *input_host, *input_size, *input_count, *input_timeout_ms;
 
@@ -258,8 +307,8 @@ int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_a
     input_count = USP_ARG_Get(input_args, "NumberOfRepetitions", "");
     input_timeout_ms = USP_ARG_Get(input_args, "Timeout", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_IPPing Host: %s, DataBlockSize: %s, NumberOfRepetitions: %s, Timeout: %s",
-                 input_host, input_size, input_count, input_timeout_ms);
+    USP_LOG_Debug("%s: Host: %s, DataBlockSize: %s, NumberOfRepetitions: %s, Timeout: %s",
+                  __FUNCTION__, input_host, input_size, input_count, input_timeout_ms);
 
     if (strcmp(input_host, "") == 0
         || strcmp(input_size, "") == 0
@@ -281,8 +330,7 @@ int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_a
     strcat(param, "###");
     strcat(param, input_timeout_ms);
 
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_IPPing SendEvent res: %d", res);
+    SK_TR369_API_SendEvent(param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[16], ipAddressUsed[16], successCount[8], failureCount[8], avg[8], min[8], max[8], avg_ns[8], min_ns[8], max_ns[8];
@@ -307,6 +355,11 @@ int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_a
     USP_ARG_Add(output_args, "MinimumResponseTimeDetailed", min_ns);
     USP_ARG_Add(output_args, "MaximumResponseTimeDetailed", max_ns);
     USP_ARG_Add(output_args, "IPAddressUsed", ipAddressUsed);
+
+    USP_LOG_Info("%s: Status: %s, SuccessCount: %s, FailureCount: %s, "
+                 "AverageResponseTime: %s, MinimumResponseTime: %s, MaximumResponseTime: %s, "
+                 "AverageResponseTimeDetailed: %s, MinimumResponseTimeDetailed: %s, MaximumResponseTimeDetailed: %s, IPAddressUsed: %s",
+                 __FUNCTION__, status, successCount, failureCount, avg, min, max, avg_ns, min_ns, max_ns, ipAddressUsed);
 
 exit:
     return err;
@@ -335,10 +388,23 @@ static char *trace_route_output_args[] =
     "RouteHops.",
 };
 
+/*********************************************************************//**
+**
+** SK_TR369_Start_TraceRoute
+**
+** Called when sync command Device.IP.Diagnostics.TraceRoute() is executed
+**
+** \param   req - pointer to structure identifying the command
+** \param   command_key - not used, OnBoardRequest notification doesn't have a command key field
+** \param   input_args - not used, the command doesn't receive parameters
+** \param   output_args - not used, the command doesn't return values
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int i, err = USP_ERR_OK;
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute start");
     // Input variables
     char *input_host, *input_timeout, *input_max_hop_count, *input_size;
 
@@ -347,8 +413,8 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
     input_timeout = USP_ARG_Get(input_args, "Timeout", "");
     input_max_hop_count = USP_ARG_Get(input_args, "MaxHopCount", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute Host: %s, Timeout: %s, MaxHopCount: %s",
-                 input_host, input_timeout, input_max_hop_count);
+    USP_LOG_Debug("%s: Host: %s, Timeout: %s, MaxHopCount: %s",
+                  __FUNCTION__, input_host, input_timeout, input_max_hop_count);
 
     if (strcmp(input_host, "") == 0
         || strcmp(input_timeout, "") == 0
@@ -365,18 +431,17 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.MaxHopCount", input_max_hop_count);
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.DataBlockSize", input_size);
 
-    int res = SK_TR369_API_SendEvent("TraceRoute");
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute SendEvent res: %d", res);
+    SK_TR369_API_SendEvent("TraceRoute");
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[32], responseTime[8];
     SK_TR369_GetDBParam("Device.IP.Diagnostics.TraceRoute.Status", status);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.TraceRoute.ResponseTime", responseTime);
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute Status: %s, ResponseTime: %s", status, responseTime);
-
     USP_ARG_Add(output_args, "Status", status);
     USP_ARG_Add(output_args, "ResponseTime", responseTime);
+
+    USP_LOG_Info("%s: Status: %s, ResponseTime: %s", __FUNCTION__, status, responseTime);
 
     int_vector_t iv;
     INT_VECTOR_Init(&iv);
@@ -408,8 +473,8 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
         USP_ARG_Add(output_args, output_address_path, output_address);
         USP_ARG_Add(output_args, output_time_path, output_time);
 
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_TraceRoute [%d] %s: %s, %s: %s, %s: %s",
-                     i, output_host_path, output_host, output_address_path, output_address, output_time_path, output_time);
+        USP_LOG_Info("%s: [%d] %s: %s, %s: %s, %s: %s",
+                     __FUNCTION__,i, output_host_path, output_host, output_address_path, output_address, output_time_path, output_time);
     }
     INT_VECTOR_Destroy(&iv);
 
@@ -445,11 +510,24 @@ static char *download_diagnostics_output_args[] =
     "TestBytesReceived",
 };
 
+/*********************************************************************//**
+**
+** SK_TR369_Start_DownloadDiagnostics
+**
+** Called when sync command Device.IP.Diagnostics.DownloadDiagnostics() is executed
+**
+** \param   req - pointer to structure identifying the command
+** \param   command_key - not used, OnBoardRequest notification doesn't have a command key field
+** \param   input_args - not used, the command doesn't receive parameters
+** \param   output_args - not used, the command doesn't return values
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vector_t *input_args, kv_vector_t *output_args)
 {
     int err = USP_ERR_OK;
     char param[1024] = {0};
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics start");
     // Input variables
     char *input_download_url, *input_duration;
 
@@ -457,8 +535,8 @@ int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vect
     input_download_url = USP_ARG_Get(input_args, "DownloadURL", "");
     input_duration = USP_ARG_Get(input_args, "TimeBasedTestDuration", "");
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics DownloadURL: %s, TimeBasedTestDuration: %s",
-                 input_download_url, input_duration);
+    USP_LOG_Debug("%s: DownloadURL: %s, TimeBasedTestDuration: %s",
+                 __FUNCTION__, input_download_url, input_duration);
 
     if (strcmp(input_download_url, "") == 0
         || strcmp(input_duration, "") == 0)
@@ -474,8 +552,7 @@ int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vect
     strcat(param, "###");
     strcat(param, input_duration);
 
-    int res = SK_TR369_API_SendEvent(param);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics SendEvent res: %d", res);
+    SK_TR369_API_SendEvent(param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[32], BOMTime[32], EOMTime[32], testBytesReceived[8];
@@ -484,18 +561,29 @@ int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vect
     SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.EOMTime", EOMTime);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.TestBytesReceived", testBytesReceived);
 
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_Start_DownloadDiagnostics status: %s, BOMTime: %s, EOMTime: %s, testBytesReceived: %s",
-                 status, BOMTime, EOMTime, testBytesReceived);
-
     USP_ARG_Add(output_args, "Status", status);
     USP_ARG_Add(output_args, "BOMTime", BOMTime);
     USP_ARG_Add(output_args, "EOMTime", EOMTime);
     USP_ARG_Add(output_args, "TestBytesReceived", testBytesReceived);
 
+    USP_LOG_Info("%s: Status: %s, BOMTime: %s, EOMTime: %s, testBytesReceived: %s",
+                 __FUNCTION__, status, BOMTime, EOMTime, testBytesReceived);
+
 exit:
     return err;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_InitCustomEvent
+**
+** Customize Command events.
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_InitCustomEvent(void)
 {
     int err = USP_ERR_OK;
@@ -539,7 +627,8 @@ int SK_TR369_InitCustomEvent(void)
     return err;
 }
 
-
+//------------------------------------------------------------------------------------
+// Array of multiple object arguments
 char *sk_multi_object_map[] =
 {
     "Device.DeviceInfo.TemperatureStatus.TemperatureSensor",
@@ -571,7 +660,17 @@ char *sk_multi_object_map[] =
 //    "Device.X_Skyworth.BluetoothDevice"         // 该节点需要动态添加
 };
 
-
+/*********************************************************************//**
+**
+** SK_TR369_SetDefaultProcessStatus
+**
+** Initialize the MultiObject node for "Device.DeviceInfo.ProcessStatus.Process.{i}."
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_SetDefaultProcessStatus(void)
 {
     int err = USP_ERR_OK;
@@ -583,7 +682,7 @@ int SK_TR369_SetDefaultProcessStatus(void)
     }
     SK_TR369_API_GetParams("Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries", num_buf, sizeof(num_buf));
     int num = atoi(num_buf);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject ProcessNumberOfEntries: %s(%d)", num_buf, num);
+    USP_LOG_Info("%s: Get ProcessNumberOfEntries: %s (%d)", __FUNCTION__, num_buf, num);
     if (num > 0)
     {
         err = SK_TR369_AddMultiObject("Device.DeviceInfo.ProcessStatus.Process", num);
@@ -595,7 +694,17 @@ int SK_TR369_SetDefaultProcessStatus(void)
     return err;
 }
 
-
+/*********************************************************************//**
+**
+** SK_TR369_SetDefaultNeighboringWiFi
+**
+** Initialize the MultiObject node for "Device.WiFi.NeighboringWiFiDiagnostic.Result.{i}."
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_SetDefaultNeighboringWiFi(void)
 {
     int err = USP_ERR_OK;
@@ -607,7 +716,7 @@ int SK_TR369_SetDefaultNeighboringWiFi(void)
     }
     SK_TR369_API_GetParams("Device.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries", num_buf, sizeof(num_buf));
     int num = atoi(num_buf);
-    USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject ResultNumberOfEntries: %s(%d)", num_buf, num);
+    USP_LOG_Info("%s: Get ResultNumberOfEntries: %s (%d)", __FUNCTION__, num_buf, num);
     if (num > 0)
     {
         err = SK_TR369_AddMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result", num);
@@ -619,6 +728,17 @@ int SK_TR369_SetDefaultNeighboringWiFi(void)
     return err;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_SetDefaultMultiObject
+**
+** Initialize all MultiObject nodes. The node is obtained from the array of "sk_multi_object_map".
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_SetDefaultMultiObject(void)
 {
     int i = 0;
@@ -630,18 +750,16 @@ int SK_TR369_SetDefaultMultiObject(void)
     for (i = 0; i < map_size; i++)
     {
         INT_VECTOR_Init(&iv);
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject path: %s", sk_multi_object_map[i]);
         err = DATA_MODEL_GetInstances(sk_multi_object_map[i], &iv);
         if (err != USP_ERR_OK)
         {
             INT_VECTOR_Destroy(&iv);
             continue;
         }
-        USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject num_entries: %d", iv.num_entries);
         if (iv.num_entries == 0)
         {
             err = DATA_MODEL_AddInstance(sk_multi_object_map[i], &instance, 0);
-            USP_LOG_Info(" ######### Outis ~~~ SK_TR369_SetDefaultMultiObject instance: %d", instance);
+            USP_LOG_Info("%s: Nodes added: %s.%d", __FUNCTION__, sk_multi_object_map[i], instance);
             if (err != USP_ERR_OK)
             {
                 INT_VECTOR_Destroy(&iv);

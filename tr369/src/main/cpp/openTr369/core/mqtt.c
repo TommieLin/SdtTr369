@@ -305,7 +305,6 @@ int MQTT_Init(void)
 void MQTT_Destroy(void)
 {
     int i;
-    USP_LOG_Info(" ######### Outis !!! MQTT_Destroy start.");
 
     mqtt_client_t* client = NULL;
     for (i = 0; i < MAX_MQTT_CLIENTS; i++)
@@ -1684,10 +1683,6 @@ void ResetRetryCount(mqtt_client_t* client)
 void DestroyClient(mqtt_client_t *client)
 {
     int i;
-    USP_LOG_Info(" ######### Outis !!! DestroyClient start.");
-
-//    CleanMqttClient(client, false);
-//    DisconnectClient(client);
 
     MQTT_DestroyConnParams(&client->conn_params);
     MQTT_DestroyConnParams(&client->next_params);
@@ -1738,7 +1733,6 @@ void DestroyClient(mqtt_client_t *client)
 void CleanMqttClient(mqtt_client_t *client, bool is_reconnect)
 {
     int sock;
-    USP_LOG_Info(" ######### Outis !!! CleanMqttClient start.");
 
     // NOTE: It is expected that this function is called only when we know that no socket is open
     // If a socket is still open, it is not safe to forcibly close it here, as that creates a SIGPIPE exception when libmosquitto accesses the socket next
@@ -1887,7 +1881,6 @@ int EnableMosquitto(mqtt_client_t *client)
     // Create a new mosquitto client instance
     // This takes the instance as the (void *) obj argument
     // Allowing us to use the instance number to identify any callbacks
-    USP_LOG_Info(" ######### Outis ### EnableMosquitto start");
     if (client->mosq != NULL)
     {
         // Destroy the mosquitto client
@@ -1897,14 +1890,11 @@ int EnableMosquitto(mqtt_client_t *client)
     }
 
     bool clean = client->conn_params.clean_session; // v3
-    USP_LOG_Info(" ######### Outis ### EnableMosquitto clean1: %d", clean);
 
     // Use clean_start (v5) flag instead
-    USP_LOG_Info(" ######### Outis ### EnableMosquitto version: %d", client->conn_params.version);
     if (client->conn_params.version == kMqttProtocol_5_0)
     {
         clean = client->conn_params.clean_start;
-        USP_LOG_Info(" ######### Outis ### EnableMosquitto clean2: %d", clean);
     }
 
     char* client_id = NULL;
@@ -1921,13 +1911,11 @@ int EnableMosquitto(mqtt_client_t *client)
             USP_ASSERT(strlen(client->conn_params.client_id) > 0);
 
             client_id = client->conn_params.client_id;
-            USP_LOG_Info(" ######### Outis ### EnableMosquitto client_id 1: %s", client_id);
         }
     }
     else
     {
         client_id = client->conn_params.client_id;
-        USP_LOG_Info(" ######### Outis ### EnableMosquitto client_id 2: %s", client_id);
     }
 
     // If there's no client_id, we wil be requesting a new one,
@@ -2155,12 +2143,10 @@ int PerformMqttClientConnect(mqtt_client_t *client)
     int mosq_err = MOSQ_ERR_SUCCESS;
     int err = USP_ERR_OK;
     int keep_alive;
-    USP_LOG_Info(" ######### Outis ### PerformMqttClientConnect start");
 
     // Exit if unable to configure username/password for this mosquitto context
     if (strlen(client->conn_params.username) > 0)
     {
-        USP_LOG_Info(" ######### Outis ### PerformMqttClientConnect username: %s, password: %s", client->conn_params.username, client->conn_params.password);
         if (mosquitto_username_pw_set(client->mosq, client->conn_params.username, client->conn_params.password) != MOSQ_ERR_SUCCESS)
         {
             HandleMqttError(client, kMqttFailure_OtherError, "Failed to set username/password");
@@ -2174,7 +2160,6 @@ int PerformMqttClientConnect(mqtt_client_t *client)
     }
 
     // Exit if unable to configure encryption for this mosquitto context
-    USP_LOG_Info(" ######### Outis ### PerformMqttClientConnect ts_protocol: %u", client->conn_params.ts_protocol);
     if (client->conn_params.ts_protocol == kMqttTSprotocol_tls)
     {
         USP_LOG_Debug("%s: Enabling encryption for MQTT client", __FUNCTION__);
@@ -2217,13 +2202,11 @@ int PerformMqttClientConnect(mqtt_client_t *client)
     // NOTE: TCP connect can block for around 2 minutes if the broker does not respond to the TCP handshake
     if (version == kMqttProtocol_5_0)
     {
-        USP_LOG_Info(" ######### Outis ### mosquitto_connect_bind_v5 host: %s, port: %u, keep_alive: %d", client->conn_params.host, client->conn_params.port, keep_alive);
         mosq_err = mosquitto_connect_bind_v5(client->mosq, client->conn_params.host, client->conn_params.port,
                                              keep_alive, NULL, proplist);
     }
     else
     {
-        USP_LOG_Info(" ######### Outis ### mosquitto_connect host: %s, port: %u, keep_alive: %d", client->conn_params.host, client->conn_params.port, keep_alive);
         mosq_err = mosquitto_connect(client->mosq, client->conn_params.host, client->conn_params.port,
                                      keep_alive);
     }
@@ -2562,7 +2545,6 @@ void DisconnectClient(mqtt_client_t *client)
 {
     int result;
     int sock;
-    USP_LOG_Info(" ######### Outis !!! DisconnectClient start.");
 
     // Send a disconnect frame, if the socket is still connected
     sock = mosquitto_socket(client->mosq);

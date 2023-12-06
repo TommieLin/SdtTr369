@@ -201,6 +201,7 @@ int DATA_MODEL_Init(void)
     // Exit if an error has occurred
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: Unexpected error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -208,6 +209,7 @@ int DATA_MODEL_Init(void)
     err = VENDOR_Init();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: VENDOR_Init error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -216,6 +218,7 @@ int DATA_MODEL_Init(void)
     err = DATABASE_Start();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DATABASE_Start error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -223,6 +226,7 @@ int DATA_MODEL_Init(void)
     err = DEVICE_LOCAL_AGENT_SetDefaults();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DEVICE_LOCAL_AGENT_SetDefaults error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -231,17 +235,12 @@ int DATA_MODEL_Init(void)
     err = DEVICE_MQTT_SetDefaults();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaults error(%d).", __FUNCTION__, err);
         return err;
     }
 #endif
 
     is_executing_within_dm_init = false;
-
-    // Exit if unable to register all nodes in the schema
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
 
     // If the code gets here, then all of the data model components initialised successfully
     return USP_ERR_OK;
@@ -270,6 +269,7 @@ int DATA_MODEL_Start(void)
         err = DATABASE_ReadDataModelInstanceNumbers(false);
         if (err != USP_ERR_OK)
         {
+            USP_LOG_Error("%s: DATABASE_ReadDataModelInstanceNumbers error(%d).", __FUNCTION__, err);
             return err;
         }
     }
@@ -295,6 +295,7 @@ int DATA_MODEL_Start(void)
     err = DM_TRANS_Start(&trans);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DM_TRANS_Start error(%d).", __FUNCTION__, err);
         goto exit;
     }
 
@@ -352,6 +353,7 @@ exit:
     }
     else
     {
+        USP_LOG_Error("%s: Unexpected error(%d).", __FUNCTION__, err);
         DM_TRANS_Abort(); // Ignore error from this - we want to return the error from the body of this function instead
     }
 
@@ -576,8 +578,6 @@ int DATA_MODEL_SetParameterValue(char *path, char *new_value, unsigned flags)
     dm_req_t req;
     bool exists;
     unsigned db_flags = 0;          // Default to database not unobfuscating values. NOTE Only secure nodes are obfuscated
-
-    USP_LOG_Info(" ######### Outis *** DATA_MODEL_SetParameterValue Path: %s, new_value: %s, flags: %d", path, new_value, flags);
 
 //    USP_ASSERT(DM_TRANS_IsWithinTransaction()==true);
 
@@ -3344,13 +3344,12 @@ int DM_PRIV_FormDB_FromPath(char *path, dm_hash_t *hash, char *instances, int le
 
     // Exit if parameter does not exist in the data model
     // or parameter is specified with incorrect instance order
-    USP_LOG_Info(" ######### Outis ### DM_PRIV_FormDB_FromPath path: %s", path);
     node = DM_PRIV_GetNodeFromPath(path, &inst, NULL);
     if (node == NULL)
     {
         return USP_ERR_INVALID_PATH;
     }
-    USP_LOG_Info(" ######### Outis ### DM_PRIV_FormDB_FromPath node->type: %u", node->type);
+    USP_LOG_Debug("%s: path: %s, type: %u", __FUNCTION__, path, node->type);
 
     // If the path has been migrated to a new path, then determine the new node to use in the database
     // This code ensures that factory reset databases set using dbset commands or '-r' option seed the new parameters in the USP DB

@@ -11,6 +11,7 @@
 #include "sk_jni_network.h"
 #include "vendor_defs.h"
 #include "usp_err_codes.h"
+#include "usp_log.h"
 
 #define JNI_REG_CLASS "com/sdt/opentr369/OpenTR369Native"
 
@@ -51,7 +52,7 @@ static inline JNIEnv *getJNIEnv(bool *needsDetach) {
         JavaVMAttachArgs args = {JNI_VERSION_1_4, nullptr, nullptr};
         int result = mJavaVm->AttachCurrentThread(&env, (void *) &args);
         if (result != JNI_OK) {
-            TX_ERR("Thread attach failed: %#x", result);
+            USP_LOG_Error("Thread attach failed: %#x", result);
             return nullptr;
         }
         *needsDetach = true;
@@ -62,12 +63,12 @@ static inline JNIEnv *getJNIEnv(bool *needsDetach) {
 static inline void detachJNI() {
     int result = mJavaVm->DetachCurrentThread();
     if (result != JNI_OK) {
-        TX_ERR("Thread detach failed: %#x", result);
+        USP_LOG_Error("Thread detach failed: %#x", result);
     }
 }
 
 int SK_TR369_Callback_Get(const int what, char *dst, int size, const char *str1, const char *str2) {
-    TX_ERR("==>: %d, %s, %s", what, str1, str2);
+    USP_LOG_Debug("%s ==>: %d, %s, %s", __FUNCTION__, what, str1, str2);
     do {
         bool needsDetach;
         const char *pStr = nullptr;
@@ -96,12 +97,12 @@ int SK_TR369_Callback_Get(const int what, char *dst, int size, const char *str1,
         if (env->ExceptionCheck()) env->ExceptionClear();
         if (needsDetach) detachJNI();
     } while (false);
-    TX_ERR("<==: %s, %s", str1, dst);
+    USP_LOG_Debug("%s <==: %s, %s", __FUNCTION__, str1, dst);
     return 0;
 }
 
 int SK_TR369_Callback_Set(const int what, const char *str1, const char *str2, const char *str3) {
-    TX_ERR("==>: %d, %s, %s, %s", what, str1, str2, str3);
+    USP_LOG_Debug("%s ==>: %d, %s, %s, %s", __FUNCTION__, what, str1, str2, str3);
     int ret = -1;
     do {
         bool needsDetach;
@@ -119,13 +120,13 @@ int SK_TR369_Callback_Set(const int what, const char *str1, const char *str2, co
         if (env->ExceptionCheck()) env->ExceptionClear();
         if (needsDetach) detachJNI();
     } while (false);
-    TX_ERR("<==: %s, %s, %s", str1, str2, str3);
+    USP_LOG_Debug("%s <==: %s, %s, %s", __FUNCTION__, str1, str2, str3);
     return ret;
 }
 
 int SK_TR369_Callback_GetAttr(const char *path, const char *method, const char **value,
                               unsigned int *len) {
-    TX_ERR("path ==>: %s", path);
+    USP_LOG_Debug("%s ==>: %s", __FUNCTION__, path);
     do {
         bool needsDetach;
         const char *pStr = nullptr;
@@ -145,13 +146,13 @@ int SK_TR369_Callback_GetAttr(const char *path, const char *method, const char *
         if (env->ExceptionCheck()) env->ExceptionClear();
         if (needsDetach) detachJNI();
     } while (false);
-    TX_ERR("path, value, len <==: %s, %s, %d", path, *value, *len);
+    USP_LOG_Debug("%s <==: %s, %s, %d", __FUNCTION__, path, *value, *len);
     return 0;
 }
 
 int SK_TR369_Callback_SetAttr(const char *path, const char *method, const char *value,
                               unsigned int len) {
-    TX_ERR("==>:%s->%s", path, method);
+    USP_LOG_Debug("%s ==>: %s->%s", __FUNCTION__, path, method);
     int ret = -1;
     do {
         bool needsDetach;
@@ -167,12 +168,12 @@ int SK_TR369_Callback_SetAttr(const char *path, const char *method, const char *
         if (env->ExceptionCheck()) env->ExceptionClear();
         if (needsDetach) detachJNI();
     } while (false);
-    TX_ERR("<==:%d-%s-ret=%d", len, value, ret);
+    USP_LOG_Debug("%s <==: %d-%s-ret=%d", __FUNCTION__, len, value, ret);
     return ret;
 }
 
 void SK_TR369_Callback_Start() {
-    TX_ERR("==>: %s", __FUNCTION__);
+    USP_LOG_Debug("==>: %s", __FUNCTION__);
     do {
         bool needsDetach;
         JNIEnv *env = getJNIEnv(&needsDetach);
@@ -181,7 +182,7 @@ void SK_TR369_Callback_Start() {
         if (env->ExceptionCheck()) env->ExceptionClear();
         if (needsDetach) detachJNI();
     } while (false);
-    TX_ERR("<==: %s", __FUNCTION__);
+    USP_LOG_Debug("<==: %s", __FUNCTION__);
 }
 
 static void SK_TR369_JniConfig(JNIEnv *env) {
@@ -189,7 +190,7 @@ static void SK_TR369_JniConfig(JNIEnv *env) {
     env->GetJavaVM(&mJavaVm);
 
     if ((clazz = env->FindClass(JNI_REG_CLASS)) == nullptr) {
-        TX_ERR("Call FindClass(%s) failed", JNI_REG_CLASS);
+        USP_LOG_Error("Call FindClass(%s) failed", JNI_REG_CLASS);
         return;
     }
     mClass = reinterpret_cast<jclass> (env->NewGlobalRef(clazz));
@@ -199,8 +200,8 @@ static void SK_TR369_JniConfig(JNIEnv *env) {
                      env->GetStaticMethodID(mClass,
                                             sFuncScript[i].name,
                                             sFuncScript[i].type)) == nullptr) {
-            TX_ERR("Call GetStaticMethodID %s(%s) failed", sFuncScript[i].name,
-                   sFuncScript[i].type);
+            USP_LOG_Error("Call GetStaticMethodID %s(%s) failed", sFuncScript[i].name,
+                          sFuncScript[i].type);
             return;
         }
     }

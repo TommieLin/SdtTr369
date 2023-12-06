@@ -104,6 +104,7 @@ int DEVICE_REQUEST_Init(void)
     err |= USP_REGISTER_DBParam_ReadWrite("Internal.Request.{i}.InputArgs.{i}.Value", "", NULL, NULL, DM_STRING);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: An internal error occurred(%d).", __FUNCTION__, err);
         return err;
     }
 

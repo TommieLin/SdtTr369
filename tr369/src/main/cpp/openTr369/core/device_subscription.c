@@ -229,6 +229,7 @@ int DEVICE_SUBSCRIPTION_Init(void)
 
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: An internal error occurred(%d).", __FUNCTION__, err);
         return err;
     }
 

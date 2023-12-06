@@ -339,7 +339,18 @@ exit:
 }
 #endif
 
-
+/*********************************************************************//**
+**
+** SK_TR369_SetInitFilePath
+**
+** Set the storage path of the default value configuration file.
+** The default path is: /data/user/0/com.sdt.android.tr369/sdt_tms_tr369_model.default
+**
+** \param   default_path - Pointer to the configuration file path.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_SetInitFilePath(const char *const default_path)
 {
     // 初始化Model默认值文件路径
@@ -362,11 +373,35 @@ int SK_TR369_SetInitFilePath(const char *const default_path)
     return USP_ERR_OK;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_GetDefaultFilePath
+**
+** Get the storage path of the default value configuration file.
+** The default path is: /data/user/0/com.sdt.android.tr369/sdt_tms_tr369_model.default
+**
+** \param   None
+**
+** \return  Pointer to the configuration file path.
+**
+**************************************************************************/
 char *SK_TR369_GetDefaultFilePath()
 {
     return sk_tr369_model_default;
 }
 
+/*********************************************************************//**
+**
+** SK_TR369_Start
+**
+** Customized initialization main function.
+**
+** \param   model_path - Node list storage path. The default file is: sdt_tms_tr369_model.xml
+**              The default path is: /data/user/0/com.sdt.android.tr369/sdt_tms_tr369_model.xml
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
 int SK_TR369_Start(const char *const model_path)
 {
     int err;
@@ -388,6 +423,7 @@ int SK_TR369_Start(const char *const model_path)
     err = USP_MEM_Init();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: USP_MEM_Init error(%d).", __FUNCTION__, err);
         goto exit;
     }
 
@@ -406,12 +442,13 @@ int SK_TR369_Start(const char *const model_path)
     if (sk_tr369_model_xml == NULL)
     {
         err = USP_ERR_SK_MALLOC_FAILURE;
+        USP_LOG_Error("%s: Pointer to 'sk_tr369_model_xml' is null.", __FUNCTION__);
         goto exit;
     }
 
     strncpy(sk_tr369_model_xml, model_path, len);
     sk_tr369_model_xml[len] = '\0';
-    USP_LOG_Debug("sk_tr369_model_default: %s, sk_tr369_model_xml: %s\n", sk_tr369_model_default, sk_tr369_model_xml);
+    USP_LOG_Debug("%s: sk_tr369_model_default: %s, sk_tr369_model_xml: %s", __FUNCTION__, sk_tr369_model_default, sk_tr369_model_xml);
 
     // Following debug is only logged when running as a daemon (not when running as CLI client).
     USP_LOG_Info("USP Agent starting...");
@@ -420,6 +457,7 @@ int SK_TR369_Start(const char *const model_path)
     err = MAIN_Start(DEFAULT_DATABASE_FILE, enable_mem_info);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: MAIN_Start error(%d).", __FUNCTION__, err);
         goto exit;
     }
 
@@ -444,6 +482,7 @@ int SK_TR369_Start(const char *const model_path)
     err = OS_UTILS_CreateThread("MTP_MQTT", MTP_EXEC_MqttMain, NULL);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: CreateThread(MTP_MQTT) error(%d).", __FUNCTION__, err);
         goto exit;
     }
 #endif
@@ -466,6 +505,7 @@ int SK_TR369_Start(const char *const model_path)
     err = OS_UTILS_CreateThread("BulkDataColl", BDC_EXEC_Main, NULL);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: CreateThread(BulkDataColl) error(%d).", __FUNCTION__, err);
         goto exit;
     }
 
@@ -515,6 +555,7 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     err = DATABASE_Init(db_file);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DATABASE_Init error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -524,6 +565,7 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     err |= BDC_EXEC_Init();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: *_EXEC_Init error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -534,6 +576,7 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     err = DATA_MODEL_Init();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DATA_MODEL_Init error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -547,6 +590,7 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     err = DATA_MODEL_Start();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DATA_MODEL_Start error(%d).", __FUNCTION__, err);
         return err;
     }
 
@@ -566,6 +610,7 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
     err = DEVICE_MQTT_StartAllClients();
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: DEVICE_MQTT_StartAllClients error(%d).", __FUNCTION__, err);
         return err;
     }
 #endif

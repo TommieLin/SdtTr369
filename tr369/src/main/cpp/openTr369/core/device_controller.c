@@ -366,6 +366,7 @@ int DEVICE_CONTROLLER_Init(void)
     // Exit if any errors occurred
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: An internal error occurred(%d).", __FUNCTION__, err);
         return USP_ERR_INTERNAL_ERROR;
     }
 
