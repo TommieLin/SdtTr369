@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 
 import androidx.annotation.NonNull;
@@ -19,8 +20,6 @@ import com.sdt.diagnose.database.DbManager;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,15 +44,14 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     private static final String URL_INSTALL_RESULT_REPORT = "/appList/installResult";
 
     // 重试发送状态的次数
-    private static final int DEFAULT_REQUEST_RETRY_COUNT = 6;
-    // 重试发送状态的延迟 (ms)
+    private static final int DEFAULT_REQUEST_RETRY_COUNT = 3;
+    // 重试发送状态的延迟 (单位: 秒)
     private static final int DEFAULT_REQUEST_RETRY_DELAY = 10 * 1000;
 
-    private static Timer mTimer;
-    private static TimerTask mTask;
     private static int mRetryCount = 0;
     private static final int MSG_REQUEST_RETRY = 3308;
     private static boolean isRequestSuccess = false;
+    private static boolean isClearNeeded = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -68,7 +66,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         } else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(action)) {
             if (isConnected(context.getApplicationContext())) {
                 if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {
-                    retryRequestUpdateStatus();
+                    retryReportResponse();
                 }
             }
         }
@@ -77,6 +75,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     private boolean checkPackageNameValidity(Intent input) {
         String pkgName = input.getStringExtra("packageName");
         if (pkgName != null) {
+            LogUtils.d(TAG, "checkPackageNameValidity pkgName: " + pkgName);
             return pkgName.equals(GlobalContext.getContext().getPackageName());
         }
         return false;
@@ -116,32 +115,32 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         }
 
         String reportUrl = url + URL_INSTALL_RESULT_REPORT;
-        HttpsUtils.requestAppUpdateStatus(reportUrl, hashMap, new Callback() {
+        HttpsUtils.requestAppUpgradeStatus(reportUrl, hashMap, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 LogUtils.e(TAG, "Failed to report installation status");
                 DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "1");
-                requestBean.setResponseEnableDBParam();
-                retryRequestUpdateStatus();
+                requestBean.setResponseDBParams();
+                retryReportResponse();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                LogUtils.d(TAG, "requestAppUpdateStatus Protocol: " + response.protocol()
-                        + " ,Code: " + response.code());
+                LogUtils.d(TAG, "requestAppUpgradeStatus Protocol: " + response.protocol()
+                        + ", Code: " + response.code());
                 if (response.code() == 200) {
                     DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "0");
                 } else {
                     DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "1");
-                    requestBean.setResponseEnableDBParam();
-                    retryRequestUpdateStatus();
+                    requestBean.setResponseDBParams();
+                    retryReportResponse();
                 }
             }
         });
     }
 
-    private static void handleRequest() {
-        final HashMap<String, String> hashMap = AppUpgradeResponseBean.getResponseEnableDBParam();
+    private static void handleResponse() {
+        final HashMap<String, String> hashMap = AppUpgradeResponseBean.getResponseDBParams();
         LogUtils.d(TAG, "execute POST install request, params: " + hashMap);
 
         String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
@@ -151,7 +150,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         }
 
         String reportUrl = url + URL_INSTALL_RESULT_REPORT;
-        HttpsUtils.requestAppUpdateStatus(reportUrl, hashMap,
+        HttpsUtils.requestAppUpgradeStatus(reportUrl, hashMap,
                 new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -160,8 +159,8 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        LogUtils.d(TAG, "requestAppUpdateStatus Protocol: " + response.protocol()
-                                + " ,Code: " + response.code());
+                        LogUtils.d(TAG, "handleResponse Protocol: " + response.protocol()
+                                + ", Code: " + response.code());
                         if (response.code() == 200) {
                             DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Enable", "0");
                             isRequestSuccess = true;
@@ -170,38 +169,53 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
                 });
     }
 
-    private static final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REQUEST_RETRY:
-                    if (mRetryCount > DEFAULT_REQUEST_RETRY_COUNT || isRequestSuccess) {
-                        mTask.cancel();
-                    } else {
-                        handleRequest();
-                    }
-                    mRetryCount++;
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
-
-    private static class RequestTimerTask extends TimerTask {
-        @Override
-        public void run() {
-            mHandler.sendEmptyMessage(MSG_REQUEST_RETRY);
-        }
-    }
-
-    public static void retryRequestUpdateStatus() {
+    public static void retryReportResponse() {
         mRetryCount = 0;
         isRequestSuccess = false;
-        if (mTimer == null) mTimer = new Timer();
-        if (mTask != null) mTask.cancel();
-        mTask = new RequestTimerTask();
-        mTimer.schedule(mTask, 0, DEFAULT_REQUEST_RETRY_DELAY);
+
+        Handler handler = ReportResponseThread.getInstance().getHandler();
+        handler.sendEmptyMessage(MSG_REQUEST_RETRY);
+    }
+
+    private static class ReportResponseThread {
+        private final HandlerThread mHandlerThread = new HandlerThread("ReportResponseThread");
+        private final Handler mHandler;
+
+        private ReportResponseThread() {
+            LogUtils.d(TAG, "ReportResponseThread Create");
+            mHandlerThread.start();
+            mHandler = new Handler(mHandlerThread.getLooper()) {
+                @Override
+                public void handleMessage(Message msg) {
+                    if (msg.what == MSG_REQUEST_RETRY) {
+                        if (mRetryCount > DEFAULT_REQUEST_RETRY_COUNT || isRequestSuccess) {
+                            mHandler.removeMessages(MSG_REQUEST_RETRY);
+                        } else {
+                            handleResponse();
+                        }
+                        mRetryCount++;
+                        mHandler.sendEmptyMessageDelayed(MSG_REQUEST_RETRY, DEFAULT_REQUEST_RETRY_DELAY);
+                    }
+                }
+            };
+        }
+
+        private static volatile ReportResponseThread instance = null;
+
+        public static ReportResponseThread getInstance() {
+            if (instance == null) {
+                synchronized (ReportResponseThread.class) {
+                    if (instance == null) {
+                        instance = new ReportResponseThread();
+                    }
+                }
+            }
+            return instance;
+        }
+
+        public Handler getHandler() {
+            return mHandler;
+        }
     }
 }
 

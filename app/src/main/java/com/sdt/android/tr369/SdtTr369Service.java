@@ -233,7 +233,7 @@ public class SdtTr369Service extends Service {
         }
         // 重新上传APP安装结果
         if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {
-            ExternalAppUpgradeReceiver.retryRequestUpdateStatus();
+            ExternalAppUpgradeReceiver.retryReportResponse();
         }
         // 初始化FTI停留时间监控程序
         new FTIMonitor();

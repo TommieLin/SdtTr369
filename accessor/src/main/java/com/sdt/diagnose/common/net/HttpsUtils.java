@@ -103,7 +103,7 @@ public class HttpsUtils {
         });
     }
 
-    public static void requestAppUpdateStatus(String url, HashMap<String, String> param, Callback callback) {
+    public static void requestAppUpgradeStatus(String url, HashMap<String, String> param, Callback callback) {
         OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         String wholeUrl = buildUrl(url, param);
         Request request = new Request.Builder()

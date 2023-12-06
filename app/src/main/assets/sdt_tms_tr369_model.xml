@@ -661,7 +661,7 @@
                 <schema name="Msg" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Status" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="PlanId" getter="diagnose" setter="diagnose" type="string" write="W" />
-                <schema name="deviceId" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="DeviceId" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="OperatorCode" getter="diagnose" setter="diagnose" type="string" write="W" />
             </schema>
 

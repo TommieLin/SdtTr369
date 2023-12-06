@@ -52,8 +52,7 @@ public class AppInfo {
         enable = isEnabled();
         isSystemSign = isSignedWithPlatformKey();
         isUpdatedSystemApp = isUpdatedSystemApp();
-
-        // showAble 表示是否应该显示 Enable/Disable 功能,isEnabled 表示当前应用是否 enable状态
+        // showAble 表示是否应该显示 Enable/Disable 功能, isEnabled 表示当前应用是否 enable状态
         canShowEnable = canShowEnble(context, pm);
         storageUsed = getStorageUsed();
     }
