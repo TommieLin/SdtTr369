@@ -127,8 +127,14 @@ int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *inp
     SK_TR369_API_SendEvent(param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
-    USP_ARG_Add(output_args, "Status", "Complete");
-    USP_LOG_Info("%s function execution completed.", __FUNCTION__);
+    char status[16], message[256];
+    SK_TR369_GetDBParam("Device.X_Skyworth.UploadResponse.Status", status);
+    SK_TR369_GetDBParam("Device.X_Skyworth.UploadResponse.Message", message);
+
+    USP_ARG_Add(output_args, "Status", status);
+    USP_ARG_Add(output_args, "Message", message);
+
+    USP_LOG_Info("%s: Status: %s, Message: %s", __FUNCTION__, status, message);
 
 exit:
     return err;

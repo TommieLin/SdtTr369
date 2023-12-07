@@ -35,7 +35,7 @@ public class AppUpgradeResponseBean {
         DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.DeviceId", deviceId);
         DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.OperatorCode", operatorCode);
         DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Status", status);
-        DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Msg", msg);
+        DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Message", msg);
     }
 
     public static HashMap<String, String> getResponseDBParams() {
@@ -44,7 +44,7 @@ public class AppUpgradeResponseBean {
         hashMap.put("deviceId", DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.DeviceId"));
         hashMap.put("operatorCode", DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.OperatorCode"));
         hashMap.put("status", DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Status"));
-        hashMap.put("msg", DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Msg"));
+        hashMap.put("msg", DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Message"));
         return hashMap;
     }
 
@@ -54,7 +54,7 @@ public class AppUpgradeResponseBean {
         DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.DeviceId", "");
         DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.OperatorCode", "");
         DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Status", "");
-        DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Msg", "");
+        DbManager.setDBParam("Device.X_Skyworth.UpgradeResponse.Message", "");
     }
 
     public String getPlanId() {

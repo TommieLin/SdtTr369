@@ -120,6 +120,9 @@ public class SdtTr369Service extends Service {
         OpenTR369Native.SetListener(mListener);
         // 注册监听器以启动TR369协议
         registerSdtTr369Receiver();
+
+        // 初始化FTI停留时间监控程序
+        new FTIMonitor();
     }
 
     private void registerSdtTr369Receiver() {
@@ -235,8 +238,6 @@ public class SdtTr369Service extends Service {
         if (DbManager.getDBParam("Device.X_Skyworth.UpgradeResponse.Enable").equals("1")) {
             ExternalAppUpgradeReceiver.retryReportResponse();
         }
-        // 初始化FTI停留时间监控程序
-        new FTIMonitor();
         // 初始化系统数据采集程序
         new SystemDataStat(this);
         // 初始化LanX用于检测静态IP是否能访问互联网

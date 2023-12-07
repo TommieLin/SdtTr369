@@ -94,9 +94,9 @@ public class Event {
 
     private static final String format = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final SimpleDateFormat df = new SimpleDateFormat(format);
-    public static String RAW_LOG_FILE = "logcat.log";
+    public static final String RAW_LOG_FILE = "logcat_tr369.log";
     private static final String LOG_SOURCE_DIR_PATH = "/data/tcpdump/";
-    private static final String LOG_SOURCE_FILE_PATH = "/data/tcpdump/logcat_tr369.log";
+    private static final String LOG_SOURCE_FILE_PATH = LOG_SOURCE_DIR_PATH + RAW_LOG_FILE;
 
 
     @Tr369Set("skyworth.tr369.event")
@@ -341,11 +341,18 @@ public class Event {
 
     }
 
+    public static void setUploadResponseDBParams(String status, String message) {
+        DbManager.setDBParam("Device.X_Skyworth.UploadResponse.Status", status);
+        DbManager.setDBParam("Device.X_Skyworth.UploadResponse.Message", message);
+    }
+
     public static void uploadLogFile(String uploadUrl, String filePath, int fileCount) {
         try {
             File file = new File(filePath);
             if (!file.exists() || !file.isFile()) {
-                LogUtils.e(TAG, "The file in this path does not exist. path: " + filePath);
+                String message = "The file under the specified path was not found.";
+                LogUtils.e(TAG, "uploadLogFile: " + message + ", path: " + filePath);
+                setUploadResponseDBParams("Error", message);
                 return;
             }
             long fileSize = file.length();
@@ -364,7 +371,9 @@ public class Event {
                 con.disconnect();
             }
         } catch (Exception e) {
-            LogUtils.e(TAG, "Failed to upload log files, " + e.getMessage());
+            String message = "Failed to upload log files, " + e.getMessage();
+            LogUtils.e(TAG, "uploadLogFile: " + message);
+            setUploadResponseDBParams("Error", message);
         }
     }
 
@@ -423,7 +432,9 @@ public class Event {
             }
 
             if (con.getResponseCode() == 200) {
-                LogUtils.e(TAG, "Successfully uploaded file via https! Path: " + filePath);
+                String message = "Successfully uploaded the file via https.";
+                LogUtils.e(TAG, "uploadLogFileByHttps: " + message + ", path: " + filePath);
+                setUploadResponseDBParams("Complete", message);
                 // 上传成功，只删除分段保存的那些文件
                 if (!filePath.contains(RAW_LOG_FILE)) {
                     File file = new File(filePath);
@@ -433,10 +444,14 @@ public class Event {
                     }
                 }
             } else {
-                LogUtils.e(TAG, "The response code obtained via https is: " + con.getResponseCode());
+                String message = "The response code obtained via https is: " + con.getResponseCode();
+                LogUtils.e(TAG, "uploadLogFileByHttps: " + message);
+                setUploadResponseDBParams("Error", message);
             }
         } catch (Exception e) {
-            LogUtils.e(TAG, "Failed to upload file via https, " + e.getMessage());
+            String message = "Failed to upload file via https, " + e.getMessage();
+            LogUtils.e(TAG, "uploadLogFileByHttp: " + message);
+            setUploadResponseDBParams("Error", message);
         }
     }
 
@@ -487,7 +502,9 @@ public class Event {
             }
 
             if (con.getResponseCode() == 200) {
-                LogUtils.e(TAG, "Successfully uploaded file via http! Path: " + filePath);
+                String message = "Successfully uploaded the file via http.";
+                LogUtils.e(TAG, "uploadLogFileByHttp: " + message + ", path: " + filePath);
+                setUploadResponseDBParams("Complete", message);
                 // 上传成功，只删除分段保存的那些文件
                 if (!filePath.contains(RAW_LOG_FILE)) {
                     File file = new File(filePath);
@@ -497,10 +514,14 @@ public class Event {
                     }
                 }
             } else {
-                LogUtils.e(TAG, "The response code obtained via http is: " + con.getResponseCode());
+                String message = "The response code obtained via http is: " + con.getResponseCode();
+                LogUtils.e(TAG, "uploadLogFileByHttp: " + message);
+                setUploadResponseDBParams("Error", message);
             }
         } catch (Exception e) {
-            LogUtils.e(TAG, "Failed to upload file via http, " + e.getMessage());
+            String message = "Failed to upload file via http, " + e.getMessage();
+            LogUtils.e(TAG, "uploadLogFileByHttp: " + message);
+            setUploadResponseDBParams("Error", message);
         }
     }
 
@@ -581,21 +602,30 @@ public class Event {
     }
 
     private void handleLogFile(String uploadUrl) {
-        if (uploadUrl == null) {
-            LogUtils.e(TAG, "Execution error: URL parameter error.");
+        if (TextUtils.isEmpty(uploadUrl)) {
+            String message = "The URL parameter is empty.";
+            LogUtils.e(TAG, "handleLogFile: " + message);
+            setUploadResponseDBParams("Error", message);
             return;
         }
         File folder = new File(LOG_SOURCE_DIR_PATH);
         if (!folder.exists() || !folder.isDirectory()) {
-            LogUtils.e(TAG, "Execution error: The folder for storing logs was not found.");
+            String message = "Unable to find the folder for storing logs.";
+            LogUtils.e(TAG, "handleLogFile: " + message);
+            setUploadResponseDBParams("Error", message);
             return;
         }
 
         File[] files = folder.listFiles();
         if (files == null) {
-            LogUtils.e(TAG, "Execution error: This abstract pathname does not denote a directory.");
+            String message = "This abstract pathname does not denote the directory.";
+            LogUtils.e(TAG, "handleLogFile: " + message);
+            setUploadResponseDBParams("Error", message);
             return;
         }
+
+        // 初始化Upload事件的结果
+        setUploadResponseDBParams("", "");
 
         // 分割号和同事协商后定义为%%%，服务端下发数据内容<URL>https://xxx/xxx%%%开始时间戳%%%结束时间戳</URL>
         String[] keywords = uploadUrl.split("%%%");
@@ -613,8 +643,10 @@ public class Event {
         }
 
         ArrayList<String> logFiles = new ArrayList<>();
-        if (filterUrl.isEmpty()) {
-            LogUtils.e(TAG, "Execution error: URL recognition failed.");
+        if (TextUtils.isEmpty(filterUrl)) {
+            String message = "The URL parameter is empty.";
+            LogUtils.e(TAG, "handleLogFile: " + message);
+            setUploadResponseDBParams("Error", message);
             return;
         } else if (filterStartTime.isEmpty() || filterEndTime.isEmpty()) {
 //            File file = new File(LOG_SOURCE_FILE_PATH);

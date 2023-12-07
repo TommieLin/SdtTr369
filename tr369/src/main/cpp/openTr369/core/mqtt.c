@@ -3501,7 +3501,7 @@ void HandleMqttError(mqtt_client_t *client, mqtt_failure_t failure_code, const c
 {
     time_t cur_time;
 
-    USP_LOG_Debug("%s: Got error: %d, reason: %s, retry_count: %d", __FUNCTION__, failure_code, message, client->retry_count);
+    USP_LOG_Error("%s: Got error: %d, reason: %s, retry_count: %d", __FUNCTION__, failure_code, message, client->retry_count);
 
     // Exit if an error occurred whilst waiting for an MQTT disconnect to complete (as part of a reconnect sequence)
     // In this case, initiate the reconnect immediately, without waiting for the disconnect callback
@@ -3563,7 +3563,7 @@ void HandleMqttError(mqtt_client_t *client, mqtt_failure_t failure_code, const c
 **************************************************************************/
 void MoveState_Private(mqtt_state_t *state, mqtt_state_t to, const char *event, const char* func)
 {
-    USP_LOG_Debug("%s (%s): %s --> [[ %s ]] --> %s", func, __FUNCTION__, mqtt_state_names[*state], event, mqtt_state_names[to]);
+    USP_LOG_Info("%s (%s): %s --> [[ %s ]] --> %s", func, __FUNCTION__, mqtt_state_names[*state], event, mqtt_state_names[to]);
 
     *state = to;
 }

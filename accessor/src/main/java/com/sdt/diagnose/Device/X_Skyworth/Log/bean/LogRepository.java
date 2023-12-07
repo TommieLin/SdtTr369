@@ -313,18 +313,25 @@ public class LogRepository {
             return false;
         }
 
-        Pattern pattern = Pattern.compile("\\d+");
+        Pattern pattern = Pattern.compile("logcat_tr369_(.*?)\\.txt");
         Matcher matcher = pattern.matcher(fileName);
-        String fileTime = "0";
+        String fileTime;
 
         if (matcher.find()) {
-            fileTime = matcher.group();
+            fileTime = matcher.group(1);
+            if (fileTime == null)  return false;
+            LogUtils.d(TAG, "isFileNeedToBeDeleted: fileTime: " + fileTime);
         } else {
             return false;
         }
 
-        return Long.parseLong(fileTime) > Long.parseLong(startTime)
-                && Long.parseLong(fileTime) <= Long.parseLong(endTime);
+        try {
+            return Long.parseLong(fileTime) > Long.parseLong(startTime)
+                    && Long.parseLong(fileTime) <= Long.parseLong(endTime);
+        } catch (Exception e) {
+            LogUtils.e(TAG, "isFileNeedToBeDeleted error, " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean deleteLogFiles(String filterTime) {
@@ -363,8 +370,8 @@ public class LogRepository {
     }
 
     private void cleanExpiredFiles() {
-        long curTime = System.currentTimeMillis() / 1000;
-        String endTime = String.valueOf(curTime - (MAX_LOG_RETENTION_DAYS * 24 * 60 * 60));
+        long curTime = System.currentTimeMillis();
+        String endTime = String.valueOf(curTime - (MAX_LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000));
         deleteLogFiles("0%%%" + endTime);
     }
 

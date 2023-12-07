@@ -66,7 +66,7 @@ Device.LocalAgent.Controller.1.PeriodicNotifInterval "3600"
 Device.LocalAgent.Controller.1.PeriodicNotifTime "0001-01-01T00:00:00Z"
 Device.LocalAgent.Controller.1.ControllerCode ""
 Device.LocalAgent.Controller.1.AssignedRole "Device.LocalAgent.ControllerTrust.Role.1"
-Device.LocalAgent.Controller.1.EndpointID "self::sdtacs-ABCD369"
+Device.LocalAgent.Controller.1.EndpointID "self::sdtacs-ABC369"
 Device.LocalAgent.Controller.1.MTP.1.Alias "cpe-1"
 Device.LocalAgent.Controller.1.MTP.1.Enable "true"
 Device.LocalAgent.Controller.1.MTP.1.Protocol "MQTT"
@@ -101,7 +101,7 @@ Device.MQTT.Client.1.Subscription.1.QoS "2"
 Device.X_Skyworth.Lock.Enable "0"
 
 ## 平台软件默认不开启logcat后台持续保存日志功能，按项目需求打开或关闭
-Device.X_Skyworth.Logcat.Background.Enable "0"
+Device.X_Skyworth.Logcat.Background.Enable "1"
 ## 平台软件默认不开启logcat自动上传日志功能，按项目需求打开
 Device.X_Skyworth.Logcat.AutoUpload.Enable "0"
 

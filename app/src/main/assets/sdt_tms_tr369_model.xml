@@ -658,11 +658,15 @@
 
             <schema name="UpgradeResponse" type="object">
                 <schema name="Enable" getter="diagnose" setter="diagnose" type="string" write="W" />
-                <schema name="Msg" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Status" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="Message" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="PlanId" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="DeviceId" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="OperatorCode" getter="diagnose" setter="diagnose" type="string" write="W" />
+            </schema>
+            <schema name="UploadResponse" type="object">
+                <schema name="Status" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="Message" getter="diagnose" setter="diagnose" type="string" write="W" />
             </schema>
 
         </schema>
