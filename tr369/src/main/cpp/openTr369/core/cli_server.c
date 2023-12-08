@@ -61,7 +61,7 @@
 #endif
 
 #ifdef ENABLE_MQTT
-#include <mosquitto.h>
+#include <mosquitto/mosquitto.h>
 #endif
 
 #include "common_defs.h"

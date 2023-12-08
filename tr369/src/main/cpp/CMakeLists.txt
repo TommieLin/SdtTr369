@@ -13,7 +13,6 @@ project("tr369")
 # Gradle automatically packages shared libraries with your APK.
 
 aux_source_directory(openTr369/core SRC_TR369_CORE)
-aux_source_directory(openTr369/protobuf-c SRC_TR369_PROTOBUF)
 aux_source_directory(openTr369/vendor SRC_TR369_VENDOR)
 
 add_library(
@@ -25,24 +24,21 @@ add_library(
         skSource/sk_tr369_jni.cpp
         skSource/sk_jni_callback.cpp
         skSource/sk_jni_network.cpp
-        ${SRC_TR369_CORE} ${SRC_TR369_PROTOBUF} ${SRC_TR369_VENDOR}
+        ${SRC_TR369_CORE} ${SRC_TR369_VENDOR}
 )
 
 include_directories(
         openTr369/core
         openTr369/include
-        openTr369/protobuf-c
         openTr369/vendor
-        openTr369
         skSource
         libs/armeabi-v7a/include
-        libs/armeabi-v7a/include/mosquitto
 )
 
 set(CMAKE_C_FLAGS
         "${CMAKE_C_FLAGS} \
-        -DENABLE_MQTT \
         -DDISABLE_STOMP \
+        -DENABLE_MQTT \
         -DE2ESESSION_EXPERIMENTAL_USP_V_1_2 \
         -DREMOVE_DEVICE_INFO \
         -DREMOVE_DEVICE_TIME \
