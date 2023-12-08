@@ -28,6 +28,7 @@ import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.Device.X_Skyworth.BoxAllowActivity;
 import com.sdt.diagnose.Device.X_Skyworth.BoxControlBean;
+import com.sdt.diagnose.Device.X_Skyworth.FTIMonitor;
 import com.sdt.diagnose.Device.X_Skyworth.LockUnlockActivity;
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogCmd;
 import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogRepository;
@@ -475,7 +476,7 @@ public class SkyworthX {
     private static String remoteSshUrl;
 
     @Tr369Set("Device.X_Skyworth.RemoteSSH.")
-    public Boolean SK_TR369_SetRemoteSSHParams(String path, String value) {
+    public boolean SK_TR369_SetRemoteSSHParams(String path, String value) {
         if (path.contains("Enable")) {
             if ("1".equals(value)) {
                 String serviceUrl = String.format("%s?userId=%s", remoteSshUrl, DeviceInfoUtils.getSerialNumber());
@@ -542,7 +543,7 @@ public class SkyworthX {
     }
 
     @Tr369Set("Device.X_Skyworth.ArrayRecordInterval")
-    public Boolean SK_TR369_SetSystemStatArrayRecordInterval(String path, String value) {
+    public boolean SK_TR369_SetSystemStatArrayRecordInterval(String path, String value) {
         SystemDataStat.setPeriodicMillisTime(value);
         return (DbManager.setDBParam("Device.X_Skyworth.ArrayRecordInterval", value) == 0);
     }
@@ -559,7 +560,15 @@ public class SkyworthX {
 
     @Tr369Get("Device.X_Skyworth.FTI.ResidenceDuration")
     public String SK_TR369_GetFTIResidenceDuration() {
+        // FTI停留时间 (单位: 秒)
         return SystemProperties.get("persist.sys.tr369.FTI.residence.duration", "");
+    }
+
+    @Tr369Set("Device.X_Skyworth.FTI.ResidenceDuration")
+    public boolean SK_TR369_SetFTIResidenceDuration(String path, String value) {
+        SystemProperties.set("persist.sys.tr369.FTI.residence.duration", value);
+        FTIMonitor.updateFTIDurationSpent();
+        return true;
     }
 
     @Tr369Get("Device.X_Skyworth.MaxScreenRecordFileSize")
@@ -568,7 +577,7 @@ public class SkyworthX {
     }
 
     @Tr369Set("Device.X_Skyworth.MaxScreenRecordFileSize")
-    public Boolean SK_TR369_SetMaxUploadFileSize(String path, String value) {
+    public boolean SK_TR369_SetMaxUploadFileSize(String path, String value) {
         long maxFileSize = 10 * 1024 * 1024;
         if (value == null || value.length() == 0 || Long.parseLong(value) <= 0) {
             DbManager.setDBParam("Device.X_Skyworth.MaxScreenRecordFileSize", String.valueOf(maxFileSize));
@@ -603,7 +612,7 @@ public class SkyworthX {
     }
 
     @Tr369Set("Device.X_Skyworth.DreamInfo")
-    public Boolean SK_TR369_SetActiveDream(String path, String caption) {
+    public boolean SK_TR369_SetActiveDream(String path, String caption) {
         DreamBackend mBackend = new DreamBackend(GlobalContext.getContext());
         final DreamBackend.DreamInfo dreamInfo = mDreamInfos.get(caption);
         if (dreamInfo != null) {
@@ -628,7 +637,7 @@ public class SkyworthX {
     }
 
     @Tr369Set("Device.X_Skyworth.DreamTime")
-    public Boolean SK_TR369_SetDreamTime(String path, String ms) {
+    public boolean SK_TR369_SetDreamTime(String path, String ms) {
         return Settings.System.putInt(
                 GlobalContext.getContext().getContentResolver(),
                 SCREEN_OFF_TIMEOUT,
@@ -731,7 +740,7 @@ public class SkyworthX {
     }};
 
     @Tr369Set("Device.X_Skyworth.Sound")
-    public Boolean SK_TR369_SetSound(String path, String mode) {
+    public boolean SK_TR369_SetSound(String path, String mode) {
         return Settings.Global.putInt(GlobalContext.getContext().getContentResolver(),
                 Settings.Global.ENCODED_SURROUND_OUTPUT, sound.indexOf(mode));
     }

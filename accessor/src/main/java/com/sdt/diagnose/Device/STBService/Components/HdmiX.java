@@ -187,7 +187,7 @@ public class HdmiX {
     }
 
     @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.ResolutionValue")
-    public Boolean SK_TR369_SetHdmiResolutionValue(String path, String value) {
+    public boolean SK_TR369_SetHdmiResolutionValue(String path, String value) {
         if (!isHDMIPlugged()) return false;
 
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();

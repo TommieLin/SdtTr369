@@ -266,7 +266,7 @@ public class StorageX {
     }
 
     @Tr369Set("Device.X_Skyworth.Storage.Clear")
-    public Boolean SK_TR369_HandleClearStorageCache(String path, String value) {
+    public boolean SK_TR369_HandleClearStorageCache(String path, String value) {
         if (value == null || value.isEmpty()) return false;
         if (TextUtils.equals(value, "1") || TextUtils.equals(value, "true")) {
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
@@ -281,7 +281,7 @@ public class StorageX {
     }
 
     @Tr369Set("Device.X_Skyworth.Storage.ClearAppsData")
-    public Boolean SK_TR369_HandleClearAppsData(String path, String value) {
+    public boolean SK_TR369_HandleClearAppsData(String path, String value) {
         if (value == null || value.isEmpty()) return false;
 
         try {
@@ -306,7 +306,7 @@ public class StorageX {
     }
 
     @Tr369Set("Device.X_Skyworth.Storage.ClearAppsCache")
-    public Boolean SK_TR369_HandleClearAppsCache(String path, String value) {
+    public boolean SK_TR369_HandleClearAppsCache(String path, String value) {
         if (value == null || value.isEmpty()) return false;
 
         try {

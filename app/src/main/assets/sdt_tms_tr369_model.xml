@@ -469,7 +469,7 @@
                 <schema name="Numbers" getter="diagnose" inform="true" type="int" />
             </schema>
             <schema name="FTI" type="object">
-                <schema name="ResidenceDuration" getter="diagnose" inform="true" type="int" />
+                <schema name="ResidenceDuration" getter="diagnose" inform="true" setter="diagnose" type="int" write="W" />
             </schema>
 
             <schema name="ScreenInUse" getter="diagnose" inform="true" type="int" />
