@@ -48,6 +48,7 @@ import com.sdt.diagnose.common.XshellClient;
 import com.sdt.diagnose.common.bean.NotificationBean;
 import com.sdt.diagnose.common.bean.SpeedTestBean;
 import com.sdt.diagnose.common.bean.StandbyBean;
+import com.sdt.diagnose.common.configuration.Config;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.database.DbManager;
 import com.skyworth.scrrtcsrv.Device;
@@ -843,6 +844,35 @@ public class SkyworthX {
     public String SK_TR369_GetNotificationParams(String path) {
         if (path.contains("Url")) {
             return NotificationBean.getInstance().getUrl();
+        }
+        return "";
+    }
+
+    private static final String CONFIG_DEVICE_BASE_URL = "tms_url";
+    private static final String DEFAULT_DEVICE_BASE_URL = "";
+    private static final String CONFIG_DEVICE_BASE_PORT = "tms_tr369_port";
+    private static final String DEFAULT_DEVICE_BASE_PORT = "";
+
+    @Tr369Get("Device.X_Skyworth.ManagementServer.")
+    public String SK_TR369_GetManagementServerParams(String path) {
+        if (path.contains("Url")) {
+            String base_url = Config.getString(CONFIG_DEVICE_BASE_URL, DEFAULT_DEVICE_BASE_URL);
+            String base_port = Config.getString(CONFIG_DEVICE_BASE_PORT, DEFAULT_DEVICE_BASE_PORT);
+            if (TextUtils.isEmpty(base_url) || TextUtils.isEmpty(base_port)) {
+                return "";
+            } else {
+                return base_url + ":" + base_port;
+            }
+        } else if (path.contains("Hostname")) {
+            String base_url = Config.getString(CONFIG_DEVICE_BASE_URL, DEFAULT_DEVICE_BASE_URL);
+            int index = base_url.indexOf("://");
+            if (index != -1 && index + 3 < base_url.length()) {
+                return base_url.substring(index + 3);
+            } else {
+                return "";
+            }
+        } else if (path.contains("Port")) {
+            return Config.getString(CONFIG_DEVICE_BASE_PORT, DEFAULT_DEVICE_BASE_PORT);
         }
         return "";
     }

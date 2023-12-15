@@ -45,6 +45,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/sysinfo.h>
+#include <ctype.h>
 
 #include "common_defs.h"
 #include "usp_api.h"
@@ -700,11 +701,12 @@ int GetDefaultSerialNumber(char *buf, int len)
 **
 ** ConvertSerialNumberToHex
 **
-** Function to convert a string to a fixed 12-character hexadecimal string
+** Convert the input string to hexadecimal format and store it starting from the end of
+** the hexadecimal string according to the size of the output array.
 **
-** \param   input - pointer to the buffer containing the string to be converted to hexadecimal.
-** \param   output - pointer to output that is used to return the converted hexadecimal result.
-** \param   outputSize = length of output buffer
+** \param   input - pointer to the buffer containing the string to be converted to hexadecimal
+** \param   output - pointer to output that is used to return the converted hexadecimal result
+** \param   outputSize - size of output buffer
 **
 ** \return  None
 **
@@ -719,11 +721,58 @@ void ConvertSerialNumberToHex(const char *input, char *output, size_t outputSize
     {
         snprintf(&hexHash[i * 2], 3, "%02X", hash[i]);
     }
+    hexHash[SHA256_DIGEST_LENGTH * 2] = '\0';
 
-    // Copy the first 12 characters to the output
-    snprintf(output, outputSize, "%.12s", hexHash);
+    // Copy the last characters to the output
+    snprintf(output, outputSize, "%s", hexHash + sizeof(hexHash) - outputSize);
 }
 
+/*********************************************************************//**
+**
+** ExtractDigitsFromSerialNumber
+**
+** Extracts the numbers from the input string and splits the numeric string based on the size of
+** the passed output string.
+**  * If the length of the numeric string is greater than the length of the output string,
+**    the length of the output string is truncated from the end.
+**  * If the length of the numeric string is less than the length of the output string,
+**    the part that is not full length is automatically filled with zeros.
+**
+** \param   input - pointer to the input raw string
+** \param   output - pointer to the output string
+** \param   outputSize - size of output buffer
+**
+** \return  None
+**
+**************************************************************************/
+void ExtractDigitsFromSerialNumber(const char *input, char *output, size_t outputSize)
+{
+    int output_index = 0;
+    char *input_digit = (char *) malloc(strlen(input) + 1);
+    if (input_digit == NULL)
+    {
+        USP_LOG_Error("%s: Pointer to 'input_digit' is null", __FUNCTION__);
+        return;
+    }
+    for (int i = 0; i < strlen(input); i++)
+    {
+        if (isdigit(input[i]))
+        {
+            input_digit[output_index++] = input[i];
+        }
+    }
+    input_digit[output_index] = '\0';
+
+    if (output_index < (outputSize - 1))
+    {
+        snprintf(output, outputSize, "%0*d%s", (outputSize - 1) - output_index, 0, input_digit);
+    }
+    else
+    {
+        snprintf(output, outputSize, "%s", &input_digit[output_index - (outputSize - 1)]);
+    }
+    free(input_digit);
+}
 
 /*********************************************************************//**
 **
@@ -768,13 +817,13 @@ int GetDefaultEndpointID(char *buf, int len, char *oui, char *serial_number)
     USP_LOG_Debug("%s: oui: %s, encoded: %s", __FUNCTION__, oui, oui_encoded);
     USP_LOG_Debug("%s: serial_number: %s, encoded: %s", __FUNCTION__, serial_number, serial_number_encoded);
 
-    // Convert the input string to a 12-character hexadecimal string
-    char serial_number_hex[13]; // 12 characters + null-terminator
-    ConvertSerialNumberToHex(serial_number, serial_number_hex, sizeof(serial_number_hex));
-    USP_LOG_Debug("%s: After serial_number is converted to hex: %s", __FUNCTION__, serial_number_hex);
+    // Trim the input string to a maximum of 12 characters.
+    char serial_number_short[13] = {0}; // Maximum 12 characters + null-terminator
+    ExtractDigitsFromSerialNumber(serial_number_encoded, serial_number_short, sizeof(serial_number_short));
+    USP_LOG_Debug("%s: After extracting the number from serial_number: %s", __FUNCTION__, serial_number_short);
 
     // Form the final endpoint_id
-    USP_SNPRINTF(buf, len, "os::%s-%s", oui_encoded, serial_number_hex);
+    USP_SNPRINTF(buf, len, "os::%s-%s", oui_encoded, serial_number_short);
 
     return USP_ERR_OK;
 }

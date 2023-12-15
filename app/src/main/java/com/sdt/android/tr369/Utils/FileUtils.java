@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.Build;
 import android.os.SystemProperties;
 
+import com.sdt.diagnose.common.log.LogUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,9 +17,8 @@ import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.Set;
 
-public class FileUtil {
-
-    private static final String TAG = "FileUtil";
+public class FileUtils {
+    private static final String TAG = "FileUtils";
     public static final String PLATFORM_TMS_TR369_MODEL_DEFAULT = "sdt_tms_tr369_model.default";
     public static final String PLATFORM_TMS_TR369_MODEL_XML = "sdt_tms_tr369_model.xml";
     public static final String SYS_PROP_TR369_MODE_ISUPDATED = "persist.sys.tr369.mode.isUpdated";
@@ -55,13 +56,13 @@ public class FileUtil {
             outputStream.flush();
             chmod(outFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "copyAssetFile error, " + e.getMessage());
         } finally {
             try {
                 if (outputStream != null) outputStream.close();
                 if (inputStream != null) inputStream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtils.e(TAG, "copyAssetFile finally error, " + e.getMessage());
             }
         }
     }

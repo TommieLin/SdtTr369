@@ -54,6 +54,7 @@
 #include "text_utils.h"
 #include "mqtt.h"
 #include "iso8601.h"
+#include "vendor_api.h"
 
 typedef struct
 {
@@ -91,6 +92,13 @@ static char *endpoint_id_path = "Device.LocalAgent.EndpointID";
 static char *response_topic_path = "Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured";
 static char *short_msg_topic_path = "Device.MQTT.Client.1.Subscription.1.Topic";
 static char *client_id_path = "Device.MQTT.Client.1.ClientID";
+static char *broker_address_path = "Device.MQTT.Client.1.BrokerAddress";
+static char *broker_port_path = "Device.MQTT.Client.1.BrokerPort";
+static char *transport_protocol_path = "Device.MQTT.Client.1.TransportProtocol";
+
+//------------------------------------------------------------------------------
+// String, specify a string containing the MQTT server URL.
+char *mqtt_server_url = NULL;
 
 //------------------------------------------------------------------------------
 // Forward declarations. Note these are not static, because we need them in the symbol table for USP_LOG_Callstack() to show them
@@ -251,52 +259,236 @@ int DEVICE_MQTT_Init(void)
 
 /*********************************************************************//**
 **
-** DEVICE_MQTT_SetDefaults
+** DEVICE_MQTT_SetDefaultsByEndpointId
 **
-** Sets the default values for the database parameters: ResponseTopicConfigured and ClientID
-** NOTE: This can only be performed after vendor hooks have been registered and after any factory reset (if required)
+** Set default values related to EndpointId for database parameters:
+**      1. Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured
+**      2. Device.MQTT.Client.1.ClientID
+**      3. Device.MQTT.Client.1.Subscription.1.Topic (SMS topic)
 **
 ** \param   None
 **
 ** \return  USP_ERR_OK if successful
 **
 **************************************************************************/
-int DEVICE_MQTT_SetDefaults(void)
+int DEVICE_MQTT_SetDefaultsByEndpointId(void)
 {
-    int err;
     char endpoint_id[MAX_DM_SHORT_VALUE_LEN];
     char response_topic[MAX_DM_SHORT_VALUE_LEN];
     char short_msg_topic[MAX_DM_SHORT_VALUE_LEN];
 
     // Get the actual value of EndpointID
     // This may be the value in the USP DB or the default value (if not present in DB)
-    err = DATA_MODEL_GetParameterValue(endpoint_id_path, endpoint_id, sizeof(endpoint_id), 0);
+    int err = DATA_MODEL_GetParameterValue(endpoint_id_path, endpoint_id, sizeof(endpoint_id), 0);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: Unable to get endpoint_id", __FUNCTION__);
         return err;
     }
 
     USP_SNPRINTF(response_topic, sizeof(response_topic), "sdtcpe/agent/resptopic/%s", endpoint_id);
     USP_SNPRINTF(short_msg_topic, sizeof(short_msg_topic), "sdtcpe/agent/shortmsg/%s", endpoint_id);
 
-    // Register the default value of ResponseTopicConfigured
+    // 1. Register the default value of ResponseTopicConfigured
     err = DATA_MODEL_SetParameterInDatabase(response_topic_path, response_topic);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: Unable to set response_topic", __FUNCTION__);
         return err;
     }
 
-    // Register the default value of Subscription.1.Topic
-    err = DATA_MODEL_SetParameterInDatabase(short_msg_topic_path, short_msg_topic);
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
-
-    // Register the default value of ClientID
+    // 2. Register the default value of ClientID
     err = DATA_MODEL_SetParameterInDatabase(client_id_path, endpoint_id);
     if (err != USP_ERR_OK)
     {
+        USP_LOG_Error("%s: Unable to set client_id", __FUNCTION__);
+        return err;
+    }
+
+    // 3. Register the default value of Subscription.1.Topic
+    err = DATA_MODEL_SetParameterInDatabase(short_msg_topic_path, short_msg_topic);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set short_msg_topic", __FUNCTION__);
+        return err;
+    }
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** DEVICE_MQTT_CheckDefaultsExistInDatabase
+**
+** Check whether these parameter values already exist in the database.
+** If they already exist, no further initialization is required.
+**      1. Device.MQTT.Client.1.BrokerAddress
+**      2. Device.MQTT.Client.1.BrokerPort
+**      3. Device.MQTT.Client.1.TransportProtocol
+**
+** \param   None
+**
+** \return  1 - The values already exist;
+**          0 - The value does not exist.
+**
+**************************************************************************/
+int DEVICE_MQTT_CheckDefaultsExistInDatabase(void)
+{
+    char default_value[MAX_DM_SHORT_VALUE_LEN];
+    // Check if the BrokerAddress node value is empty or does not exist.
+    int err = SK_TR369_GetDBParam(broker_address_path, default_value);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to get broker_address value.", __FUNCTION__);
+        return 0;
+    }
+    USP_LOG_Debug("%s: %s is %s", __FUNCTION__, broker_address_path, default_value);
+    if (default_value[0] == '\0')
+    {
+        USP_LOG_Error("%s: broker_address is empty and needs to be initialized.", __FUNCTION__);
+        return 0;
+    }
+
+    // Check if the BrokerPort node value is empty or does not exist.
+    memset(default_value, 0, sizeof(default_value));
+    err = SK_TR369_GetDBParam(broker_port_path, default_value);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to get broker_port value.", __FUNCTION__);
+        return 0;
+    }
+    USP_LOG_Debug("%s: %s is %s", __FUNCTION__, broker_port_path, default_value);
+    if (default_value[0] == '\0')
+    {
+        USP_LOG_Error("%s: broker_port is empty and needs to be initialized.", __FUNCTION__);
+        return 0;
+    }
+
+    // Check if the TransportProtocol node value is empty or does not exist.
+    memset(default_value, 0, sizeof(default_value));
+    err = SK_TR369_GetDBParam(transport_protocol_path, default_value);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to get transport_protocol value.", __FUNCTION__);
+        return 0;
+    }
+    USP_LOG_Debug("%s: %s is %s", __FUNCTION__, transport_protocol_path, default_value);
+    if (default_value[0] == '\0')
+    {
+        USP_LOG_Error("%s: transport_protocol is empty and needs to be initialized.", __FUNCTION__);
+        return 0;
+    }
+
+    return 1;
+}
+
+/*********************************************************************//**
+**
+** DEVICE_MQTT_SetDefaultsByConfigFile
+**
+** Set default values for database parameters related to the configuration file:
+**      1. Device.MQTT.Client.1.BrokerAddress
+**      2. Device.MQTT.Client.1.BrokerPort
+**      3. Device.MQTT.Client.1.TransportProtocol
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int DEVICE_MQTT_SetDefaultsByConfigFile(void)
+{
+    // Check whether the parameter already exists in the database.
+    // If it exists, it will be returned directly without any other operations.
+    if (DEVICE_MQTT_CheckDefaultsExistInDatabase())
+    {
+        USP_LOG_Info("%s: Broker information already exists, no additional operations are required.", __FUNCTION__);
+        return USP_ERR_OK;
+    }
+
+    // Read the global variable of the MQTT server URL
+    if ((mqtt_server_url != NULL) && (*mqtt_server_url != '\0') && (strcmp(mqtt_server_url, "null") != 0))
+    {
+        USP_LOG_Error("%s: Failed to read the MQTT server URL.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Debug("%s: The server URL that needs to be subscribed is %s", __FUNCTION__, mqtt_server_url);
+
+    // Separate the protocol, address, and port from the url
+    char *protocol_ptr = strstr(mqtt_server_url, "://");
+    if (protocol_ptr == NULL)
+    {
+        USP_LOG_Error("%s: The URL format is incorrect and the protocol cannot be extracted.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // Calculate the extracted protocol length.
+    size_t protocol_length = protocol_ptr - mqtt_server_url;
+
+    // Declare and initialize the string storing the protocol.
+    char protocol[protocol_length + 1];
+    strncpy(protocol, mqtt_server_url, protocol_length);
+    protocol[protocol_length] = '\0';
+    USP_LOG_Debug("%s: The parsed protocol is %s", __FUNCTION__, protocol);
+
+    // Move the pointer to the beginning of the address.
+    char *address_ptr = protocol_ptr + 3; // Skip "://"
+
+    // Look for the ":" position, which marks the separation of address and port.
+    char *port_separator_ptr = strchr(address_ptr, ':');
+    if (port_separator_ptr == NULL)
+    {
+        USP_LOG_Error("%s: The URL format is incorrect and the address and port cannot be extracted.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+
+    // Calculate the extracted address length.
+    size_t address_length = port_separator_ptr - address_ptr;
+
+    // Declare and initialize the string storing the address.
+    char address[address_length + 1];
+    strncpy(address, address_ptr, address_length);
+    address[address_length] = '\0';
+    USP_LOG_Debug("%s: The parsed address is %s", __FUNCTION__, address);
+
+    // Extract the port number and print it.
+    char port[7]; // Assume the port number is at most 6 digits.
+    strcpy(port, port_separator_ptr + 1);
+    USP_LOG_Debug("%s: The parsed port is %s", __FUNCTION__, port);
+
+    // 1. Register the default value of BrokerAddress
+    int err = DATA_MODEL_SetParameterInDatabase(broker_address_path, address);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set broker_address", __FUNCTION__);
+        return err;
+    }
+
+    // 2. Register the default value of BrokerPort
+    err = DATA_MODEL_SetParameterInDatabase(broker_port_path, port);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set broker_port", __FUNCTION__);
+        return err;
+    }
+
+    // 3. Register the default value of TransportProtocol
+    if (strcasecmp(protocol, "tcp") == 0)
+    {
+        err = DATA_MODEL_SetParameterInDatabase(transport_protocol_path, "TCP/IP");
+    }
+    else if (strcasecmp(protocol, "ssl") == 0)
+    {
+        err = DATA_MODEL_SetParameterInDatabase(transport_protocol_path, "TLS");
+    }
+    else
+    {
+        USP_LOG_Error("%s: This protocol format (%s) is not recognized.", __FUNCTION__, protocol);
+        err = USP_ERR_INTERNAL_ERROR;
+    }
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set transport_protocol", __FUNCTION__);
         return err;
     }
 

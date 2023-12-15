@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.sdt.annotations.Tr369Set;
+import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.ScreenRecordActivity;
@@ -388,7 +389,7 @@ public class Event {
             con.setHostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {
-                    String val = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Hostname");
+                    String val = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Hostname");
                     return val.isEmpty() || hostname.equals(val);
                 }
             });

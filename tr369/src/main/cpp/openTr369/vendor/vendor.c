@@ -516,7 +516,6 @@ int SK_TR369_ParseModelFile(void)
     return USP_ERR_OK;
 }
 
-
 /*********************************************************************//**
 **
 ** VENDOR_Init
@@ -537,11 +536,6 @@ int VENDOR_Init(void)
 
     return USP_ERR_OK;
 }
-
-#define CONFIG_FILE_PATH_DEFAULT            "/vendor/etc/skyconfig/config.properties"
-#define CONFIG_TMS_URL                      "tms_url"
-#define CONFIG_TMS_TR369_PORT               "tms_tr369_port"
-#define MAX_LINE_LENGTH                     128
 
 /*********************************************************************//**
 **
@@ -586,111 +580,6 @@ void trim(char *str)
 
 /*********************************************************************//**
 **
-** SK_TR369_SetDefaultServerUrl
-**
-** The interface used to set the default values for the "Device.X_Skyworth.ManagementServer." node.
-**
-** Read configuration information from the "/vendor/etc/skyconfig/config.properties" file.
-**
-** 1. Device.X_Skyworth.ManagementServer.Url: The value of the "tms_url" configuration item.
-** 2. Device.X_Skyworth.ManagementServer.Port: The value of the "tms_tr369_port" configuration item.
-** 3. Device.X_Skyworth.ManagementServer.Hostname: The host name section parsed from "tms_url".
-**
-** \param   None
-**
-** \return  USP_ERR_OK if successful
-**
-**************************************************************************/
-int SK_TR369_SetDefaultServerUrl(void)
-{
-    FILE *input_file;
-    int err = USP_ERR_OK;
-    char *config_url = NULL;
-
-    // 检查数据库中是否已经存在数据
-    char buf[MAX_LINE_LENGTH] = {0};
-    SK_TR369_GetDBParam("Device.X_Skyworth.ManagementServer.Url", buf);
-    if (buf[0] != '\0')
-    {
-        USP_LOG_Debug("%s: There is no need to set URL(%s) defaults anymore.", __FUNCTION__, buf);
-        return err;
-    }
-
-    input_file = fopen(CONFIG_FILE_PATH_DEFAULT, "r");
-    if (input_file == NULL)
-    {
-        USP_LOG_Error("%s: Failed to open factory reset file (%s)", __FUNCTION__, CONFIG_FILE_PATH_DEFAULT);
-        return USP_ERR_INTERNAL_ERROR;
-    }
-
-    char tms_url[MAX_LINE_LENGTH] = {0};
-    char tms_tr369_port[MAX_LINE_LENGTH] = {0};
-
-    while (!feof(input_file))
-    {
-        char line[MAX_LINE_LENGTH];
-        if (fgets(line, MAX_LINE_LENGTH, input_file) != NULL)
-        {
-            if (strncmp(
-                    line,
-                    CONFIG_TMS_URL"=",
-                    strlen(CONFIG_TMS_URL) + 1) == 0)
-            {
-                strncpy(tms_url, line + strlen(CONFIG_TMS_URL) + 1, MAX_LINE_LENGTH - 1);
-                trim(tms_url);
-            }
-            else if (strncmp(
-                    line,
-                    CONFIG_TMS_TR369_PORT"=",
-                    strlen(CONFIG_TMS_TR369_PORT) + 1) == 0)
-            {
-                strncpy(tms_tr369_port, line + strlen(CONFIG_TMS_TR369_PORT) + 1,
-                        MAX_LINE_LENGTH - 1);
-                trim(tms_tr369_port);
-            }
-        }
-    }
-    fclose(input_file);
-
-    if (strlen(tms_url) * strlen(tms_tr369_port) == 0)
-    {
-        USP_LOG_Error("%s: Length of configuration variable is 0. Url(%d), Port(%d)",
-                __FUNCTION__, strlen(tms_url), strlen(tms_tr369_port));
-        return USP_ERR_INTERNAL_ERROR;
-    }
-
-    char *tms_tr369_hostname = strstr(tms_url, "://");
-    if (tms_tr369_hostname == NULL)
-    {
-        USP_LOG_Error("%s: The URL(%s) is illegal and cannot obtain the host name.", __FUNCTION__, tms_url);
-        return USP_ERR_INTERNAL_ERROR;
-    }
-    tms_tr369_hostname += 3;
-
-    unsigned int url_len = strlen(tms_url) + strlen(tms_tr369_port) + 1;
-    config_url = (char *)malloc(url_len + 1);
-    if (config_url == NULL)
-    {
-        USP_LOG_Error("%s: malloc() execution failed.", __FUNCTION__);
-        return USP_ERR_SK_MALLOC_FAILURE;
-    }
-
-    sprintf(config_url, "%s:%s", tms_url, tms_tr369_port);
-    config_url[url_len] = '\0';
-
-    SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Url", config_url);
-    SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Hostname", tms_tr369_hostname);
-    SK_TR369_SetDBParam("Device.X_Skyworth.ManagementServer.Port", tms_tr369_port);
-    USP_LOG_Debug("%s: The default value setting result: Url: %s, Hostname: %s, Port: %s",
-            __FUNCTION__, config_url, tms_tr369_hostname, tms_tr369_port);
-
-    free(config_url);
-
-    return err;
-}
-
-/*********************************************************************//**
-**
 ** VENDOR_Start
 **
 ** Called after data model has been registered and after instance numbers have been read from the USP database
@@ -706,8 +595,6 @@ int VENDOR_Start(void)
 {
     // 设置默认MultiObject类型的节点
     SK_TR369_SetDefaultMultiObject();
-    // 设置Device.X_Skyworth.ManagementServer.节点的默认值
-    SK_TR369_SetDefaultServerUrl();
 
     return USP_ERR_OK;
 }

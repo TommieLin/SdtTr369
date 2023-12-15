@@ -12,6 +12,7 @@ import android.os.Message;
 
 import androidx.annotation.NonNull;
 
+import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.AppUpgradeResponseBean;
 import com.sdt.diagnose.common.log.LogUtils;
@@ -49,7 +50,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     private static final int DEFAULT_REQUEST_RETRY_DELAY = 10 * 1000;
 
     private static int mRetryCount = 0;
-    private static final int MSG_REQUEST_RETRY = 3308;
+    private static final int MSG_REQUEST_RETRY = 3309;
     private static boolean isRequestSuccess = false;
     private static boolean isClearNeeded = false;
 
@@ -94,7 +95,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         HashMap<String, String> hashMap = requestBean.toHashMap();
         LogUtils.d(TAG, "execute POST download request, params: " + hashMap);
 
-        String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
+        String url = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Url");
         if (!url.isEmpty()) {
             HttpsUtils.noticeResponse(url + URL_DOWNLOAD_RESULT_REPORT, hashMap);
         } else {
@@ -108,7 +109,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         HashMap<String, String> hashMap = requestBean.toHashMap();
         LogUtils.d(TAG, "execute POST install request, params: " + hashMap);
 
-        String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
+        String url = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Url");
         if (url.isEmpty()) {
             LogUtils.e(TAG, "The URL of the install result report is illegal");
             return;
@@ -143,7 +144,7 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
         final HashMap<String, String> hashMap = AppUpgradeResponseBean.getResponseDBParams();
         LogUtils.d(TAG, "execute POST install request, params: " + hashMap);
 
-        String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
+        String url = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Url");
         if (url.isEmpty()) {
             LogUtils.e(TAG, "The URL of the install result report is illegal");
             return;

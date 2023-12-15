@@ -173,7 +173,7 @@ public class ShellUtils {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "execCommand error, " + e.getMessage());
         } finally {
             try {
                 if (os != null) {
@@ -195,7 +195,7 @@ public class ShellUtils {
                     fos.close();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtils.e(TAG, "execCommand finally error, " + e.getMessage());
             }
 
             if (process != null) {

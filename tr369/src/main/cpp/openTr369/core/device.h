@@ -241,7 +241,8 @@ int DEVICE_SELF_TEST_Init(void);
 #endif
 
 int DEVICE_MQTT_Init(void);
-int DEVICE_MQTT_SetDefaults(void);
+int DEVICE_MQTT_SetDefaultsByEndpointId(void);
+int DEVICE_MQTT_SetDefaultsByConfigFile(void);
 int DEVICE_MQTT_Start(void);
 void DEVICE_MQTT_Stop(void);
 int DEVICE_MQTT_StartAllClients(void);
@@ -268,9 +269,12 @@ extern const enum_entry_t mqtt_protocol[kMqttProtocol_Max];
 extern char *device_req_root;
 
 //-----------------------------------------------------------------------------------------------
-// Global variables set by command line
+// Global variables initialized through the Java layer.
 extern char *auth_cert_file;
 extern char *usp_trust_store_file;
+extern char *auth_cert_str;
+extern char *auth_key_str;
+extern char *usp_trust_store_str;
 
 //-----------------------------------------------------------------------------------------------
 /*

@@ -12,6 +12,7 @@ import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -22,6 +23,7 @@ import java.util.List;
  * 上报wln0，eth0接口的信息
  */
 public class InterfaceX {
+    private static final String TAG = "InterfaceX";
     private final static String REFIX = "Device.IP.Interface.";
     private final static String REGEX = "\\.";
     private final String[] interfaces = {"wlan0", "eth0"};
@@ -138,7 +140,7 @@ public class InterfaceX {
                 return "Loopback";
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "getType error, " + e.getMessage());
         }
         return "Normal";
     }
@@ -151,7 +153,7 @@ public class InterfaceX {
                 return String.valueOf(mtu);
             }
         } catch (SocketException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "getMaxMTUSize error, " + e.getMessage());
         }
         return String.valueOf(-1);
     }
@@ -211,7 +213,7 @@ public class InterfaceX {
             try {
                 return nif.isUp() ? "Enabled" : "Disabled";
             } catch (SocketException e) {
-                e.printStackTrace();
+                LogUtils.e(TAG, "getIPv4Status error, " + e.getMessage());
             }
         }
         return "Error";

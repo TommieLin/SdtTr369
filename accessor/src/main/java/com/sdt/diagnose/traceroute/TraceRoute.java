@@ -61,14 +61,14 @@ public class TraceRoute {
     private TraceRouteContainer latestTrace;
     ExecutePingAsyncTask pingAsyncTask = null;
     private ExecutorService mExecutorService = null;
-    private static final int MSG_TIME_OUT = 3309;
+    private static final int MSG_TIME_OUT = 3310;
     private CountDownLatch lock;
 
     private boolean await(long timeout) {
         try {
             return lock.await(timeout, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "await error, " + e.getMessage());
         }
         return false;
     }

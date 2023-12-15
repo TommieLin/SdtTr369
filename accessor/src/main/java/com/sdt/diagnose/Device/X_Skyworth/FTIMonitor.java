@@ -25,7 +25,7 @@ public class FTIMonitor {
     private final HandlerThread mThread;
     private static long mTimeSpent = 0;  // 之前已度过的时间（用于还在FTI阶段但重启后，需要接着上次的时间）
     private static long mCycles = 0; // 监控循环的次数
-    private static final int MSG_START_MONITOR_FTI_DURATION = 3303;
+    private static final int MSG_START_MONITOR_FTI_DURATION = 3304;
     private static final int DEFAULT_PERIOD_SECOND_TIME = 30;    // 默认30s监控一次
 
     public FTIMonitor() {

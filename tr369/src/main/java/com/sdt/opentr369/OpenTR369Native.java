@@ -89,8 +89,14 @@ public class OpenTR369Native {
 
     public static native String stringFromJNI();
     public static native int OpenTR369Init(String path);
-    public static native int SetInitFilePath(String default_path);
-    public static native String GetDefaultFilePath();
+    public static native int SetDefaultModelPath(String default_path);
+    public static native String GetDefaultModelPath();
+    public static native int SetMqttServerUrl(String mqttServer);
+    public static native int SetMqttCaCertContext(String caCertContext);
+    public static native int SetMqttClientPrivateKey(String clientPrivateKey);
+    public static native int SetMqttClientCertContext(String clientCertContext);
+    public static native void SetUspLogLevel(int level);
+    public static native int GetUspLogLevel();
     public static native String GetDBParam(String path);
     public static native int SetDBParam(String path, String value);
     public static native int AddMultiObject(String path, int num);

@@ -217,39 +217,39 @@ public class DreamBackend {
     }
 
     public boolean isEnabled() {
-        return getBoolean(Settings.Secure.SCREENSAVER_ENABLED, mDreamsEnabledByDefault);
+        return getSettingsSecureBoolean(Settings.Secure.SCREENSAVER_ENABLED, mDreamsEnabledByDefault);
     }
 
     public void setEnabled(boolean value) {
         logd("setEnabled(%s)", value);
-        setBoolean(Settings.Secure.SCREENSAVER_ENABLED, value);
+        setSettingsSecureBoolean(Settings.Secure.SCREENSAVER_ENABLED, value);
     }
 
     public boolean isActivatedOnDock() {
-        return getBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
+        return getSettingsSecureBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
                 mDreamsActivatedOnDockByDefault);
     }
 
     public void setActivatedOnDock(boolean value) {
         logd("setActivatedOnDock(%s)", value);
-        setBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, value);
+        setSettingsSecureBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK, value);
     }
 
     public boolean isActivatedOnSleep() {
-        return getBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+        return getSettingsSecureBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
                 mDreamsActivatedOnSleepByDefault);
     }
 
     public void setActivatedOnSleep(boolean value) {
         logd("setActivatedOnSleep(%s)", value);
-        setBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, value);
+        setSettingsSecureBoolean(Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, value);
     }
 
-    private boolean getBoolean(String key, boolean def) {
+    private boolean getSettingsSecureBoolean(String key, boolean def) {
         return Settings.Secure.getInt(mContext.getContentResolver(), key, def ? 1 : 0) == 1;
     }
 
-    private void setBoolean(String key, boolean value) {
+    private void setSettingsSecureBoolean(String key, boolean value) {
         Settings.Secure.putInt(mContext.getContentResolver(), key, value ? 1 : 0);
     }
 

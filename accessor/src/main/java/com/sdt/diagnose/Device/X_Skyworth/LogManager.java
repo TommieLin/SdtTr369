@@ -41,7 +41,7 @@ public class LogManager {
     String[] cmds = new String[]{"logcat"};
     public static LogThread mLogThread;
 
-    private static final int MSG_START_REALTIME_LOG = 3307;
+    private static final int MSG_START_REALTIME_LOG = 3308;
 
     public void init() {
         handlerThread = new HandlerThread("setFlag");

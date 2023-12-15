@@ -48,7 +48,7 @@ public class ScanWifiInfosManager extends AbstractCachedArray<ScanedWifiInfo> {
         try {
             Thread.sleep(6000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "buildList error, " + e.getMessage());
         }
 
         fetchScansAndConfigs(context, mWifiManager);

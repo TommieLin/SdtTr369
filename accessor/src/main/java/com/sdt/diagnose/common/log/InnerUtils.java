@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import java.lang.reflect.InvocationTargetException;
 
 public class InnerUtils {
+    private static final String TAG = "InnerUtils";
 
     @SuppressLint("StaticFieldLeak")
     private static Application sApplication;
@@ -44,7 +45,7 @@ public class InnerUtils {
             PackageInfo pi = pm.getPackageInfo(packageName, 0);
             return pi == null ? null : pi.applicationInfo.loadLabel(pm).toString();
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "getAppName error, " + e.getMessage());
             return "";
         }
     }
@@ -71,7 +72,7 @@ public class InnerUtils {
             ApplicationInfo ai = pm.getApplicationInfo(packageName, 0);
             return ai != null && (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "isAppDebug error, " + e.getMessage());
             return false;
         }
     }
@@ -88,7 +89,7 @@ public class InnerUtils {
             return (Application) app;
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException |
                  ClassNotFoundException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "getApplicationByReflect error, " + e.getMessage());
         }
         throw new NullPointerException("u should init first");
     }

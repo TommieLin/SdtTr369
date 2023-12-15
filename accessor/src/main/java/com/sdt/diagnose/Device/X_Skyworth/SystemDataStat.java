@@ -56,7 +56,7 @@ public class SystemDataStat {
     private static int mPeriodicMillisTime = 0;
     private static final int MAX_CACHE_NUM = 144;   // 最大储存量
     private static int CUR_CACHE_NUM = 0;
-    private static final int MSG_START_SYSTEM_DATA_STAT = 3304;
+    private static final int MSG_START_SYSTEM_DATA_STAT = 3305;
     private static final int DEFAULT_PERIOD_MILLIS_TIME = 600000;   // 默认十分钟统计一次
     private static List<JSONObject> mDataStatListMap;
     private long lastRxTotal = 0;

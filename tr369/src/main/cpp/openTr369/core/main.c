@@ -341,7 +341,52 @@ exit:
 
 /*********************************************************************//**
 **
-** SK_TR369_SetInitFilePath
+** SK_TR369_SetUspLogLevel
+**
+** Set the minimum level allowed for USP log printing.
+**
+** \param   level - Log level: kLogLevel_Error(1) ~ kLogLevel_Debug(4) means different printing levels.
+**                  kLogLevel_Off(0) means turning off printing,
+**                  kLogLevel_Max means turning on all printing.
+**
+** \return  None
+**
+**************************************************************************/
+void SK_TR369_SetUspLogLevel(int level)
+{
+    if (level <= kLogLevel_Off)
+    {
+        usp_log_level = kLogLevel_Off;
+    }
+    else if (level >= kLogLevel_Max)
+    {
+        usp_log_level = kLogLevel_Max;
+    }
+    else
+    {
+        usp_log_level = level;
+    }
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_GetUspLogLevel
+**
+** Get the Verbosity level printed by the current USP log.
+**
+** \param   None
+**
+** \return  The log level.
+**
+**************************************************************************/
+int SK_TR369_GetUspLogLevel()
+{
+    return usp_log_level;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetDefaultModelPath
 **
 ** Set the storage path of the default value configuration file.
 ** The default path is: /data/user/0/com.sdt.android.tr369/sdt_tms_tr369_model.default
@@ -351,7 +396,7 @@ exit:
 ** \return  USP_ERR_OK if successful
 **
 **************************************************************************/
-int SK_TR369_SetInitFilePath(const char *const default_path)
+int SK_TR369_SetDefaultModelPath(const char *const default_path)
 {
     // 初始化Model默认值文件路径
     if (sk_tr369_model_default != NULL)
@@ -375,7 +420,7 @@ int SK_TR369_SetInitFilePath(const char *const default_path)
 
 /*********************************************************************//**
 **
-** SK_TR369_GetDefaultFilePath
+** SK_TR369_GetDefaultModelPath
 **
 ** Get the storage path of the default value configuration file.
 ** The default path is: /data/user/0/com.sdt.android.tr369/sdt_tms_tr369_model.default
@@ -385,9 +430,137 @@ int SK_TR369_SetInitFilePath(const char *const default_path)
 ** \return  Pointer to the configuration file path.
 **
 **************************************************************************/
-char *SK_TR369_GetDefaultFilePath()
+char *SK_TR369_GetDefaultModelPath()
 {
     return sk_tr369_model_default;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetMqttServerUrl
+**
+** Set the MQTT server URL.
+**
+** \param   mqtt_server - Pointer to the MQTT server URL
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttServerUrl(const char *const mqtt_server)
+{
+    if (mqtt_server_url != NULL)
+    {
+        free(mqtt_server_url);
+        mqtt_server_url = NULL;
+    }
+
+    unsigned int len = strlen(mqtt_server);
+    mqtt_server_url = (char *) malloc(len + 1);
+    if (mqtt_server_url == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(mqtt_server_url, mqtt_server, len);
+    mqtt_server_url[len] = '\0';
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetMqttCaCertContext
+**
+** Set the CA certificate.
+**
+** \param   ca_cert_context - Pointer to the CA certificate
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttCaCertContext(const char *const ca_cert_context)
+{
+    if (usp_trust_store_str != NULL)
+    {
+        free(usp_trust_store_str);
+        usp_trust_store_str = NULL;
+    }
+
+    unsigned int len = strlen(ca_cert_context);
+    usp_trust_store_str = (char *) malloc(len + 1);
+    if (usp_trust_store_str == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(usp_trust_store_str, ca_cert_context, len);
+    usp_trust_store_str[len] = '\0';
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetMqttClientPrivateKey
+**
+** Set the MQTT client Private Key.
+**
+** \param   client_private_key - Pointer to the client's Private Key
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttClientPrivateKey(const char *const client_private_key)
+{
+    if (auth_key_str != NULL)
+    {
+        free(auth_key_str);
+        auth_key_str = NULL;
+    }
+
+    unsigned int len = strlen(client_private_key);
+    auth_key_str = (char *) malloc(len + 1);
+    if (auth_key_str == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(auth_key_str, client_private_key, len);
+    auth_key_str[len] = '\0';
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetMqttClientCertContext
+**
+** Set the MQTT client certificate.
+**
+** \param   client_cert_context - Pointer to the client certificate context
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttClientCertContext(const char *const client_cert_context)
+{
+    if (auth_cert_str != NULL)
+    {
+        free(auth_cert_str);
+        auth_cert_str = NULL;
+    }
+
+    unsigned int len = strlen(client_cert_context);
+    auth_cert_str = (char *) malloc(len + 1);
+    if (auth_cert_str == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(auth_cert_str, client_cert_context, len);
+    auth_cert_str[len] = '\0';
+
+    return USP_ERR_OK;
 }
 
 /*********************************************************************//**
@@ -409,12 +582,6 @@ int SK_TR369_Start(const char *const model_path)
 
     // Verbosity level
     usp_log_level = kLogLevel_Debug;
-
-    // Set the location of the file containing trust store certificates
-    usp_trust_store_file = "/vendor/etc/security/certs/ca.pem";
-
-    // Set the location of the client certificate file to use
-    auth_cert_file = "/vendor/etc/security/certs/client.pem";
 
     // Determine a handle for the data model thread (this thread)
     OS_UTILS_SetDataModelThread();
@@ -515,7 +682,7 @@ int SK_TR369_Start(const char *const model_path)
 
 exit:
     // If the code gets here, an error occurred
-    USP_LOG_Error("USP Agent aborted unexpectedly");
+    USP_LOG_Error("USP Agent terminated abnormally.");
     return err;
 }
 
@@ -622,6 +789,50 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
 
 /*********************************************************************//**
 **
+** SK_TR369_Stop
+**
+** Frees all memory created by Skyworth.
+**
+** \param   None
+**
+** \return  None
+**
+**************************************************************************/
+void SK_TR369_Stop()
+{
+    if (sk_tr369_model_default != NULL)
+    {
+        free(sk_tr369_model_default);
+        sk_tr369_model_default = NULL;
+    }
+
+    if (mqtt_server_url != NULL)
+    {
+        free(mqtt_server_url);
+        mqtt_server_url = NULL;
+    }
+
+    if (usp_trust_store_str != NULL)
+    {
+        free(usp_trust_store_str);
+        usp_trust_store_str = NULL;
+    }
+
+    if (auth_key_str != NULL)
+    {
+        free(auth_key_str);
+        auth_key_str = NULL;
+    }
+
+    if (auth_cert_str != NULL)
+    {
+        free(auth_cert_str);
+        auth_cert_str = NULL;
+    }
+}
+
+/*********************************************************************//**
+**
 ** MAIN_Stop
 **
 ** Frees all memory and closes all sockets and file handles
@@ -629,11 +840,13 @@ int MAIN_Start(char *db_file, bool enable_mem_info)
 **
 ** \param   None
 **
-** \return  USP_ERR_OK if successful
+** \return  None
 **
 **************************************************************************/
 void MAIN_Stop(void)
 {
+    // Free all memory used by Skyworth
+    SK_TR369_Stop();
     // Free all memory used by USP Agent
     DM_EXEC_Destroy();
     curl_global_cleanup();

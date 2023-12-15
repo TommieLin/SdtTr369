@@ -10,7 +10,7 @@ import androidx.annotation.RequiresApi;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.diagnose.Device.Wifi.NeighboringWiFiDiagnostic.Result;
-import com.sdt.diagnose.Device.X_Skyworth.SkyworthXManager;
+import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.ProtocolPathUtils;
@@ -197,7 +197,7 @@ public class EndPointX {
             case "Retransmissions":
                 return "0";
             case "X_SKYW_SNR":
-                return SkyworthXManager.getInstance().getWiFiRFSNR();
+                return String.valueOf(SystemDataStat.getWifiSNR("wlan0"));
             default:
                 break;
         }

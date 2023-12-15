@@ -50,7 +50,7 @@ public class LogRepository {
     private static volatile LogRepository sLogRepository;
     private final Handler mHandler;
     private final HandlerThread mThread;
-    private final int MSG_START_SPLIT_LOG_FILE = 3306;
+    private final int MSG_START_SPLIT_LOG_FILE = 3307;
     private int mPeriodicMillisTime = 0;
     private final int DEFAULT_PERIOD_MILLIS_TIME = 1800000;   // 默认三十分钟统计一次
     private boolean isAllowAutoUpload = false;

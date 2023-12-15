@@ -106,7 +106,20 @@ public class HttpsUtils {
     public static void requestAppUpgradeStatus(String url, HashMap<String, String> param, Callback callback) {
         OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
         String wholeUrl = buildUrl(url, param);
+        LogUtils.d(TAG, "requestAppUpgradeStatus wholeUrl: " + wholeUrl);
         Request request = new Request.Builder()
+                .url(wholeUrl)
+                .get()
+                .build();
+        okHttpClient.newCall(request).enqueue(callback);
+    }
+
+    public static void requestMqttServerConfigs(String url, String token, HashMap<String, String> param, Callback callback) {
+        OkHttpClient okHttpClient = mCreateSSL.getCheckedOkHttpClient();
+        String wholeUrl = buildUrl(url, param);
+        LogUtils.d(TAG, "requestMqttServerConfigs wholeUrl: " + wholeUrl);
+        Request request = new Request.Builder()
+                .header("X-Auth-Token", token)
                 .url(wholeUrl)
                 .get()
                 .build();

@@ -30,6 +30,7 @@ import androidx.core.text.BidiFormatter;
 import androidx.core.text.TextDirectionHeuristicsCompat;
 
 import com.android.internal.app.LocalePicker;
+import com.sdt.diagnose.common.configuration.Config;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
@@ -50,46 +51,21 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DeviceInfoUtils {
     private static final String TAG = "DeviceInfoUtils";
-    private static final String CONFIG_FILE_PATH_DEFAULT = "/vendor/etc/skyconfig/config.properties";
     private static final String CONFIG_DEVICE_OPERATOR = "tms_operator_name";
+    private static final String DEFAULT_DEVICE_OPERATOR = "";
 
     public static String getDeviceName(Context context) {
         return Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
     }
 
     public static String getOperatorName() {
-        InputStream is;
-        BufferedReader reader;
-        String line = null;
-        String operatorName = "platform";
-
-        try {
-            int pos = -1;
-            is = Files.newInputStream(Paths.get(CONFIG_FILE_PATH_DEFAULT));
-            reader = new BufferedReader(new InputStreamReader(is));
-            line = reader.readLine();
-            while (line != null) {
-                pos = line.indexOf(CONFIG_DEVICE_OPERATOR);
-                if (pos >= 0) {
-                    LogUtils.d(TAG, "Read configuration file data: " + line);
-                    break;
-                }
-                line = reader.readLine();
-            }
-            reader.close();
-            is.close();
-
-            if (pos >= 0) {
-                operatorName = line.substring(pos + CONFIG_DEVICE_OPERATOR.length() + 1);
-                LogUtils.d(TAG, "operatorName: " + operatorName);
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "getOperatorName error: " + e.getMessage());
-        }
-
+        String operatorName = Config.getString(CONFIG_DEVICE_OPERATOR, DEFAULT_DEVICE_OPERATOR);
+        LogUtils.d(TAG, "getOperatorName: " + operatorName);
         return operatorName;
     }
 
@@ -99,6 +75,51 @@ public class DeviceInfoUtils {
 
     public static String getSerialNumber() {
         return Build.getSerial();
+    }
+
+    public static String extractNumbers(String input, int desiredLength) {
+        // 定义正则表达式匹配数字
+        String regex = "\\d+";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(input);
+
+        // 使用StringBuilder来构建结果字符串
+        StringBuilder result = new StringBuilder();
+
+        // 找到匹配的数字并追加到结果字符串中
+        while (matcher.find()) {
+            result.append(matcher.group());
+        }
+
+        // 根据指定长度进行处理
+        return adjustLength(result.toString(), desiredLength);
+    }
+
+    private static String adjustLength(String input, int desiredLength) {
+        int inputLength = input.length();
+
+        // 如果长度不足，前面补0
+        if (inputLength < desiredLength) {
+            StringBuilder zeros = new StringBuilder();
+            for (int i = 0; i < desiredLength - inputLength; i++) {
+                zeros.append("0");
+            }
+            return zeros + input;
+        }
+        // 如果长度超过，只取末尾的指定长度
+        else if (inputLength > desiredLength) {
+            return input.substring(inputLength - desiredLength);
+        }
+        // 如果长度正好，直接返回
+        else {
+            return input;
+        }
+    }
+
+    public static String getUspAgentID() {
+        String sn = extractNumbers(getSerialNumber(), 12);
+        LogUtils.d(TAG, "getUspAgentID: " + sn);
+        return "os::309176-" + sn;
     }
 
     /**

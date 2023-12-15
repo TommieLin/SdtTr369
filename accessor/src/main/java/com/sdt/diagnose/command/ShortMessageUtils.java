@@ -23,6 +23,7 @@ import android.view.KeyEvent;
 
 import com.google.gson.Gson;
 import com.sdt.accessor.R;
+import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.bean.ShortMessageBean;
@@ -134,7 +135,7 @@ public class ShortMessageUtils {
         HashMap<String, String> params = new HashMap<>();
         params.put("deviceId", DeviceInfoUtils.getSerialNumber());
         params.put("messageId", id);
-        String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
+        String url = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Url");
         if (!url.isEmpty()) {
             HttpsUtils.noticeResponse(url + "/tr369/message/sendResult", params);
         } else {

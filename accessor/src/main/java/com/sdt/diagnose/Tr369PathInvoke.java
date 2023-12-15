@@ -93,7 +93,7 @@ public class Tr369PathInvoke {
                             value.mObject.getClass().getDeclaredMethod(
                                     value.mProperty.mMethodName, String.class, String.class);
                 } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
+                    LogUtils.e(TAG, "createMap error, " + e.getMessage());
                     continue;
                 }
             }

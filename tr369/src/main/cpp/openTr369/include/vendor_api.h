@@ -58,6 +58,8 @@ int VENDOR_Stop(void);
 int SK_TR369_InitCustomEvent(void);
 int SK_TR369_SetDefaultMultiObject(void);
 
+int SK_TR369_ParseConfigParams(const char *, char *, int);
+
 #ifdef INCLUDE_PROGRAMMATIC_FACTORY_RESET
 int VENDOR_GetFactoryResetParams(kv_vector_t *kvv);
 #endif

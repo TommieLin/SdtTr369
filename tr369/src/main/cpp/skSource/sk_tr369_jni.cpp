@@ -213,7 +213,7 @@ static void SK_TR369_JniConfig(JNIEnv *env) {
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_sdt_opentr369_OpenTR369Native_stringFromJNI(JNIEnv *env, jclass thiz) {
-    return env->NewStringUTF("Hello Test NDK !");
+    return env->NewStringUTF("USP Agent terminated abnormally.");
 }
 
 extern "C" JNIEXPORT jint JNICALL
@@ -234,21 +234,79 @@ Java_com_sdt_opentr369_OpenTR369Native_OpenTR369Init(JNIEnv *env, jclass clazz,
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_sdt_opentr369_OpenTR369Native_SetInitFilePath(JNIEnv *env, jclass clazz,
+Java_com_sdt_opentr369_OpenTR369Native_SetDefaultModelPath(JNIEnv *env, jclass clazz,
                                                        const jstring default_path) {
     const char *const defaultFilePath = env->GetStringUTFChars(default_path, nullptr);
-    int ret = SK_TR369_SetInitFilePath(defaultFilePath);
+    int ret = SK_TR369_SetDefaultModelPath(defaultFilePath);
     env->ReleaseStringUTFChars(default_path, defaultFilePath);
     return ret;
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_sdt_opentr369_OpenTR369Native_GetDefaultFilePath(JNIEnv *env, jclass clazz) {
-    char *filePath = SK_TR369_GetDefaultFilePath();
+Java_com_sdt_opentr369_OpenTR369Native_GetDefaultModelPath(JNIEnv *env, jclass clazz) {
+    char *filePath = SK_TR369_GetDefaultModelPath();
     if (filePath != nullptr) {
         return env->NewStringUTF(filePath);
     }
     return env->NewStringUTF("");
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttServerUrl(JNIEnv *env, jclass clazz,
+                                                        jstring mqtt_server) {
+    // TODO: implement SetMqttServerUrl()
+    const char *const mqttServer = env->GetStringUTFChars(mqtt_server, nullptr);
+    int ret = SK_TR369_SetMqttServerUrl(mqttServer);
+    env->ReleaseStringUTFChars(mqtt_server, mqttServer);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttCaCertContext(JNIEnv *env, jclass clazz,
+                                                            jstring ca_cert_context) {
+    // TODO: implement SetMqttCaCertContext()
+    const char *const caCertContext = env->GetStringUTFChars(ca_cert_context, nullptr);
+    int ret = SK_TR369_SetMqttCaCertContext(caCertContext);
+    env->ReleaseStringUTFChars(ca_cert_context, caCertContext);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttClientPrivateKey(JNIEnv *env, jclass clazz,
+                                                               jstring client_private_key) {
+    // TODO: implement SetMqttClientPrivateKey()
+    const char *const clientPrivateKey = env->GetStringUTFChars(client_private_key, nullptr);
+    int ret = SK_TR369_SetMqttClientPrivateKey(clientPrivateKey);
+    env->ReleaseStringUTFChars(client_private_key, clientPrivateKey);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttClientCertContext(JNIEnv *env, jclass clazz,
+                                                                jstring client_cert_context) {
+    // TODO: implement SetMqttClientCertContext()
+    const char *const clientCertContext = env->GetStringUTFChars(client_cert_context, nullptr);
+    int ret = SK_TR369_SetMqttClientCertContext(clientCertContext);
+    env->ReleaseStringUTFChars(client_cert_context, clientCertContext);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetUspLogLevel(JNIEnv *env, jclass clazz, jint level) {
+    // TODO: implement SetUspLogLevel()
+    SK_TR369_SetUspLogLevel(level);
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetUspLogLevel(JNIEnv *env, jclass clazz) {
+    // TODO: implement GetUspLogLevel()
+    return SK_TR369_GetUspLogLevel();
 }
 
 extern "C" JNIEXPORT jstring JNICALL
@@ -365,7 +423,7 @@ Java_com_sdt_opentr369_OpenTR369Native_GetNetDevInterfaceStatus(JNIEnv *env, jcl
         snprintf(ret, size, "Down");
     }
 #else
-    if ((ifr.ifr_flags == 0x00001043)) {
+    if (ifr.ifr_flags == 0x00001043) {
         snprintf(cRet, size, "Up");
     } else if (0x00001003 == ifr.ifr_flags || 0x00001002 == ifr.ifr_flags) {
         //ifconfig eth0 down --> 00001002

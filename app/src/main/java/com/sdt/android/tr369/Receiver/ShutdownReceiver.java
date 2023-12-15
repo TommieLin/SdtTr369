@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
@@ -27,7 +28,7 @@ public class ShutdownReceiver extends BroadcastReceiver {
             HashMap<String, String> params = new HashMap<>();
             String serialNumber = DeviceInfoUtils.getSerialNumber();
             params.put("serialNumber", serialNumber);
-            String url = DbManager.getDBParam("Device.X_Skyworth.ManagementServer.Url");
+            String url = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Url");
             if (!url.isEmpty()) {
                 HttpsUtils.noticeResponse(url + path, params);
             } else {

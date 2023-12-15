@@ -454,9 +454,9 @@
 
         <schema name="X_Skyworth" type="object">
             <schema name="ManagementServer" type="object">
-                <schema name="Url" getter="diagnose" setter="diagnose" type="string" />
-                <schema name="Hostname" getter="diagnose" setter="diagnose" type="string" />
-                <schema name="Port" getter="diagnose" setter="diagnose" type="string" />
+                <schema name="Url" getter="diagnose" type="string" />
+                <schema name="Hostname" getter="diagnose" type="string" />
+                <schema name="Port" getter="diagnose" type="string" />
             </schema>
 
             <schema name="DreamInfo" getter="diagnose" setter="diagnose" type="string" write="W" />

@@ -106,7 +106,7 @@ public class XshellClient {
             ptyProcessOutputStream.write(data);
             ptyProcessOutputStream.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            LogUtils.e(TAG, "onMessage error, " + e.getMessage());
         }
     }
 
@@ -129,7 +129,7 @@ public class XshellClient {
                     baos = new ByteArrayOutputStream();
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                LogUtils.e(TAG, "ForwardThread run error, " + e.getMessage());
             }
             LogUtils.i(TAG, "ForwardThread end...");
         }

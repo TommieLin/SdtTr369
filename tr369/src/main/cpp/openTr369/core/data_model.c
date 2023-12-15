@@ -231,11 +231,19 @@ int DATA_MODEL_Init(void)
     }
 
 #ifdef ENABLE_MQTT
-    // Set the default values of ResponseTopicConfigured and ClientID
-    err = DEVICE_MQTT_SetDefaults();
+    // Set default values related to EndpointId for database parameters
+    err = DEVICE_MQTT_SetDefaultsByEndpointId();
     if (err != USP_ERR_OK)
     {
-        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaults error(%d).", __FUNCTION__, err);
+        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultsByEndpointId error(%d).", __FUNCTION__, err);
+        return err;
+    }
+
+    // Set default values for database parameters related to the configuration file
+    err = DEVICE_MQTT_SetDefaultsByConfigFile();
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultsByConfigFile error(%d).", __FUNCTION__, err);
         return err;
     }
 #endif

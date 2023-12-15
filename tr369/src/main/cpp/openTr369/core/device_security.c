@@ -78,6 +78,18 @@ char *auth_cert_file = NULL;
 char *usp_trust_store_file = NULL;
 
 //------------------------------------------------------------------------------
+// String, specify a string containing the client cert.
+char *auth_cert_str = NULL;
+
+//------------------------------------------------------------------------------
+// String, specify a string containing the private key.
+char *auth_key_str = NULL;
+
+//------------------------------------------------------------------------------
+// String, specify a string containing the trust store certificate.
+char *usp_trust_store_str = NULL;
+
+//------------------------------------------------------------------------------
 // Location of the Device.Security.Certificate table within the data model
 #define DEVICE_CERT_ROOT "Device.Security.Certificate"
 static const char device_cert_root[] = DEVICE_CERT_ROOT;
@@ -189,6 +201,7 @@ static char *fp_output_args[] =
 
 //------------------------------------------------------------------------------
 // Forward declarations. Note these are not static, because we need them in the symbol table for USP_LOG_Callstack() to show them
+void LoadCerts_FromString(char *cert_str, cert_usage_t cert_usage, ctrust_role_t role);
 void LoadCerts_FromPath(char *path, cert_usage_t cert_usage, ctrust_role_t role);
 void LoadCerts_FromFile(char *file_path, cert_usage_t cert_usage, ctrust_role_t role);
 void LoadCerts_FromDir(char *dir_path, cert_usage_t cert_usage, ctrust_role_t role);
@@ -211,6 +224,8 @@ cert_t *Find_CertByHash(cert_hash_t hash);
 int LoadTrustStore(void);
 int LoadClientCert(SSL_CTX *ctx);
 int GetClientCert(X509 **p_cert, EVP_PKEY **p_pkey);
+int GetCertFromString(char *cert_str, X509 **p_cert);
+int GetKeyFromString(char *key_str, EVP_PKEY **p_pkey);
 int GetCertFromFile(char *cert_file, X509 **p_cert, EVP_PKEY **p_pkey);
 int GetClientCertFromMemory(X509 **p_cert, EVP_PKEY **p_pkey);
 int AddClientCert(SSL_CTX *ctx);
@@ -341,6 +356,11 @@ int DEVICE_SECURITY_Start(void)
     if ((usp_trust_store_file != NULL) && (strcmp(usp_trust_store_file, "null") != 0))
     {
         LoadCerts_FromPath(usp_trust_store_file, kCertUsage_TrustCert, kCTrustRole_FullAccess);
+    }
+    else if ((usp_trust_store_str != NULL) && (*usp_trust_store_str != '\0') && (strcmp(usp_trust_store_str, "null") != 0))
+    {
+        USP_LOG_Debug("%s: Failed to load certificate from path, default certificate will be used.", __FUNCTION__);
+        LoadCerts_FromString(usp_trust_store_str, kCertUsage_TrustCert, kCTrustRole_FullAccess);
     }
 
     // Exit if unable to create a temporary SSL context.
@@ -984,6 +1004,47 @@ int DEVICE_SECURITY_AddCertHostnameValidationCtx(SSL_CTX* ssl_ctx, const char* n
 
 /*********************************************************************//**
 **
+** LoadCerts_FromString
+**
+** Called to load a certificate of type string into the device
+**
+** \param   cert_str - certificate of type string.
+** \param   cert_usage - type of certificates to add
+** \param   role - if the certificates are trust certs, then this is the role that the certs permit to a broker cert
+**
+** \return  None - errors are ignored
+**
+**************************************************************************/
+void LoadCerts_FromString(char *cert_str, cert_usage_t cert_usage, ctrust_role_t role)
+{
+    BIO *bio;
+    X509 *cert;
+
+    // Exit if unable to create a bio to read from the string
+    bio = BIO_new_mem_buf(cert_str, strlen(cert_str));
+    if (bio == NULL)
+    {
+        USP_LOG_Error("%s: BIO_new_mem_buf() failed", __FUNCTION__);
+        return;
+    }
+
+    // Exit if unable to parse an X509 structure from the string
+    cert = PEM_read_bio_X509(bio, NULL, 0, NULL);
+    if (cert == NULL)
+    {
+        USP_LOG_Error("%s: PEM_read_bio_X509() failed", __FUNCTION__);
+        BIO_free(bio);
+        return;
+    }
+
+    // Skip this file if unable to add the certificate
+    // NOTE: Ownership of the X509 cert passes to AddCert(), so no need to free it in this function
+    AddCert(cert, cert_usage, role);
+    return;
+}
+
+/*********************************************************************//**
+**
 ** LoadCerts_FromPath
 **
 ** Called to load all certificates in the specified file or directory into the Device.Security.Certificate table
@@ -1244,9 +1305,153 @@ int GetClientCert(X509 **p_cert, EVP_PKEY **p_pkey)
         err = GetCertFromFile(auth_cert_file, p_cert, p_pkey);
         return err;
     }
+    else
+    {
+        if ((auth_cert_str != NULL) && (*auth_cert_str != '\0') && (strcmp(auth_cert_str, "null") != 0))
+        {
+            USP_LOG_Debug("%s: Failed to load client certificate from path, default certificate will be used.", __FUNCTION__);
+            err = GetCertFromString(auth_cert_str, p_cert);
+            if (err != USP_ERR_OK)
+            {
+                return err;
+            }
+        }
+
+        if ((auth_key_str != NULL) && (*auth_key_str != '\0') && (strcmp(auth_key_str, "null") != 0))
+        {
+            USP_LOG_Debug("%s: Failed to load private key from path, default private key will be used.", __FUNCTION__);
+            err = GetKeyFromString(auth_key_str, p_pkey);
+            return err;
+        }
+    }
 
     // Otherwise, attempt to read the client cert from an in-memory buffer provided by the get_agent_cert vendor hook
     err = GetClientCertFromMemory(p_cert, p_pkey);
+    return err;
+}
+
+/*********************************************************************//**
+**
+** GetCertFromString
+**
+** Get the certificate from the specified string
+**
+** \param   cert_str - pointer containing the PEM formatted cert data
+** \param   p_cert - pointer to variable in which to return a pointer to the client cert
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int GetCertFromString(char *cert_str, X509 **p_cert)
+{
+    BIO *bio = NULL;
+    X509 *cert = NULL;
+    int err = USP_ERR_INTERNAL_ERROR;
+
+    // Exit if unable to create a bio to read from the string
+    bio = BIO_new_mem_buf(cert_str, strlen(cert_str));
+    if (bio == NULL)
+    {
+        USP_ERR_SetMessage("%s: BIO_new_mem_buf() failed", __FUNCTION__);
+        goto exit;
+    }
+
+    if (p_cert != NULL)
+    {
+        // Exit if unable to parse an X509 structure from the string
+        cert = PEM_read_bio_X509(bio, NULL, NULL, NULL);
+        if (cert == NULL)
+        {
+            USP_ERR_SetMessage("%s: PEM_read_bio_X509() failed", __FUNCTION__);
+            goto exit;
+        }
+
+        // Public cert retrieved successfully
+        *p_cert = cert;
+    }
+
+    // If the code gets here, then it was successful
+    err = USP_ERR_OK;
+
+exit:
+    // Clean up, if an error occurred
+    if (err != USP_ERR_OK)
+    {
+        if (cert != NULL)
+        {
+            X509_free(cert);
+        }
+    }
+
+    if (bio != NULL)
+    {
+        BIO_free(bio);
+    }
+
+    return err;
+}
+
+/*********************************************************************//**
+**
+** GetKeyFromString
+**
+** Get the optional associated private key from the specified string
+**
+** \param   key_str - pointer containing the PEM formatted private key
+** \param   p_pkey - pointer to variable in which to return a pointer to the client cert's private key or NULL if private key not required
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int GetKeyFromString(char *key_str, EVP_PKEY **p_pkey)
+{
+    BIO *bio = NULL;
+    EVP_PKEY *pkey = NULL;
+    int err = USP_ERR_INTERNAL_ERROR;
+
+    // Exit if unable to create a bio to read from the string
+    bio = BIO_new_mem_buf(key_str, strlen(key_str));
+    if (bio == NULL)
+    {
+        USP_ERR_SetMessage("%s: BIO_new_mem_buf() failed", __FUNCTION__);
+        goto exit;
+    }
+
+    // Optionally retrieve private key
+    // NOTE: This is only performed for client certs, in which a private key is expected to be present.
+    // Trust store CA certs do not contain private keys
+    if (p_pkey != NULL)
+    {
+        // Exit if unable to parse a EVP_PKEY (private key) structure from the string
+        pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL, NULL);
+        if (pkey == NULL)
+        {
+            USP_ERR_SetMessage("%s: PEM_read_bio_PrivateKey() failed", __FUNCTION__);
+            goto exit;
+        }
+
+        // Private key retrieved successfully
+        *p_pkey = pkey;
+    }
+
+    // If the code gets here, then it was successful
+    err = USP_ERR_OK;
+
+exit:
+    // Clean up, if an error occurred
+    if (err != USP_ERR_OK)
+    {
+        if (pkey != NULL)
+        {
+            EVP_PKEY_free(pkey);
+        }
+    }
+
+    if (bio != NULL)
+    {
+        BIO_free(bio);
+    }
+
     return err;
 }
 

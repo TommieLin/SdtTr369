@@ -158,4 +158,8 @@ void MQTT_SubscriptionReplace(mqtt_subscription_t *dest, mqtt_subscription_t *sr
 void MQTT_SubscriptionDestroy(mqtt_subscription_t *sub);
 int MQTT_GetAgentResponseTopicDiscovered(int instance, char *buf, int len);
 
+//-----------------------------------------------------------------------------------------------
+// Global variables initialized through the Java layer.
+extern char *mqtt_server_url;
+
 #endif
