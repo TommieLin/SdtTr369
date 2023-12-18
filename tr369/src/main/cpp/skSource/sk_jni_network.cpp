@@ -4,6 +4,8 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <openssl/hmac.h>
+#include "sk_tr369_log.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -104,6 +106,73 @@ char *SK_TR369_API_GetDevKeyString() {
     if (ret == nullptr) return nullptr;
     strcpy(ret, keystr);
     return ret;
+}
+
+#define ALGORITHM "HmacSHA256"
+
+static void byteArrayToHex(const unsigned char *data, int length, char *output) {
+    for (int i = 0; i < length; i++) {
+        sprintf(output + (i * 2), "%02x", data[i]);
+    }
+}
+
+static char *calculateHMac(const char *key, const char *data) {
+    unsigned char hash[EVP_MAX_MD_SIZE];
+    unsigned int hashLen;
+
+    HMAC_CTX *hmacContext = HMAC_CTX_new();
+    HMAC_Init_ex(hmacContext, key, strlen(key), EVP_sha256(), NULL);
+    HMAC_Update(hmacContext, (unsigned char *) data, strlen(data));
+    HMAC_Final(hmacContext, hash, &hashLen);
+    HMAC_CTX_free(hmacContext);
+
+    char *result = (char *) malloc(hashLen * 2 + 1);
+    byteArrayToHex(hash, hashLen, result);
+    return result;
+}
+
+char *SK_TR369_API_GetXAuthToken(const char *dev_mac, const char *dev_sn) {
+    char *result = NULL;
+
+    if (dev_mac == NULL || dev_sn == NULL || dev_mac[0] == '\0' || dev_sn[0] == '\0') {
+        SK_ERR("Parameters are empty");
+        return result;
+    }
+
+    // generate HMAC_SHA256 of dev_mac and dev_sn.
+    try {
+        // set time zone (Note: C does not have a direct equivalent to Java's TimeZone)
+        // you may need to handle time zone conversions separately if needed
+
+        // Get the current time.
+        time_t rawTime;
+        struct tm *timeInfo;
+        time(&rawTime);
+        timeInfo = gmtime(&rawTime);
+
+        // Adjust to Shanghai time zone (China Standard Time).
+        // Shanghai is located in the East Asia time zone (UTC+8).
+        int shanghai_offset = 8;
+        timeInfo->tm_hour += shanghai_offset;
+        mktime(timeInfo); // Adjust for changes due to daylight saving time.
+
+        // Format time as a string.
+        char today[11]; // "yyyy-MM-dd" plus null terminator
+        strftime(today, sizeof(today), "%Y-%m-%d", timeInfo);
+        SK_DBG("Requested server configuration on %s", today);
+
+        char *data = (char *) malloc(
+                strlen(dev_sn) + strlen(today) + 2); // +2 for '/' and null terminator
+        sprintf(data, "%s/%s", dev_sn, today);
+
+        result = calculateHMac(dev_mac, data);
+
+        free(data);
+    } catch (const char *errorMessage) {
+        SK_ERR("generatePassword error: %s\n", errorMessage);
+    }
+
+    return result;
 }
 
 #ifdef __cplusplus

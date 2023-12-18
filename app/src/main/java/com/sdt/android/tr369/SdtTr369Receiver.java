@@ -18,7 +18,6 @@ import com.sdt.android.tr369.Bean.ClientCertBean;
 import com.sdt.android.tr369.Bean.MqttConfigsResponseBean;
 import com.sdt.android.tr369.Utils.FileUtils;
 import com.sdt.android.tr369.Utils.GzipUtils;
-import com.sdt.android.tr369.Utils.HMacUtils;
 import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.NetworkUtils;
@@ -40,7 +39,7 @@ public class SdtTr369Receiver extends BroadcastReceiver {
     private Handler mHandler = null;
     public static final int MSG_START_TR369_PROTOCOL = 3302;
     public static final int MSG_REQUEST_MQTT_CONFIGS = 3303;
-    private static final int DEFAULT_PERIOD_MILLIS_TIME = 60000;   // 默认一分钟请求一次
+    private static final int DEFAULT_PERIOD_MILLIS_TIME = 120000;   // 默认两分钟请求一次
 
     public void handleProtocolMessage(@NonNull Message msg) {
         switch (msg.what) {
@@ -121,7 +120,7 @@ public class SdtTr369Receiver extends BroadcastReceiver {
         String mac = NetworkUtils.getEthernetMacAddress();
         LogUtils.d(TAG, "handleMqttServerConfigs id: " + id + ", mac: " + mac);
 
-        String token = HMacUtils.generatePassword(mac, id);
+        String token = OpenTR369Native.GetXAuthToken(mac, id);
 //        LogUtils.d(TAG, "handleMqttServerConfigs token: " + token);     // 此打印信息释放版本时禁止打开
 
         HashMap<String, String> hashMap = new HashMap<>();

@@ -22,8 +22,8 @@ extern "C" {
 #define ALOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #define ALOGF(...)  __android_log_print(ANDROID_LOG_FATAL, LOG_TAG, __VA_ARGS__)
 
-#define TX_DBG(fmt, args...)    ALOGD("[%s, %d]: " fmt, __FUNCTION__, __LINE__, ##args)
-#define TX_ERR(fmt, args...)    ALOGE("[%s, %d]: " fmt, __FUNCTION__, __LINE__, ##args)
+#define SK_DBG(fmt, args...)    ALOGD("%s: " fmt, __FUNCTION__, ##args)
+#define SK_ERR(fmt, args...)    ALOGE("%s: " fmt, __FUNCTION__, ##args)
 
 #define CHECK_BREAK(e) if(!(e)) {ALOGE("CHECK_BREAK(%s)", #e); break;}
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))

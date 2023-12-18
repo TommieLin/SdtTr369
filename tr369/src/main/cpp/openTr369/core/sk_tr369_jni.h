@@ -27,6 +27,7 @@ int SK_TR369_AddMultiObject(const char *, int);
 int SK_TR369_DelMultiObject(const char *);
 int SK_TR369_ShowData(const char *);
 
+char *SK_TR369_API_GetXAuthToken(const char *, const char *);
 char *SK_TR369_API_GetCACertString();
 char *SK_TR369_API_GetDevCertString();
 char *SK_TR369_API_GetDevKeyString();
