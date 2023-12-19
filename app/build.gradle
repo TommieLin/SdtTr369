@@ -17,8 +17,8 @@ android {
         minSdk 31
         targetSdk 33
         manifestPlaceholders = [apkName : apkName]
-        versionCode 10002
-        versionName "1.0.2"
+        versionCode 10003
+        versionName "1.0.3"
         flavorDimensions "default"
         ndk {
             abiFilters 'armeabi-v7a'

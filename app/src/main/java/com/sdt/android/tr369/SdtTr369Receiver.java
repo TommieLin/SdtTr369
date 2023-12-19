@@ -118,6 +118,9 @@ public class SdtTr369Receiver extends BroadcastReceiver {
     private void handleMqttServerConfigs() {
         String id = DeviceInfoUtils.getUspAgentID();
         String mac = NetworkUtils.getEthernetMacAddress();
+        if (TextUtils.isEmpty(mac)) {
+            mac = NetworkUtils.getWifiMacAddress();
+        }
         LogUtils.d(TAG, "handleMqttServerConfigs id: " + id + ", mac: " + mac);
 
         String token = OpenTR369Native.GetXAuthToken(mac, id);
@@ -128,6 +131,10 @@ public class SdtTr369Receiver extends BroadcastReceiver {
         hashMap.put("mac", mac);
 
         String url = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Url");
+        if (TextUtils.isEmpty(url)) {
+            LogUtils.e(TAG, "TR369 related configuration is missing in the config.properties file.");
+            return;
+        }
         String requestUrl = url + "/tr369/mqttaddr/enquire";
 
         HttpsUtils.requestMqttServerConfigs(requestUrl, token, hashMap, new Callback() {
@@ -150,6 +157,11 @@ public class SdtTr369Receiver extends BroadcastReceiver {
                 } else if (response.code() == 403 && (response.body() != null)) {
                     LogUtils.e(TAG, "Response: " + response.protocol() + " " + response.code()
                             + " Body: " + response.body().string());
+                } else if (response.code() == 400 && (response.body() != null)) {
+                    // 参数异常，无需再发送
+                    LogUtils.e(TAG, "Response: " + response.protocol() + " " + response.code()
+                            + " Body: " + response.body().string());
+                    return;
                 }
                 mHandler.sendEmptyMessageDelayed(MSG_REQUEST_MQTT_CONFIGS, DEFAULT_PERIOD_MILLIS_TIME);
             }
