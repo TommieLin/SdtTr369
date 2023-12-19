@@ -469,6 +469,22 @@ int SK_TR369_SetMqttServerUrl(const char *const mqtt_server)
 
 /*********************************************************************//**
 **
+** SK_TR369_GetMqttServerUrl
+**
+** Get the MQTT server URL.
+**
+** \param   None
+**
+** \return  Pointer to the MQTT server URL
+**
+**************************************************************************/
+char *SK_TR369_GetMqttServerUrl()
+{
+    return mqtt_server_url;
+}
+
+/*********************************************************************//**
+**
 ** SK_TR369_SetMqttCaCertContext
 **
 ** Set the CA certificate.
@@ -804,6 +820,12 @@ void SK_TR369_Stop()
     {
         free(sk_tr369_model_default);
         sk_tr369_model_default = NULL;
+    }
+
+    if (sk_tr369_model_xml != NULL)
+    {
+        free(sk_tr369_model_xml);
+        sk_tr369_model_xml = NULL;
     }
 
     if (mqtt_server_url != NULL)

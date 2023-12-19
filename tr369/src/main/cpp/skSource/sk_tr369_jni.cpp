@@ -248,6 +248,17 @@ Java_com_sdt_opentr369_OpenTR369Native_GetDefaultModelPath(JNIEnv *env, jclass c
 }
 
 extern "C"
+JNIEXPORT jstring JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_GetMqttServerUrl(JNIEnv *env, jclass clazz) {
+    // TODO: implement GetMqttServerUrl()
+    char *url = SK_TR369_GetMqttServerUrl();
+    if (url != nullptr) {
+        return env->NewStringUTF(url);
+    }
+    return env->NewStringUTF("");
+}
+
+extern "C"
 JNIEXPORT jint JNICALL
 Java_com_sdt_opentr369_OpenTR369Native_SetMqttServerUrl(JNIEnv *env, jclass clazz,
                                                         jstring mqtt_server) {

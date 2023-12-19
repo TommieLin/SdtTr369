@@ -350,7 +350,7 @@ public class NetworkUtils {
         if (macAddress.length() == 0) {
             LogUtils.e(TAG, "Unable to read ethernet mac address from system properties");
             macAddress = getEthernetMac();
-            if (macAddress.length() == 0) {
+            if (macAddress == null || macAddress.length() == 0) {
                 LogUtils.e(TAG, "Unable to read ethernet mac address from ConnectivityManager");
                 macAddress = getNetworkMac("eth0");
             }

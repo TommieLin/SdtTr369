@@ -54,7 +54,6 @@
 #include "text_utils.h"
 #include "mqtt.h"
 #include "iso8601.h"
-#include "vendor_api.h"
 
 typedef struct
 {
@@ -318,72 +317,6 @@ int DEVICE_MQTT_SetDefaultsByEndpointId(void)
 
 /*********************************************************************//**
 **
-** DEVICE_MQTT_CheckDefaultsExistInDatabase
-**
-** Check whether these parameter values already exist in the database.
-** If they already exist, no further initialization is required.
-**      1. Device.MQTT.Client.1.BrokerAddress
-**      2. Device.MQTT.Client.1.BrokerPort
-**      3. Device.MQTT.Client.1.TransportProtocol
-**
-** \param   None
-**
-** \return  1 - The values already exist;
-**          0 - The value does not exist.
-**
-**************************************************************************/
-int DEVICE_MQTT_CheckDefaultsExistInDatabase(void)
-{
-    char default_value[MAX_DM_SHORT_VALUE_LEN];
-    // Check if the BrokerAddress node value is empty or does not exist.
-    int err = SK_TR369_GetDBParam(broker_address_path, default_value);
-    if (err != USP_ERR_OK)
-    {
-        USP_LOG_Error("%s: Unable to get broker_address value.", __FUNCTION__);
-        return 0;
-    }
-    USP_LOG_Debug("%s: %s is %s", __FUNCTION__, broker_address_path, default_value);
-    if (default_value[0] == '\0')
-    {
-        USP_LOG_Error("%s: broker_address is empty and needs to be initialized.", __FUNCTION__);
-        return 0;
-    }
-
-    // Check if the BrokerPort node value is empty or does not exist.
-    memset(default_value, 0, sizeof(default_value));
-    err = SK_TR369_GetDBParam(broker_port_path, default_value);
-    if (err != USP_ERR_OK)
-    {
-        USP_LOG_Error("%s: Unable to get broker_port value.", __FUNCTION__);
-        return 0;
-    }
-    USP_LOG_Debug("%s: %s is %s", __FUNCTION__, broker_port_path, default_value);
-    if (default_value[0] == '\0')
-    {
-        USP_LOG_Error("%s: broker_port is empty and needs to be initialized.", __FUNCTION__);
-        return 0;
-    }
-
-    // Check if the TransportProtocol node value is empty or does not exist.
-    memset(default_value, 0, sizeof(default_value));
-    err = SK_TR369_GetDBParam(transport_protocol_path, default_value);
-    if (err != USP_ERR_OK)
-    {
-        USP_LOG_Error("%s: Unable to get transport_protocol value.", __FUNCTION__);
-        return 0;
-    }
-    USP_LOG_Debug("%s: %s is %s", __FUNCTION__, transport_protocol_path, default_value);
-    if (default_value[0] == '\0')
-    {
-        USP_LOG_Error("%s: transport_protocol is empty and needs to be initialized.", __FUNCTION__);
-        return 0;
-    }
-
-    return 1;
-}
-
-/*********************************************************************//**
-**
 ** DEVICE_MQTT_SetDefaultsByConfigFile
 **
 ** Set default values for database parameters related to the configuration file:
@@ -398,16 +331,8 @@ int DEVICE_MQTT_CheckDefaultsExistInDatabase(void)
 **************************************************************************/
 int DEVICE_MQTT_SetDefaultsByConfigFile(void)
 {
-    // Check whether the parameter already exists in the database.
-    // If it exists, it will be returned directly without any other operations.
-    if (DEVICE_MQTT_CheckDefaultsExistInDatabase())
-    {
-        USP_LOG_Info("%s: Broker information already exists, no additional operations are required.", __FUNCTION__);
-        return USP_ERR_OK;
-    }
-
     // Read the global variable of the MQTT server URL
-    if ((mqtt_server_url != NULL) && (*mqtt_server_url != '\0') && (strcmp(mqtt_server_url, "null") != 0))
+    if ((mqtt_server_url == NULL) || (*mqtt_server_url == '\0') || (strcmp(mqtt_server_url, "null") == 0))
     {
         USP_LOG_Error("%s: Failed to read the MQTT server URL.", __FUNCTION__);
         return USP_ERR_INTERNAL_ERROR;
