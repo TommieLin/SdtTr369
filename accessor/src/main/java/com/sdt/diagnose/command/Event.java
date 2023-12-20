@@ -329,7 +329,6 @@ public class Event {
                                 LogUtils.d(TAG, "downloadFile result: " + (l * 1.0 / contentLength) * 100 + ("%"));
                             }
                         }
-
                         fos.flush();
                         fos.close();
                         inputStream.close();
@@ -531,6 +530,10 @@ public class Event {
             LogUtils.e(TAG, "Parameter error in upload() function, params.len: " + params.length);
             return;
         }
+        // 初始化Upload事件的结果
+        setUploadResponseDBParams("", "");
+
+        // 处理Upload事件
         String fileType = params[INDEX_PARAM_1];
         String delaySeconds = params[INDEX_PARAM_2];
         String uploadUrl = params[INDEX_PARAM_3];
@@ -625,9 +628,6 @@ public class Event {
             return;
         }
 
-        // 初始化Upload事件的结果
-        setUploadResponseDBParams("", "");
-
         // 分割号和同事协商后定义为%%%，服务端下发数据内容<URL>https://xxx/xxx%%%开始时间戳%%%结束时间戳</URL>
         String[] keywords = uploadUrl.split("%%%");
         String filterUrl = "";
@@ -688,25 +688,58 @@ public class Event {
     }
 
     public void uploadIconFile(String uploadUrl) {
-        String packageName = uploadUrl.split("/")[uploadUrl.split("/").length - 1].replace("-", ".");
+        if (TextUtils.isEmpty(uploadUrl)) {
+            String message = "The upload URL is empty";
+            LogUtils.e(TAG, "uploadIconFile: " + message);
+            setUploadResponseDBParams("Error", message);
+            return;
+        }
+        String regex = "appIcon/(.*?)/";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(uploadUrl);
+        if (!matcher.find() || matcher.group(1) == null) {
+            String message = "The upload URL format is incorrect and the specified string cannot be found";
+            LogUtils.e(TAG, "uploadIconFile: " + message);
+            setUploadResponseDBParams("Error", message);
+            return;
+        }
+        String packageName = matcher.group(1).replace("-", ".");
+        LogUtils.d(TAG, "uploadIconFile packageName: " + packageName);
+
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
         List<PackageInfo> packlist = packageManager.getInstalledPackages(PackageManager.GET_ACTIVITIES);
         for (PackageInfo packageInfo : packlist) {
             if (packageInfo.packageName.equals(packageName)) {
                 Drawable drawable = packageInfo.applicationInfo.loadIcon(packageManager);
                 saveIcon(drawable, packageInfo.applicationInfo.name);
-                uploadAppIcon(uploadUrl, GlobalContext.getContext().getFilesDir() + "/"
-                        + packageInfo.applicationInfo.name + ".png", new Callback() {
+                String iconPath = GlobalContext.getContext().getFilesDir() + "/" + packageInfo.applicationInfo.name + ".png";
+                uploadAppIcon(uploadUrl, iconPath, new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        LogUtils.e(TAG, "Failed to upload icon file. Failure Message: " + e.getMessage());
+                        String message = "Failed to upload icon file, " + e.getMessage();
+                        LogUtils.e(TAG, "uploadIconFile: " + message);
+                        setUploadResponseDBParams("Error", message);
                     }
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                         LogUtils.d(TAG, "uploadIconFile onResponse: " + response.protocol()
-                                + ", code: " + response.code()
-                                + ", message: " + response.message());
+                                + ", code: " + response.code());
+                        if (response.code() == 200) {
+                            File file = new File(iconPath);
+                            if (file.exists()) {
+                                LogUtils.d(TAG, "uploadIconFile: Wait to delete file: " + iconPath);
+                                file.delete();
+                            }
+                            String message = "Icon file uploaded successfully";
+                            LogUtils.e(TAG, "uploadIconFile: " + message + ", path: " + iconPath);
+                            setUploadResponseDBParams("Complete", message);
+                            return;
+                        }
+                        String message = "Failed to upload icon file, " + response.protocol()
+                                + " " + response.code() + " " + response.message();
+                        LogUtils.e(TAG, "uploadIconFile: " + message);
+                        setUploadResponseDBParams("Error", message);
                     }
                 });
             }
