@@ -137,6 +137,10 @@ public class HttpsUtils {
     }
 
     public static void uploadAllowStatus(String url, int status, String confirmMessage, String transactionId) {
+        if (TextUtils.isEmpty(url)) {
+            LogUtils.e(TAG, "uploadAllowStatus: The reported URL is empty!");
+            return;
+        }
         HashMap<String, String> param = new HashMap<>();
         param.put("deviceId", DeviceInfoUtils.getSerialNumber());
         param.put("confirmCode", String.valueOf(status));
