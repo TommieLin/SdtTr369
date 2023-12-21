@@ -176,6 +176,10 @@ public class SdtTr369Receiver extends BroadcastReceiver {
 
         Gson gson = new Gson();
         MqttConfigsResponseBean bean = gson.fromJson(responseBody, MqttConfigsResponseBean.class);
+        if (bean == null) {
+            LogUtils.e(TAG, "handleMqttResponseBody: Response body parsing failed");
+            return false;
+        }
 
         boolean enable = bean.isEnable();
         if (!enable) {
