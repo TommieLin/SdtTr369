@@ -84,21 +84,30 @@ public class HttpsUtils {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 LogUtils.e(TAG, "uploadLog onFailure: " + e.getMessage());
+                LogManager.getInstance().stopLog();
             }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.body() == null) return;
-                Gson gson = new Gson();
-                LogResponseBean logResponseBean = gson.fromJson(response.body().string(),
-                        LogResponseBean.class);
-                if (logResponseBean.getCode() != 0) {
-                    LogUtils.e(TAG, "uploadLog response code: " + logResponseBean.getCode() + ", stop upload log");
-                    LogManager.getInstance().stopLog();
+                LogUtils.d(TAG, "uploadLog Protocol: " + response.protocol()
+                        + ", Code: " + response.code());
+                if (response.code() == 200 && response.body() != null) {
+                    String responseBody = response.body().string();
+                    LogUtils.d(TAG, "uploadLog response.body: " + responseBody);
+                    Gson gson = new Gson();
+                    LogResponseBean logResponseBean = gson.fromJson(responseBody, LogResponseBean.class);
+                    if (logResponseBean != null) {
+                        if (logResponseBean.getCode() == 0) {
+                            LogUtils.d(TAG, "uploadLog: Continue to upload real-time logs");
+                            return;
+                        }
+                        LogUtils.d(TAG, "uploadLog response code: " + logResponseBean.getCode() + ", stop upload log");
+                    } else {
+                        LogUtils.e(TAG, "uploadLog: Response body parsing failed");
+                    }
                 }
-                LogUtils.d(TAG, "uploadLog protocol: " + response.protocol()
-                        + ", code: " + response.code()
-                        + ", message: " + response.message());
+                LogUtils.i(TAG, "uploadLog: Stop uploading real-time logs");
+                LogManager.getInstance().stopLog();
             }
         });
     }
