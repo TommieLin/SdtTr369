@@ -1,10 +1,21 @@
 package com.sdt.android.tr369.Bean;
 
+import com.google.gson.annotations.SerializedName;
+
 public class MqttConfigsResponseBean {
+    @SerializedName("message")
     private String message;
+
+    @SerializedName("mqttServer")
     private String mqttServer;
+
+    @SerializedName("caCert")
     private CaCertBean caCert;
+
+    @SerializedName("clientCert")
     private ClientCertBean clientCert;
+
+    @SerializedName("enable")
     private boolean enable;
 
     public String getMessage() {

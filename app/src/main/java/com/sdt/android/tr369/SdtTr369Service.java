@@ -270,7 +270,8 @@ public class SdtTr369Service extends Service {
 
         @Override
         public void openTR369Start() {
-            mHandler.sendEmptyMessage(MSG_START_TR369_SERVICE);
+            // 延迟一段时间以确保协议初始化完毕
+            mHandler.sendEmptyMessageDelayed(MSG_START_TR369_SERVICE, 5000);
         }
     };
 

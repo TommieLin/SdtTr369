@@ -359,7 +359,7 @@ int DEVICE_SECURITY_Start(void)
     }
     else if ((usp_trust_store_str != NULL) && (*usp_trust_store_str != '\0') && (strcmp(usp_trust_store_str, "null") != 0))
     {
-        USP_LOG_Debug("%s: Failed to load certificate from path, default certificate will be used.", __FUNCTION__);
+        USP_LOG_Info("%s: Failed to load certificate from path, default certificate will be used.", __FUNCTION__);
         LoadCerts_FromString(usp_trust_store_str, kCertUsage_TrustCert, kCTrustRole_FullAccess);
     }
 
@@ -1309,7 +1309,7 @@ int GetClientCert(X509 **p_cert, EVP_PKEY **p_pkey)
     {
         if ((auth_cert_str != NULL) && (*auth_cert_str != '\0') && (strcmp(auth_cert_str, "null") != 0))
         {
-            USP_LOG_Debug("%s: Failed to load client certificate from path, default certificate will be used.", __FUNCTION__);
+            USP_LOG_Info("%s: Failed to load client certificate from path, default certificate will be used.", __FUNCTION__);
             err = GetCertFromString(auth_cert_str, p_cert);
             if (err != USP_ERR_OK)
             {
@@ -1319,7 +1319,7 @@ int GetClientCert(X509 **p_cert, EVP_PKEY **p_pkey)
 
         if ((auth_key_str != NULL) && (*auth_key_str != '\0') && (strcmp(auth_key_str, "null") != 0))
         {
-            USP_LOG_Debug("%s: Failed to load private key from path, default private key will be used.", __FUNCTION__);
+            USP_LOG_Info("%s: Failed to load private key from path, default private key will be used.", __FUNCTION__);
             err = GetKeyFromString(auth_key_str, p_pkey);
             return err;
         }

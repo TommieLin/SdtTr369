@@ -20,4 +20,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-#-keep class com.sdt.opentr369.** {*;}
+#-keep class com.sdt.opentr369.OpenTR369Native {*;}

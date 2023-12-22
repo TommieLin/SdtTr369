@@ -67,7 +67,7 @@ public class Tr369PathInvoke {
                 value.mObject = value.mClass.newInstance();
                 value.mWithParam = false;
             } catch (Exception e) {
-                LogUtils.e(TAG, "createMap error, " + e.getMessage());
+                LogUtils.i(TAG, "createMap error, " + e.getMessage());
                 continue;
             }
 
@@ -82,7 +82,7 @@ public class Tr369PathInvoke {
                                         value.mProperty.mMethodName, String.class);
                         value.mWithParam = true;
                     } catch (NoSuchMethodException e1) {
-                        LogUtils.e(TAG, "createMap getDeclaredMethod error, 1: " + e1.getMessage());
+                        LogUtils.i(TAG, "createMap getDeclaredMethod error, 1: " + e1.getMessage());
                         continue;
                     }
                     LogUtils.i(TAG, "createMap getDeclaredMethod error, 2: " + e.getMessage());
@@ -93,7 +93,7 @@ public class Tr369PathInvoke {
                             value.mObject.getClass().getDeclaredMethod(
                                     value.mProperty.mMethodName, String.class, String.class);
                 } catch (NoSuchMethodException e) {
-                    LogUtils.e(TAG, "createMap error, " + e.getMessage());
+                    LogUtils.i(TAG, "createMap error, " + e.getMessage());
                     continue;
                 }
             }
@@ -151,7 +151,7 @@ public class Tr369PathInvoke {
         try {
             return (Boolean) info.mMethod.invoke(info.mObject, path, value);
         } catch (Exception e) {
-            LogUtils.d(TAG, "setString error, " + e.getMessage());
+            LogUtils.e(TAG, "setString error, " + e.getMessage());
         }
         return false;
     }

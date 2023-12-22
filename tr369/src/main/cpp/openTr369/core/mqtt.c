@@ -2162,7 +2162,7 @@ int PerformMqttClientConnect(mqtt_client_t *client)
     // Exit if unable to configure encryption for this mosquitto context
     if (client->conn_params.ts_protocol == kMqttTSprotocol_tls)
     {
-        USP_LOG_Debug("%s: Enabling encryption for MQTT client", __FUNCTION__);
+        USP_LOG_Info("%s: Enabling encryption for MQTT client", __FUNCTION__);
         err = ConnectSetEncryption(client);
         if (err != USP_ERR_OK)
         {
@@ -2262,7 +2262,7 @@ int ConnectSetEncryption(mqtt_client_t *client)
             return USP_ERR_INTERNAL_ERROR;
         }
 
-        USP_LOG_Debug("%s: Loaded the trust store!", __FUNCTION__);
+        USP_LOG_Info("%s: Loaded the trust store!", __FUNCTION__);
         client->are_certs_loaded = true;
     }
 
@@ -2347,7 +2347,7 @@ void ConnectCallback(struct mosquitto *mosq, void *userdata, int result)
             }
             else
             {
-                USP_LOG_Debug("%s: Successfully got the cert chain!", __FUNCTION__);
+                USP_LOG_Info("%s: Successfully got the cert chain!", __FUNCTION__);
             }
 
             // Free the cert chain, now that we've finished with it
@@ -2424,7 +2424,7 @@ void ConnectV5Callback(struct mosquitto *mosq, void *userdata, int result, int f
             }
             else
             {
-                USP_LOG_Debug("%s: Successfully got the cert chain!", __FUNCTION__);
+                USP_LOG_Info("%s: Successfully got the cert chain!", __FUNCTION__);
             }
 
             // Free the cert chain, now that we've finished with it
@@ -2602,7 +2602,7 @@ void DisconnectCallback(struct mosquitto *mosq, void *userdata, int rc)
 
     // Mark the MQTT client as disconnected. The actions to perform after thismust be performed in the MQTT MTP thread
     // because they might free the mosquitto context, and that must not be done from this callback (libmosquitto is still using it in the functions which called this)
-    USP_LOG_Debug("%s: Disconnected (rc=%d, is_reconnect=%d)\n", __FUNCTION__, rc, client->is_reconnect);
+    USP_LOG_Info("%s: Disconnected (rc=%d, is_reconnect=%d)\n", __FUNCTION__, rc, client->is_reconnect);
     client->is_disconnected = true;
 
 exit:
