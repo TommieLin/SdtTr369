@@ -124,7 +124,7 @@ int SK_TR369_Start_UploadFile(dm_req_t *req, char *command_key, kv_vector_t *inp
     strcat(param, "###");
     strcat(param, input_url);
 
-    SK_TR369_API_SendEvent(param);
+    SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[16], message[256];
@@ -188,7 +188,7 @@ int SK_TR369_Start_UpgradeFile(dm_req_t *req, char *command_key, kv_vector_t *in
     strcat(param, "###");
     strcat(param, input_file_type);
 
-    SK_TR369_API_SendEvent(param);
+    SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     USP_ARG_Add(output_args, "Status", "Complete");
@@ -246,7 +246,7 @@ int SK_TR369_Start_DownloadFile(dm_req_t *req, char *command_key, kv_vector_t *i
     strcat(param, "###");
     strcat(param, input_file_type);
 
-    SK_TR369_API_SendEvent(param);
+    SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     USP_ARG_Add(output_args, "Status", "Complete");
@@ -336,7 +336,7 @@ int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_a
     strcat(param, "###");
     strcat(param, input_timeout_ms);
 
-    SK_TR369_API_SendEvent(param);
+    SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[16], ipAddressUsed[16], successCount[8], failureCount[8], avg[8], min[8], max[8], avg_ns[8], min_ns[8], max_ns[8];
@@ -437,7 +437,7 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.MaxHopCount", input_max_hop_count);
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.DataBlockSize", input_size);
 
-    SK_TR369_API_SendEvent("TraceRoute");
+    SK_TR369_API_SetParams("skyworth.tr369.event", "TraceRoute");
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[32], responseTime[8];
@@ -558,7 +558,7 @@ int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vect
     strcat(param, "###");
     strcat(param, input_duration);
 
-    SK_TR369_API_SendEvent(param);
+    SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
     char status[32], BOMTime[32], EOMTime[32], testBytesReceived[8];

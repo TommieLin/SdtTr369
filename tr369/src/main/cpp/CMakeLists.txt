@@ -21,6 +21,7 @@ add_library(
         SHARED
         # Provides a relative path to your source file(s).
         skSource/sk_tr369_jni.cpp
+        skSource/sk_jni_callback.cpp
         skSource/sk_jni_network.cpp
         ${SRC_TR369_CORE}
 )
