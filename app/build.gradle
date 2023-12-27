@@ -56,6 +56,12 @@ android {
             storeFile file('../key/UnifyHybridX4.keystore')
             storePassword 'android'
         }
+        rtk_HPR3A_1325_config {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file('../key/HPR3A1325.keystore')
+            storePassword 'android'
+        }
         aml_HP40AX2_TA_config {
             keyAlias 'SkyTelecom'
             keyPassword 'android'
@@ -88,6 +94,10 @@ android {
         UnifyHybX2 {
             dimension "default"
             signingConfig signingConfigs.aml_UnifyHybX2_config
+        }
+        HPR3A1325 {
+            dimension "default"
+            signingConfig signingConfigs.rtk_HPR3A_1325_config
         }
     }
 

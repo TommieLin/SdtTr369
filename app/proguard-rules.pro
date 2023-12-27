@@ -70,6 +70,8 @@
 -keep class com.sdt.android.tr369.Bean.CaCertBean { private *; }
 -keep class com.sdt.android.tr369.Bean.ClientCertBean { private *; }
 
+-keep class com.realtek.hardware.** {*;}
+
 -dontwarn android.app.PropertyInvalidatedCache$AutoCorker
 -dontwarn android.app.PropertyInvalidatedCache
 -dontwarn android.hardware.display.VirtualDisplayConfig
