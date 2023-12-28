@@ -677,6 +677,10 @@
                 <schema name="Message" getter="diagnose" setter="diagnose" type="string" write="W" />
             </schema>
 
+            <schema name="Netflix" type="object">
+                <schema name="ESN" getter="diagnose" type="string" write="W" />
+            </schema>
+
         </schema>
 
     </schema>
