@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Receiver.BluetoothMonitorReceiver;
 import com.sdt.android.tr369.Receiver.ExternalAppUpgradeReceiver;
+import com.sdt.android.tr369.Receiver.NetflixEsnReceiver;
 import com.sdt.android.tr369.Receiver.PackageReceiver;
 import com.sdt.android.tr369.Receiver.ShutdownReceiver;
 import com.sdt.android.tr369.Receiver.StandbyModeReceiver;
@@ -54,6 +55,7 @@ public class SdtTr369Service extends Service {
     private StandbyModeReceiver mStandbyModeReceiver = null;
     private ShutdownReceiver mShutdownReceiver = null;
     private ExternalAppUpgradeReceiver mExternalAppUpgradeReceiver = null;
+    private NetflixEsnReceiver mNetflixEsnReceiver = null;
     private HandlerThread mHandlerThread = null;
     private Handler mHandler = null;
     public static final int MSG_START_TR369_SERVICE = 3300;
@@ -191,6 +193,14 @@ public class SdtTr369Service extends Service {
         registerReceiver(mExternalAppUpgradeReceiver, intentFilter);
     }
 
+    private void registerNetflixEsnReceiver() {
+        if (mNetflixEsnReceiver == null) {
+            mNetflixEsnReceiver = new NetflixEsnReceiver();
+        }
+        IntentFilter intentFilter = new IntentFilter("com.netflix.ninja.intent.action.ESN_RESPONSE");
+        registerReceiver(mNetflixEsnReceiver, intentFilter, "com.netflix.ninja.permission.ESN", null);
+    }
+
     @Override
     public void onDestroy() {
         LogUtils.d(TAG, "onDestroy");
@@ -200,6 +210,7 @@ public class SdtTr369Service extends Service {
         if (mStandbyModeReceiver != null) unregisterReceiver(mStandbyModeReceiver);
         if (mShutdownReceiver != null) unregisterReceiver(mShutdownReceiver);
         if (mExternalAppUpgradeReceiver != null) unregisterReceiver(mExternalAppUpgradeReceiver);
+        if (mNetflixEsnReceiver != null) unregisterReceiver(mNetflixEsnReceiver);
 
         if (mHandler != null) {
             mHandler.sendEmptyMessage(MSG_STOP_TR369_SERVICE);
@@ -219,6 +230,7 @@ public class SdtTr369Service extends Service {
         registerStandbyReceiver();
         registerShutdownReceiver();
         registerExternalAppUpdateReceiver();
+        registerNetflixEsnReceiver();
 
         // 开机同步后台logcat状态
         LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");
@@ -247,6 +259,9 @@ public class SdtTr369Service extends Service {
         AppX.updateAppList();
         // 更新协议中储存的蓝牙列表
         BluetoothDeviceX.updateBluetoothList();
+
+        // 初始化时获取Netflix ESN
+        NetflixEsnReceiver.notifyNetflix();
     }
 
     private final OpenTR369Native.IOpenTr369Listener mListener = new OpenTR369Native.IOpenTr369Listener() {

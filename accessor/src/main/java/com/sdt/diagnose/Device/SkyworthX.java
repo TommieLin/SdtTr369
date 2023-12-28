@@ -353,6 +353,29 @@ public class SkyworthX {
     public static String REMOTE_CONTROL_DPI_WIDTH_SP_KEY = "Device.X_Skyworth.RemoteControl.DPI.Width";
     public static String REMOTE_CONTROL_DPI_HEIGHT_SP_KEY = "Device.X_Skyworth.RemoteControl.DPI.Height";
 
+    private boolean checkRemoteControlParam() {
+        if (TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_UPLOAD_URL_SP_KEY))
+                || TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_ICE_SERVICES_SP_KEY))) {
+            return false;
+        }
+        if (TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_FRAME_RATE_SP_KEY))) {
+            SPUtils.getInstance(GlobalContext.getContext()).put(REMOTE_CONTROL_FRAME_RATE_SP_KEY, "30");
+        }
+        if (TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_WIDTH_SP_KEY))
+                || TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_HEIGHT_SP_KEY))) {
+            SPUtils.getInstance(GlobalContext.getContext()).put(REMOTE_CONTROL_DPI_WIDTH_SP_KEY, "1280");
+            SPUtils.getInstance(GlobalContext.getContext()).put(REMOTE_CONTROL_DPI_HEIGHT_SP_KEY, "720");
+        }
+        return true;
+    }
+
+    private void getUserAllow() {
+        LogUtils.d(TAG, "RemoteControl getUserAllow ...");
+        Intent intent = new Intent(GlobalContext.getContext(), BoxAllowActivity.class);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP);
+        GlobalContext.getContext().startActivity(intent);
+    }
+
     public boolean setRemoteControlEnable(String path, String val) {
         LogUtils.d(TAG, "setRemoteControlEnable flag: " + BoxControlBean.getInstance().isAllow);
         if (Boolean.getBoolean(val) || Integer.parseInt(val) == 1) {
@@ -390,32 +413,9 @@ public class SkyworthX {
         return true;
     }
 
-    private boolean checkRemoteControlParam() {
-        if (TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_UPLOAD_URL_SP_KEY))
-                || TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_ICE_SERVICES_SP_KEY))) {
-            return false;
-        }
-        if (TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_FRAME_RATE_SP_KEY))) {
-            SPUtils.getInstance(GlobalContext.getContext()).put(REMOTE_CONTROL_FRAME_RATE_SP_KEY, "30");
-        }
-        if (TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_WIDTH_SP_KEY))
-                || TextUtils.isEmpty(SPUtils.getInstance(GlobalContext.getContext()).getString(REMOTE_CONTROL_DPI_HEIGHT_SP_KEY))) {
-            SPUtils.getInstance(GlobalContext.getContext()).put(REMOTE_CONTROL_DPI_WIDTH_SP_KEY, "1280");
-            SPUtils.getInstance(GlobalContext.getContext()).put(REMOTE_CONTROL_DPI_HEIGHT_SP_KEY, "720");
-        }
-        return true;
-    }
-
     @Tr369Get("Device.X_Skyworth.RemoteControl.")
     public String SK_TR369_GetRemoteControlInfo(String path) {
         return SPUtils.getInstance(GlobalContext.getContext()).getString(path);
-    }
-
-    private void getUserAllow() {
-        LogUtils.d(TAG, "RemoteControl getUserAllow ...");
-        Intent intent = new Intent(GlobalContext.getContext(), BoxAllowActivity.class);
-        intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP);
-        GlobalContext.getContext().startActivity(intent);
     }
 
     @Tr369Set("Device.X_Skyworth.RemoteControl.")
@@ -875,6 +875,19 @@ public class SkyworthX {
             return Config.getString(CONFIG_DEVICE_BASE_PORT, DEFAULT_DEVICE_BASE_PORT);
         }
         return "";
+    }
+
+    @Tr369Get("Device.X_Skyworth.Netflix.ESN")
+    public String SK_TR369_GetNetflixEsn() {
+        String esn = DbManager.getDBParam("Device.X_Skyworth.Netflix.ESN");
+        if (TextUtils.isEmpty(esn)) {
+            LogUtils.e(TAG, "Netflix ESN value is empty, needs to be retrieved again.");
+            Intent esnQueryIntent = new Intent("com.netflix.ninja.intent.action.ESN");
+            esnQueryIntent.setPackage("com.netflix.ninja");
+            esnQueryIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+            GlobalContext.getContext().sendBroadcast(esnQueryIntent);
+        }
+        return esn;
     }
 
 }
