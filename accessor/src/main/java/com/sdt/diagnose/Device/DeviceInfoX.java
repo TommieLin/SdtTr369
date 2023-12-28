@@ -6,6 +6,8 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 
 import com.sdt.annotations.Tr369Get;
+import com.sdt.annotations.Tr369Set;
+import com.sdt.diagnose.Device.DeviceInfo.LocationX;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.database.DbManager;
@@ -84,6 +86,20 @@ public class DeviceInfoX {
             return firstUseDate;
         }
         return firstUseDate;
+    }
+
+    @Tr369Get("Device.DeviceInfo.Location.")
+    public String SK_TR369_GetLocationInfo(String path) {
+        return DbManager.getDBParam(path);
+    }
+
+    @Tr369Set("Device.DeviceInfo.Location.")
+    public boolean SK_TR369_SetLocationInfo(String path, String value) {
+        DbManager.setDBParam(path, value);
+        if (path.contains("ExternalSource")) {
+            return LocationX.getInstance().handleIpInfoIoApi();
+        }
+        return true;
     }
 
 }

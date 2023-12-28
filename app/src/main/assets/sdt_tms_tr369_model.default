@@ -26,6 +26,8 @@ Device.LocalAgent.Controller.1.BootParameter.6.Enable "true"
 Device.LocalAgent.Controller.1.BootParameter.6.ParameterName "Device.DeviceInfo.HardwareVersion"
 Device.LocalAgent.Controller.1.BootParameter.7.Enable "true"
 Device.LocalAgent.Controller.1.BootParameter.7.ParameterName "Device.X_Skyworth.OperatorName"
+Device.LocalAgent.Controller.1.BootParameter.8.Enable "true"
+Device.LocalAgent.Controller.1.BootParameter.8.ParameterName "Device.X_Skyworth.Lock.Enable"
 
 Device.LocalAgent.Subscription.1.Alias "sdtcpe-1"
 Device.LocalAgent.Subscription.1.Enable "true"

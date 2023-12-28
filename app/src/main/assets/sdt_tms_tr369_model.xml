@@ -69,6 +69,14 @@
                 <schema name="Status" constraint="64" getter="diagnose" type="string" />
                 <schema name="BootFailureLog" constraint="64" getter="diagnose" type="string" />
             </schema>
+
+            <schema name="Location" type="object">
+                <schema name="Source" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="ExternalSource" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="ExternalProtocol" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="DataObject" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="AcquiredTime" getter="diagnose" setter="diagnose" type="string" write="W" />
+            </schema>
         </schema>
 
         <schema name="GatewayInfo" type="object">
