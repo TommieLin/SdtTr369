@@ -63,12 +63,14 @@ public class RtkHdmiX {
         return status;
     }
 
-    public void setHdmiEnableByRtk(boolean isEnable) {
+    public boolean setHdmiEnableByRtk(boolean isEnable) {
         try {
             RtkHDMIManager2.getRtkHDMIManager(mContext).setHDMIEnable(isEnable);
         } catch (NoClassDefFoundError e) {
             LogUtils.e(TAG, "setHdmiEnableByRtk: RtkHDMIManager2 call failed, " + e.getMessage());
+            return false;
         }
+        return true;
     }
 
     public boolean getHdmiResolutionModeByRtk() {

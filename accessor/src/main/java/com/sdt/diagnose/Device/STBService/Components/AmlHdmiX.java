@@ -74,13 +74,14 @@ public class AmlHdmiX {
         return status;
     }
 
-    public void setHdmiEnableByAml(boolean isEnable) {
+    public boolean setHdmiEnableByAml(boolean isEnable) {
         try {
-            SystemControlManager.getInstance().writeSysFs("/sys/class/amhdmitx/amhdmitx0/avmute",
+            return SystemControlManager.getInstance().writeSysFs("/sys/class/amhdmitx/amhdmitx0/avmute",
                     isEnable ? "-1" : "1");
         } catch (NoClassDefFoundError e) {
             LogUtils.e(TAG, "setHdmiEnableByAml: SystemControlManager call failed, " + e.getMessage());
         }
+        return false;
     }
 
     public boolean getHdmiResolutionModeByAml() {

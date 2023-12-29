@@ -195,30 +195,34 @@ public class SkyworthX {
         return String.valueOf(vol);
     }
 
-    @Tr369Get("Device.X_Skyworth.Lock.Enable")
-    public String SK_TR369_GetLockEnable() {
-        return DbManager.getDBParam("Device.X_Skyworth.Lock.Enable");
+    @Tr369Get("Device.X_Skyworth.Lock.")
+    public String SK_TR369_GetLockParams(String path) {
+        return DbManager.getDBParam(path);
     }
 
-    @Tr369Set("Device.X_Skyworth.Lock.Enable")
+    @Tr369Set("Device.X_Skyworth.Lock.")
     public boolean SK_TR369_SetLockEnable(String path, String value) {
         // value: 0->unlock, 1->lock
-        DbManager.setDBParam("Device.X_Skyworth.Lock.Enable", value);
-        SystemProperties.set("persist.sys.tr069.lock", value);
-        boolean isEnable = "1".equals(value);
-        String backgroundImageUrl = DbManager.getDBParam("Device.X_Skyworth.Lock.Background");
-        return setLock(isEnable, backgroundImageUrl);
+        DbManager.setDBParam(path, value);
+        if (path.contains("Enable")) {
+            boolean isEnable = "1".equals(value);
+            String backgroundImageUrl = DbManager.getDBParam("Device.X_Skyworth.Lock.Background");
+            return setLock(isEnable, backgroundImageUrl);
+        }
+        return true;
     }
 
     private boolean setLock(boolean toLock, String imageUrl) {
 //        checkFloatPermission(GlobalContext.getContext());
-        Intent intent = new Intent(GlobalContext.getContext(), LockUnlockActivity.class);
         if (toLock) {
+            SystemProperties.set("persist.sys.tr069.lock", "1");
+            Intent intent = new Intent(GlobalContext.getContext(), LockUnlockActivity.class);
             intent.putExtra("lockTip", "stb is locked");
             intent.putExtra("imageUrl", imageUrl);
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP);
             GlobalContext.getContext().startActivity(intent);
         } else {
+            SystemProperties.set("persist.sys.tr069.lock", "0");
             if (LockUnlockActivity.instance != null) {
                 LockUnlockActivity.instance.finish();
             }

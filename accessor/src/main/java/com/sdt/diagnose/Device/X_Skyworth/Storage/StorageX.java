@@ -17,6 +17,8 @@ import android.util.SparseLongArray;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
 import com.sdt.diagnose.common.ApplicationUtils;
@@ -285,7 +287,8 @@ public class StorageX {
         if (value == null || value.isEmpty()) return false;
 
         try {
-            List<String> packageNames = ApplicationUtils.parseStringList(value);
+            Gson gson = new Gson();
+            ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
             LogUtils.d(TAG, "Waiting to handle apps: " + packageNames);
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
@@ -310,7 +313,8 @@ public class StorageX {
         if (value == null || value.isEmpty()) return false;
 
         try {
-            List<String> packageNames = ApplicationUtils.parseStringList(value);
+            Gson gson = new Gson();
+            ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
             LogUtils.d(TAG, "Waiting to handle apps: " + packageNames);
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();

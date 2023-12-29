@@ -20,6 +20,8 @@ import android.print.PrintManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 
@@ -61,7 +63,8 @@ public class ApplicationUtils {
         if (pkgs == null || pkgs.isEmpty()) return false;
 
         try {
-            List<String> packageNames = parseStringList(pkgs);
+            Gson gson = new Gson();
+            ArrayList<String> packageNames = gson.fromJson(pkgs, new TypeToken<List<String>>(){}.getType());
             LogUtils.d(TAG, "Waiting to uninstall apps: " + packageNames);
             if (packageNames.isEmpty()) return false;
 
@@ -85,25 +88,6 @@ public class ApplicationUtils {
         }
 
         return true;
-    }
-
-    public static List<String> parseStringList(String input) {
-        List<String> result = new ArrayList<>();
-
-        // 去除首尾的括号和空格
-        input = input.trim();
-        input = input.substring(1, input.length() - 1).trim();
-
-        // 按逗号分割
-        String[] parts = input.split(",");
-
-        for (String part : parts) {
-            // 去除首尾的引号并添加到列表
-            part = part.trim();
-            result.add(part.substring(1, part.length() - 1).trim());
-        }
-
-        return result;
     }
 
     public static boolean stopApplication(String pkg) {

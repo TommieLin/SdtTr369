@@ -70,17 +70,18 @@
                 <schema name="BootFailureLog" constraint="64" getter="diagnose" type="string" />
             </schema>
 
-            <schema name="Location" type="object">
-                <schema name="Source" getter="diagnose" setter="diagnose" type="string" write="W" />
-                <schema name="ExternalSource" getter="diagnose" setter="diagnose" type="string" write="W" />
-                <schema name="ExternalProtocol" getter="diagnose" setter="diagnose" type="string" write="W" />
+            <schema name="LocationNumberOfEntries" table="Device.DeviceInfo.Location.{i}" type="multipleNumber" />
+            <schema name="Location.{i}" type="multipleObject">
+                <schema name="Source" getter="diagnose" type="string" />
+                <schema name="ExternalSource" getter="diagnose" type="string" />
+                <schema name="ExternalProtocol" getter="diagnose" type="string" />
                 <schema name="DataObject" getter="diagnose" setter="diagnose" type="string" write="W" />
-                <schema name="AcquiredTime" getter="diagnose" setter="diagnose" type="string" write="W" />
+                <schema name="AcquiredTime" getter="diagnose" type="string" />
             </schema>
         </schema>
 
         <schema name="GatewayInfo" type="object">
-            <schema name="ManufacturerOUI" default="309176" type="string" write="W" />
+            <schema name="ManufacturerOUI" default="309176" type="string" />
             <schema name="ProductClass" constraint="64" getter="diagnose" type="string" />
             <schema name="SerialNumber" constraint="64" getter="diagnose" type="string" />
         </schema>
@@ -93,37 +94,37 @@
             <schema name="NTPServer3" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="NTPServer4" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="NTPServer5" getter="diagnose" setter="diagnose" type="string" write="W" />
-            <schema name="CurrentLocalTime" getter="diagnose" setter="diagnose" type="dateTime" />
+            <schema name="CurrentLocalTime" getter="diagnose" setter="diagnose" type="dateTime" write="W" />
             <schema name="LocalTimeZone" constraint="256" getter="diagnose" setter="diagnose" type="string" write="W" />
         </schema>
 
         <schema name="UserInterface" type="object">
-            <schema name="PasswordRequired" default="0" type="boolean" write="W" />
-            <schema name="PasswordUserSelectable" default="0" type="boolean" write="W" />
-            <schema name="UpgradeAvailable" default="0" type="boolean" write="W" />
-            <schema name="WarrantyDate" type="dateTime" write="W" />
-            <schema name="ISPName" default="ISPName" type="string" write="W" />
-            <schema name="ISPHelpDesk" default="ISPHelpDesk" type="string" write="W" />
-            <schema name="ISPHomePage" default="ISPHomePage" type="string" write="W" />
-            <schema name="ISPHelpPage" default="ISPHelpPage" type="string" write="W" />
-            <schema name="ISPLogo" default="ISPLogo" type="string" write="W" />
-            <schema name="ISPLogoSize" default="ISPLogoSize" type="string" write="W" />
-            <schema name="ISPMailServer" default="ISPMailServer" type="string" write="W" />
-            <schema name="ISPNewsServer" default="ISPNewsServer" type="string" write="W" />
-            <schema name="TextColor" default="000000" type="string" write="W" />
-            <schema name="BackgroundColor" default="00ff00" type="string" write="W" />
-            <schema name="ButtonColor" default="ff00ff" type="string" write="W" />
-            <schema name="ButtonTextColor" default="000000" type="string" write="W" />
-            <schema name="AvailableLanguages" default="0:chinese,1:english" type="string" write="W" />
+            <schema name="PasswordRequired" default="0" type="boolean" />
+            <schema name="PasswordUserSelectable" default="0" type="boolean" />
+            <schema name="UpgradeAvailable" default="0" type="boolean" />
+            <schema name="WarrantyDate" type="dateTime" />
+            <schema name="ISPName" default="ISPName" type="string" />
+            <schema name="ISPHelpDesk" default="ISPHelpDesk" type="string" />
+            <schema name="ISPHomePage" default="ISPHomePage" type="string" />
+            <schema name="ISPHelpPage" default="ISPHelpPage" type="string" />
+            <schema name="ISPLogo" default="ISPLogo" type="string" />
+            <schema name="ISPLogoSize" default="ISPLogoSize" type="string" />
+            <schema name="ISPMailServer" default="ISPMailServer" type="string" />
+            <schema name="ISPNewsServer" default="ISPNewsServer" type="string" />
+            <schema name="TextColor" default="000000" type="string" />
+            <schema name="BackgroundColor" default="00ff00" type="string" />
+            <schema name="ButtonColor" default="ff00ff" type="string" />
+            <schema name="ButtonTextColor" default="000000" type="string" />
+            <schema name="AvailableLanguages" default="0:chinese,1:english" type="string" />
             <schema name="CurrentLanguage" getter="diagnose" setter="diagnose" type="string" write="W" />
-            <schema name="UserUpdateServer" default="http://192.168.11.16/update" type="string" write="W" />
-            <schema name="AutoUpdateServer" getter="diagnose" setter="diagnose" type="string" />
+            <schema name="UserUpdateServer" default="http://192.168.11.16/update" type="string" />
+            <schema name="AutoUpdateServer" getter="diagnose" setter="diagnose" type="string" write="W" />
         </schema>
 
         <schema name="Ethernet" type="object">
             <schema name="LinkNumberOfEntries" table="Device.Ethernet.Link.{i}" type="multipleNumber" />
             <schema name="Link.{i}" type="multipleObject">
-                <schema name="Alias" default="cpe-eth-alias" type="string" write="W" />
+                <schema name="Alias" default="cpe-eth-alias" type="string" />
                 <schema name="Name" constraint="64" getter="diagnose" type="string" />
                 <schema name="Enable" getter="diagnose" type="boolean" />
                 <schema name="Status" getter="diagnose" type="string" />
@@ -134,9 +135,9 @@
 
         <schema name="IP" type="object">
             <schema name="IPv4Capable" getter="diagnose" type="boolean" />
-            <schema name="IPv4Enable" getter="diagnose" setter="diagnose" type="boolean" />
+            <schema name="IPv4Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
             <schema name="IPv6Capable" getter="diagnose" type="boolean" />
-            <schema name="IPv6Enable" getter="diagnose" setter="diagnose" type="boolean" />
+            <schema name="IPv6Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
 
             <schema name="Diagnostics" type="object">
                 <schema name="IPPing" type="object">
@@ -149,16 +150,16 @@
                     <schema name="Interface" setter="diagnose" type="string" write="W" />
                     <schema name="ProtocolVersion" setter="diagnose" type="string" write="W" />
                     <!-- Output -->
-                    <schema name="Status" getter="diagnose" type="string" write="W" />
-                    <schema name="IPAddressUsed" getter="diagnose" type="string" write="W" />
-                    <schema name="SuccessCount" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="FailureCount" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="AverageResponseTime" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="MinimumResponseTime" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="MaximumResponseTime" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="AverageResponseTimeDetailed" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="MinimumResponseTimeDetailed" getter="diagnose" type="unsignedInt" write="W" />
-                    <schema name="MaximumResponseTimeDetailed" getter="diagnose" type="unsignedInt" write="W" />
+                    <schema name="Status" getter="diagnose" type="string" />
+                    <schema name="IPAddressUsed" getter="diagnose" type="string" />
+                    <schema name="SuccessCount" getter="diagnose" type="unsignedInt" />
+                    <schema name="FailureCount" getter="diagnose" type="unsignedInt" />
+                    <schema name="AverageResponseTime" getter="diagnose" type="unsignedInt" />
+                    <schema name="MinimumResponseTime" getter="diagnose" type="unsignedInt" />
+                    <schema name="MaximumResponseTime" getter="diagnose" type="unsignedInt" />
+                    <schema name="AverageResponseTimeDetailed" getter="diagnose" type="unsignedInt" />
+                    <schema name="MinimumResponseTimeDetailed" getter="diagnose" type="unsignedInt" />
+                    <schema name="MaximumResponseTimeDetailed" getter="diagnose" type="unsignedInt" />
                 </schema>
 
                 <schema name="TraceRoute" type="object">
@@ -207,10 +208,10 @@
                 <schema name="IPv4AddressNumberOfEntries" table="Device.IP.Interface.{i}.IPv4Address.{i}"
                     type="multipleNumber" />
                 <schema name="IPv4Address.{i}" type="multipleObject">
-                    <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" />
+                    <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
                     <schema name="Status" getter="diagnose" type="string" />
-                    <schema name="IPAddress" constraint="15" getter="diagnose" setter="diagnose" type="string" />
-                    <schema name="SubnetMask" constraint="15" getter="diagnose" setter="diagnose" type="string" />
+                    <schema name="IPAddress" constraint="15" getter="diagnose" setter="diagnose" type="string" write="W" />
+                    <schema name="SubnetMask" constraint="15" getter="diagnose" setter="diagnose" type="string" write="W" />
                     <schema name="AddressingType" getter="diagnose" type="string" />
                 </schema>
             </schema>
@@ -275,10 +276,11 @@
 
             <schema name="EndPointNumberOfEntries" table="Device.WiFi.EndPoint.{i}" type="multipleNumber" />
             <schema name="EndPoint.{i}" type="multipleObject">
-                <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" />
+                <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
                 <schema name="Status" constraint="64" getter="diagnose" type="string" />
                 <schema name="Alias" constraint="64" default="cpe-radio-alias" type="string" />
-                <schema name="ProfileReference" constraint="256" getter="diagnose" setter="diagnose" type="string" />
+                <schema name="ProfileReference" constraint="256" getter="diagnose" setter="diagnose" type="string"
+                    write="W" />
                 <schema name="SSIDReference" constraint="256" getter="diagnose" type="string" />
                 <schema name="WifiStandard" constraint="64" getter="diagnose" type="string" />
                 <schema name="Stats" type="object">
@@ -304,12 +306,12 @@
 
         <!-- 过期协议 -->
         <schema name="LAN" type="object">
-            <schema name="AddressingType" getter="diagnose" setter="diagnose" type="string" />
-            <schema name="IPAddress" getter="diagnose" inform="true" setter="diagnose" type="string" />
+            <schema name="AddressingType" getter="diagnose" setter="diagnose" type="string" write="W" />
+            <schema name="IPAddress" getter="diagnose" inform="true" setter="diagnose" type="string" write="W" />
             <schema name="IPv6Address" getter="diagnose" type="string" />
-            <schema name="SubnetMask" getter="diagnose" setter="diagnose" type="string" />
-            <schema name="DefaultGateway" getter="diagnose" setter="diagnose" type="string" />
-            <schema name="DNSServers" getter="diagnose" setter="diagnose" type="string" />
+            <schema name="SubnetMask" getter="diagnose" setter="diagnose" type="string" write="W" />
+            <schema name="DefaultGateway" getter="diagnose" setter="diagnose" type="string" write="W" />
+            <schema name="DNSServers" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="MACAddress" getter="diagnose" type="string" />
         </schema>
 
@@ -595,8 +597,8 @@
             <schema name="SyncParamInterval" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
 
             <schema name="Storage" type="object">
-                <schema name="Info" getter="diagnose" type="string" write="W" />
-                <schema name="AppsInfo" getter="diagnose" type="string" write="W" />
+                <schema name="Info" getter="diagnose" type="string" />
+                <schema name="AppsInfo" getter="diagnose" type="string" />
                 <schema name="Clear" setter="diagnose" type="boolean" write="W" />
                 <schema name="ClearAppsData" setter="diagnose" type="string" write="W" />
                 <schema name="ClearAppsCache" setter="diagnose" type="string" write="W" />
@@ -614,7 +616,7 @@
                 <schema name="Type" getter="diagnose" type="string" />
                 <schema name="Mac" constraint="64" getter="diagnose" type="string" />
                 <schema name="Name" constraint="128" getter="diagnose" type="string" />
-                <schema name="ConnectionStatus" getter="diagnose" setter="diagnose" type="string" />
+                <schema name="ConnectionStatus" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Power" getter="diagnose" type="string" />
             </schema>
 
@@ -678,7 +680,7 @@
             </schema>
 
             <schema name="Netflix" type="object">
-                <schema name="ESN" getter="diagnose" type="string" write="W" />
+                <schema name="ESN" getter="diagnose" type="string" />
             </schema>
 
         </schema>

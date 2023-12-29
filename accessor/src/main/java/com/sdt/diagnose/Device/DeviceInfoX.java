@@ -88,18 +88,17 @@ public class DeviceInfoX {
         return firstUseDate;
     }
 
-    @Tr369Get("Device.DeviceInfo.Location.")
+    @Tr369Get("Device.DeviceInfo.Location.1.")
     public String SK_TR369_GetLocationInfo(String path) {
+        if (path.contains("DataObject")) {
+            return LocationX.getInstance().getIpInfoIoJson();
+        }
         return DbManager.getDBParam(path);
     }
 
-    @Tr369Set("Device.DeviceInfo.Location.")
+    @Tr369Set("Device.DeviceInfo.Location.1.")
     public boolean SK_TR369_SetLocationInfo(String path, String value) {
-        DbManager.setDBParam(path, value);
-        if (path.contains("ExternalSource")) {
-            return LocationX.getInstance().handleIpInfoIoApi();
-        }
-        return true;
+        return (DbManager.setDBParam(path, value) == 0);
     }
 
 }

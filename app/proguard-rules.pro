@@ -63,6 +63,7 @@
 -keep class com.sdt.diagnose.common.configuration.** {*;}
 -keep class com.sdt.diagnose.common.bean.LogResponseBean { private *; }
 -keep class com.sdt.diagnose.common.bean.ShortMessageBean { private *; }
+-keep class com.sdt.diagnose.common.bean.LocationInfo { private *; }
 
 -keep class com.sdt.opentr369.OpenTR369Native {*;}
 
@@ -72,6 +73,8 @@
 
 -keep class com.realtek.hardware.** {*;}
 
+-keep class com.google.gson.reflect.TypeToken {*;}
+
 -dontwarn android.app.PropertyInvalidatedCache$AutoCorker
 -dontwarn android.app.PropertyInvalidatedCache
 -dontwarn android.hardware.display.VirtualDisplayConfig
@@ -80,6 +83,8 @@
 -dontwarn com.android.org.conscrypt.TrustManagerImpl
 -dontwarn com.droidlogic.app.OutputModeManager
 -dontwarn com.droidlogic.app.SystemControlManager
+-dontwarn com.google.j2objc.annotations.RetainedWith
+-dontwarn com.google.j2objc.annotations.Weak
 -dontwarn dalvik.system.BlockGuard$VmPolicy
 -dontwarn dalvik.system.CloseGuard
 -dontwarn javax.lang.model.SourceVersion
