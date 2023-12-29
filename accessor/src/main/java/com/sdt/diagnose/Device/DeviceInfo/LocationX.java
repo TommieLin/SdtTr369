@@ -81,6 +81,12 @@ public class LocationX {
         return !TextUtils.isEmpty(mApiIp) && !TextUtils.isEmpty(mApiToken);
     }
 
+    /**
+     * 使用ipinfo.io接口的方式获取Location，此方法需要使用官方提供的token来授权才能使用，token每个月有使用上限，
+     * 因此暂时不考虑此方法。
+     * <p>
+     * API相关信息请查阅：<a href="https://ipinfo.io/">ipinfo.io</a>
+     */
     public boolean handleIpInfoIoApi() {
         if (!parseIpInfoParamsFromSrc()) {
             LogUtils.e(TAG, "Failed to parse ExternalSource which does not contain expected IP and Token");
@@ -101,8 +107,7 @@ public class LocationX {
             }
         }
 
-        // API来源: https://ipinfo.io/
-        // Json格式: https://ipinfo.io/json
+        // 调用ipinfo.io接口
         IPinfo ipInfo = new IPinfo.Builder()
                 .setToken(mApiToken)
                 .build();
@@ -142,7 +147,44 @@ public class LocationX {
     }
 
     /**
-     * 获取公网IP地址，暂时不用盒端自己获取，服务器会下发IP
+     * 通过Get的方式直接获取ipinfo.io的JSON数据，此方式可以避开使用token，免去token使用次数的限制
+     * URL: <a href="https://ipinfo.io/json">https://ipinfo.io/json</a>
+     */
+    public String getIpInfoIoJson() {
+        // 访问返回IP地址的网站
+        URL url;
+        HttpURLConnection connection;
+        try {
+            url = new URL("https://ipinfo.io/json");
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            // 读取网站返回的IP地址字符串
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+
+            StringBuilder json = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                json.append(line);
+            }
+            LogUtils.d(TAG, "The JSON data acquired from \"ipinfo.io\" is: " + json);
+
+            // 关闭连接和输入流
+            reader.close();
+            connection.disconnect();
+
+            // 更新时间
+            String time = DeviceInfoUtils.getTime();
+            DbManager.setDBParam("Device.DeviceInfo.Location.1.AcquiredTime", time);
+
+            return json.toString();
+        } catch (Exception e) {
+            LogUtils.e(TAG, "getIpInfoIoJson error, " + e.getMessage());
+        }
+        return "";
+    }
+
+    /**
+     * 获取公网IP地址
      */
     public static String getIpv4NetIP() {
         // 访问返回IP地址的网站

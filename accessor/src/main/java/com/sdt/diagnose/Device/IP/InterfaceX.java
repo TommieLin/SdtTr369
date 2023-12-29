@@ -37,14 +37,14 @@ public class InterfaceX {
         boolean status = mWifiManager.isWifiEnabled();
         if (("false").equalsIgnoreCase(value)) {
             if (status) {
-                mWifiManager.setWifiEnabled(false);
+                return mWifiManager.setWifiEnabled(false);
             }
         } else if (("true").equalsIgnoreCase(value)) {
             if (!status) {
-                mWifiManager.setWifiEnabled(true);
+                return mWifiManager.setWifiEnabled(true);
             }
         }
-        return true;
+        return false;
     }
 
     @Tr369Get("Device.IP.Interface.")

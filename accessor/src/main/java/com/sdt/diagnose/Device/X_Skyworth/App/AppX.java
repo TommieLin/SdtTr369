@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.sdt.accessor.R;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
@@ -314,7 +315,8 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     private ArrayList<String> getBlockListPkgNames() {
         String listFromDBParam = DbManager.getDBParam("Device.X_Skyworth.BlockListPkgNames");
-        return (ArrayList<String>) ApplicationUtils.parseStringList(listFromDBParam);
+        Gson gson = new Gson();
+        return gson.fromJson(listFromDBParam, new TypeToken<List<String>>(){}.getType());
     }
 
     private void setBlockListPkgNames(ArrayList<String> list) {
@@ -357,7 +359,8 @@ public class AppX implements IProtocolArray<AppInfo> {
     public boolean SK_TR369_SetAppBatchBlock(String path, String value) {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
-        List<String> packageNames = ApplicationUtils.parseStringList(value);
+        Gson gson = new Gson();
+        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
         LogUtils.d(TAG, "Wait to suspend application: " + packageNames);
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
@@ -392,7 +395,8 @@ public class AppX implements IProtocolArray<AppInfo> {
     public boolean SK_TR369_SetAppBatchUnBlock(String path, String value) {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
-        List<String> packageNames = ApplicationUtils.parseStringList(value);
+        Gson gson = new Gson();
+        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
         LogUtils.d(TAG, "Wait to cancel pending application: " + packageNames);
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
@@ -450,8 +454,8 @@ public class AppX implements IProtocolArray<AppInfo> {
         ArrayList<String> blacklist = new ArrayList<>();
         for (int i = 1; i <= numBlacklist; ++i) {
             String array = SystemProperties.get("persist.sys.tr069.blacklist.part" + i, "");
-
-            List<String> packageNames = ApplicationUtils.parseStringList(array);
+            Gson gson = new Gson();
+            ArrayList<String> packageNames = gson.fromJson(array, new TypeToken<List<String>>(){}.getType());
             blacklist.addAll(packageNames);
         }
         return new Gson().toJson(blacklist);
@@ -462,7 +466,8 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppWhiteList();
         clearAppBlackList();
 
-        List<String> packageNames = ApplicationUtils.parseStringList(value);
+        Gson gson = new Gson();
+        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
         LogUtils.i(TAG, "Waiting for blacklist to be set: " + packageNames);
         if (packageNames.isEmpty()) {
             return true;
@@ -514,8 +519,8 @@ public class AppX implements IProtocolArray<AppInfo> {
         ArrayList<String> whitelist = new ArrayList<>();
         for (int i = 1; i <= numWhitelist; ++i) {
             String array = SystemProperties.get("persist.sys.tr069.whitelist.part" + i, "");
-
-            List<String> packageNames = ApplicationUtils.parseStringList(array);
+            Gson gson = new Gson();
+            ArrayList<String> packageNames = gson.fromJson(array, new TypeToken<List<String>>(){}.getType());
             whitelist.addAll(packageNames);
         }
         return new Gson().toJson(whitelist);
@@ -526,7 +531,8 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppBlackList();
         clearAppWhiteList();
 
-        List<String> packageNames = ApplicationUtils.parseStringList(value);
+        Gson gson = new Gson();
+        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
         LogUtils.i(TAG, "Waiting for whitelist to be set: " + packageNames);
         if (packageNames.isEmpty()) {
             return true;

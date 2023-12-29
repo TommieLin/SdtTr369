@@ -51,7 +51,8 @@ public class TcpdumpX {
             case "Duration":
                 if (!TextUtils.isEmpty(value)) {
                     tcpdumpBean.setDuration(value);
-                } else {  //如果前端没有设置抓包时长，默认抓包30S
+                } else {
+                    //如果前端没有设置抓包时长，默认抓包30S
                     tcpdumpBean.setDuration(String.valueOf(MAX_TCPDUMP_DURATION));
                 }
                 break;

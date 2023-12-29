@@ -32,7 +32,6 @@ public class TimeX {
         boolean result = Settings.Global.putString(GlobalContext.getContext().getContentResolver(),
                 Settings.Global.NTP_SERVER, value);
         if (result) DbManager.setDBParam(path, value);
-
         return result;
     }
 

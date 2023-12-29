@@ -100,10 +100,10 @@ int SK_TR369_GetVendorParam(dm_req_t *req, char *buf, int len)
     USP_LOG_Info("%s: The requested path: %s", __FUNCTION__, req->path);
     err = SK_TR369_API_GetParams(req->path, buf, len);
     USP_LOG_Debug("%s: SK_TR369_API_GetParams return: %d", __FUNCTION__, err);
-    if (err == -1)
+    if (err != 0)
     {
-        err = SK_TR369_GetDBParam(req->path, buf);
-        USP_LOG_Debug("%s: SK_TR369_GetDBParam return: %d", __FUNCTION__, err);
+        USP_ERR_SetMessage("%s: Execution failed: %s", __FUNCTION__, req->path);
+        err = USP_ERR_SK_API_CALL_FAILURE;
     }
     return err;
 }
@@ -129,10 +129,10 @@ int SK_TR369_SetVendorParam(dm_req_t *req, char *buf)
     USP_LOG_Info("%s: The requested path: %s", __FUNCTION__, req->path);
     err = SK_TR369_API_SetParams(req->path, buf);
     USP_LOG_Debug("%s: SK_TR369_API_SetParams return: %d", __FUNCTION__, err);
-    if (err == -1)
+    if (err != 0)
     {
-        err = SK_TR369_SetDBParam(req->path, buf);
-        USP_LOG_Debug("%s: SK_TR369_SetDBParam return: %d", __FUNCTION__, err);
+        USP_ERR_SetMessage("%s: Execution failed: %s", __FUNCTION__, req->path);
+        err = USP_ERR_SK_API_CALL_FAILURE;
     }
     return err;
 }

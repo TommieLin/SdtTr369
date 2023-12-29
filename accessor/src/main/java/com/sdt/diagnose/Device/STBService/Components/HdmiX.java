@@ -91,13 +91,13 @@ public class HdmiX {
 
         if (mStbModelType == null) mStbModelType = ModelX.getPlatform();
         if (mStbModelType == ModelX.Type.Amlogic) {
-            AmlHdmiX.getInstance().setHdmiEnableByAml(isEnable);
+            return AmlHdmiX.getInstance().setHdmiEnableByAml(isEnable);
         } else if (mStbModelType == ModelX.Type.Realtek) {
-            RtkHdmiX.getInstance().setHdmiEnableByRtk(isEnable);
+            return RtkHdmiX.getInstance().setHdmiEnableByRtk(isEnable);
         } else {
             try {
                 if (null != mCmsExtraServiceManager) {
-                    mCmsExtraServiceManager.setHdmiStatus(isEnable);
+                    return (mCmsExtraServiceManager.setHdmiStatus(isEnable) == 0);
                 } else {
                     LogUtils.e(TAG, "setHdmiEnable: CmsExtraServiceManager is null");
                 }
@@ -106,7 +106,7 @@ public class HdmiX {
             }
         }
 
-        return true;
+        return false;
     }
 
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.Status")

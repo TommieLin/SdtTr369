@@ -276,11 +276,7 @@ public class SdtTr369Service extends Service {
 
         @Override
         public boolean openTR369SetAttr(int what, String path, String value) {
-            boolean ret = Tr369PathInvoke.getInstance().setAttribute(what, path, value);
-            if (!ret) {
-                ret = (DbManager.setDBParam(path, value) == 0);
-            }
-            return ret;
+            return Tr369PathInvoke.getInstance().setAttribute(what, path, value);
         }
 
         @Override
@@ -312,6 +308,9 @@ public class SdtTr369Service extends Service {
             } else if ("dbset".equalsIgnoreCase(cmd) && args.length > 2) {
                 String value = args[2];
                 boolean ret = mListener.openTR369SetAttr(0, path, value);
+                if (!ret) {
+                    ret = (DbManager.setDBParam(path, value) == 0);
+                }
                 if (ret) {
                     pw.println(formatString(path));
                 } else {

@@ -108,4 +108,10 @@ Device.X_Skyworth.Logcat.Background.Enable "1"
 ## 平台软件默认不开启logcat自动上传日志功能，按项目需求打开
 Device.X_Skyworth.Logcat.AutoUpload.Enable "0"
 
+## 位置信息相关参数
+Device.DeviceInfo.Location.1.Source "External"
+Device.DeviceInfo.Location.1.ExternalProtocol "CWMP"
+Device.DeviceInfo.Location.1.ExternalSource "https://ipinfo.io/json"
+Device.DeviceInfo.Location.1.DataObject ""
+Device.DeviceInfo.Location.1.AcquiredTime ""
 

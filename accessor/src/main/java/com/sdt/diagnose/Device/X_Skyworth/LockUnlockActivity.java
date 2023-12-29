@@ -52,6 +52,18 @@ public class LockUnlockActivity extends Activity {
         showDialog();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        DbManager.setDBParam("Device.X_Skyworth.Lock.Enable", "1");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        DbManager.setDBParam("Device.X_Skyworth.Lock.Enable", "0");
+    }
+
     // 按center键唤出提示打开网络设置的弹窗
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
