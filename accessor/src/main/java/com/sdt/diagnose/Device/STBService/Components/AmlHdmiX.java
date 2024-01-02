@@ -2,6 +2,7 @@ package com.sdt.diagnose.Device.STBService.Components;
 
 import android.content.Context;
 import android.os.Build;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -56,6 +57,12 @@ public class AmlHdmiX {
     public boolean isHDMIPluggedByAml() {
         boolean isPlugged = false;
         try {
+            String curOutputMode = OutputModeManager.getInstance(mContext).getCurrentOutputMode();
+            // if the currentOutputMode is dummy_l it means the hdmi connected
+            // had some issue we need report to plug out.
+            if (TextUtils.equals(curOutputMode, "dummy_l")) {
+                return false;
+            }
             isPlugged = OutputModeManager.getInstance(mContext).isHDMIPlugged();
         } catch (NoClassDefFoundError e) {
             LogUtils.e(TAG, "isHDMIPluggedByAml: OutputModeManager call failed, " + e.getMessage());
