@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.print.PrintManager;
+import android.text.TextUtils;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -65,8 +66,17 @@ public class ApplicationUtils {
         try {
             Gson gson = new Gson();
             ArrayList<String> packageNames = gson.fromJson(pkgs, new TypeToken<List<String>>(){}.getType());
-            LogUtils.d(TAG, "Waiting to uninstall apps: " + packageNames);
-            if (packageNames.isEmpty()) return false;
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Waiting to uninstall apps: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
+                return true;
+            }
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             List<PackageInfo> packlist = pm.getInstalledPackages(0);
