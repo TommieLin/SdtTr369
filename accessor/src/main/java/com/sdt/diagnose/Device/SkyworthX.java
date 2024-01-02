@@ -202,17 +202,21 @@ public class SkyworthX {
 
     @Tr369Set("Device.X_Skyworth.Lock.")
     public boolean SK_TR369_SetLockEnable(String path, String value) {
-        // value: 0->unlock, 1->lock
+        if (TextUtils.isEmpty(path)) {
+            LogUtils.e(TAG, "The Lock function path is abnormal");
+            return false;
+        }
         DbManager.setDBParam(path, value);
         if (path.contains("Enable")) {
+            // value: 0->unlock, 1->lock
             boolean isEnable = "1".equals(value);
             String backgroundImageUrl = DbManager.getDBParam("Device.X_Skyworth.Lock.Background");
-            return setLock(isEnable, backgroundImageUrl);
+            setLock(isEnable, backgroundImageUrl);
         }
         return true;
     }
 
-    private boolean setLock(boolean toLock, String imageUrl) {
+    private void setLock(boolean toLock, String imageUrl) {
 //        checkFloatPermission(GlobalContext.getContext());
         if (toLock) {
             SystemProperties.set("persist.sys.tr069.lock", "1");
@@ -232,7 +236,6 @@ public class SkyworthX {
                     | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             GlobalContext.getContext().startActivity(mHomeIntent);
         }
-        return true;
     }
 
     public boolean checkFloatPermission(Context context) {

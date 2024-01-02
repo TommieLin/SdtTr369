@@ -289,7 +289,17 @@ public class StorageX {
         try {
             Gson gson = new Gson();
             ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-            LogUtils.d(TAG, "Waiting to handle apps: " + packageNames);
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Waiting to handle apps: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
+                return true;
+            }
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             final List<PackageInfo> infos = pm.getInstalledPackages(0);
@@ -315,7 +325,17 @@ public class StorageX {
         try {
             Gson gson = new Gson();
             ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-            LogUtils.d(TAG, "Waiting to handle apps: " + packageNames);
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Waiting to handle apps: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
+                return true;
+            }
 
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             final List<PackageInfo> infos = pm.getInstalledPackages(0);

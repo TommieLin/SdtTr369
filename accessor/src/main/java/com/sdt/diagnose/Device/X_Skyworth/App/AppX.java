@@ -359,9 +359,25 @@ public class AppX implements IProtocolArray<AppInfo> {
     public boolean SK_TR369_SetAppBatchBlock(String path, String value) {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
-        Gson gson = new Gson();
-        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-        LogUtils.d(TAG, "Wait to suspend application: " + packageNames);
+        ArrayList<String> packageNames;
+        try {
+            Gson gson = new Gson();
+            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Wait to suspend application: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The content of packageNames is empty and no subsequent operations are required");
+                return true;
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
+            return false;
+        }
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
         SuspendDialogInfo suspendDialogInfo = new SuspendDialogInfo.Builder()
@@ -369,18 +385,27 @@ public class AppX implements IProtocolArray<AppInfo> {
                 .setMessage(R.string.app_suspend_dialog_message)
                 .build();
 
-        String[] failedPackages = packageManager.setPackagesSuspended(
-                packageNames.toArray(new String[0]), true, null, null, suspendDialogInfo);
+        try {
+            String[] failedPackages = packageManager.setPackagesSuspended(
+                    packageNames.toArray(new String[0]), true, null, null, suspendDialogInfo);
 
-        if (failedPackages.length != 0) {
-            // 处理未成功挂起的应用程序，未成功挂起的应用将被移出黑名单全局变量
-            LogUtils.e(TAG, "Failed to suspend App: " + Arrays.toString(failedPackages));
-            for (String packageName : failedPackages) {
-                packageNames.remove(packageName);
+            if (failedPackages.length != 0) {
+                // 处理未成功挂起的应用程序，未成功挂起的应用将被移出黑名单全局变量
+                LogUtils.e(TAG, "Failed to suspend App: " + Arrays.toString(failedPackages));
+                for (String packageName : failedPackages) {
+                    packageNames.remove(packageName);
+                }
             }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setAppBatchBlock error, " + e.getMessage());
+            return false;
         }
 
         for (String packageName : packageNames) {
+            if (TextUtils.isEmpty(packageName)) {
+                LogUtils.d(TAG, "packageName is empty, skip this time");
+                continue;
+            }
             if (!blockListPkgNames.contains(packageName)) {
                 // 此处判断新挂起的应用是否已经在黑名单全局变量中，如果不在则新加到全局变量中
                 blockListPkgNames.add(packageName);
@@ -395,27 +420,52 @@ public class AppX implements IProtocolArray<AppInfo> {
     public boolean SK_TR369_SetAppBatchUnBlock(String path, String value) {
         ArrayList<String> blockListPkgNames = getBlockListPkgNames();
 
-        Gson gson = new Gson();
-        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-        LogUtils.d(TAG, "Wait to cancel pending application: " + packageNames);
+        ArrayList<String> packageNames;
+        try {
+            Gson gson = new Gson();
+            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Wait to cancel pending application: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The content of packageNames is empty and no subsequent operations are required");
+                return true;
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
+            return false;
+        }
 
         PackageManager packageManager = GlobalContext.getContext().getPackageManager();
 
-        String[] failedPackages = packageManager.setPackagesSuspended(
-                packageNames.toArray(new String[0]), false, null, null, (SuspendDialogInfo) null);
+        try {
+            String[] failedPackages = packageManager.setPackagesSuspended(
+                    packageNames.toArray(new String[0]), false, null, null, (SuspendDialogInfo) null);
 
-        for (String packageName : packageNames) {
-            if (blockListPkgNames.contains(packageName)) {
-                if (failedPackages.length != 0) {
-                    // 如果某个应用解除挂起失败，包名仍然留在黑名单全局变量中
-                    if (Arrays.asList(failedPackages).contains(packageName)) {
-                        LogUtils.e(TAG, "Unsuspended application failed: " + packageName);
-                        continue;
-                    }
+            for (String packageName : packageNames) {
+                if (TextUtils.isEmpty(packageName)) {
+                    LogUtils.d(TAG, "packageName is empty, skip this time");
+                    continue;
                 }
-                // 成功解除挂起的应用将被移出黑名单
-                blockListPkgNames.remove(packageName);
+                if (blockListPkgNames.contains(packageName)) {
+                    if (failedPackages.length != 0) {
+                        // 如果某个应用解除挂起失败，包名仍然留在黑名单全局变量中
+                        if (Arrays.asList(failedPackages).contains(packageName)) {
+                            LogUtils.e(TAG, "Unsuspended application failed: " + packageName);
+                            continue;
+                        }
+                    }
+                    // 成功解除挂起的应用将被移出黑名单
+                    blockListPkgNames.remove(packageName);
+                }
             }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setAppBatchUnBlock error, " + e.getMessage());
+            return false;
         }
 
         setBlockListPkgNames(blockListPkgNames);
@@ -466,11 +516,24 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppWhiteList();
         clearAppBlackList();
 
-        Gson gson = new Gson();
-        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-        LogUtils.i(TAG, "Waiting for blacklist to be set: " + packageNames);
-        if (packageNames.isEmpty()) {
-            return true;
+        ArrayList<String> packageNames;
+        try {
+            Gson gson = new Gson();
+            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Waiting for blacklist to be set: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
+                return true;
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
+            return false;
         }
 
         // 由于单个系统属性Set长度不能超过91，所以需要将包名数组拆分，依次存入不同的系统属性
@@ -478,6 +541,10 @@ public class AppX implements IProtocolArray<AppInfo> {
         if (value.length() > 91) {
             ArrayList<String> blacklist = new ArrayList<>();
             for (String packageName : packageNames) {
+                if (TextUtils.isEmpty(packageName)) {
+                    LogUtils.d(TAG, "packageName is empty, skip this time");
+                    continue;
+                }
                 if (packageName.length() + blacklist.toString().length() > 85) {
                     numBlacklist++;
                     setBlackListData(numBlacklist, new Gson().toJson(blacklist));
@@ -490,7 +557,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 setBlackListData(numBlacklist, new Gson().toJson(blacklist));
             }
         } else {
-            setBlackListData(1, value);
+            setBlackListData(1, new Gson().toJson(packageNames));
         }
 
         // Black功能需要额外检测包名是否已安装，已安装则需要进行卸载，只卸载非预置APPs
@@ -531,17 +598,35 @@ public class AppX implements IProtocolArray<AppInfo> {
         clearAppBlackList();
         clearAppWhiteList();
 
-        Gson gson = new Gson();
-        ArrayList<String> packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-        LogUtils.i(TAG, "Waiting for whitelist to be set: " + packageNames);
-        if (packageNames.isEmpty()) {
-            return true;
+        ArrayList<String> packageNames;
+        try {
+            Gson gson = new Gson();
+            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.i(TAG, "Waiting for whitelist to be set: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
+                return true;
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
+            return false;
         }
 
+        // 由于单个系统属性Set长度不能超过91，所以需要将包名数组拆分，依次存入不同的系统属性
         int numWhitelist = 0;
         if (value.length() > 91) {
             ArrayList<String> whitelist = new ArrayList<>();
             for (String packageName : packageNames) {
+                if (TextUtils.isEmpty(packageName)) {
+                    LogUtils.d(TAG, "packageName is empty, skip this time");
+                    continue;
+                }
                 if (packageName.length() + whitelist.toString().length() > 85) {
                     numWhitelist++;
                     setWhiteListData(numWhitelist, new Gson().toJson(whitelist));
@@ -554,7 +639,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 setWhiteListData(numWhitelist, new Gson().toJson(whitelist));
             }
         } else {
-            setWhiteListData(1, value);
+            setWhiteListData(1, new Gson().toJson(packageNames));
         }
         return true;
     }
