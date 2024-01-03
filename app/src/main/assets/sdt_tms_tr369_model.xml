@@ -233,15 +233,15 @@
                 <schema name="SupportedFrequencyBands" constraint="64" default="2.4GHz,5GHz" type="string" />
                 <schema name="OperatingFrequencyBand" constraint="64" getter="diagnose" type="string" />
                 <schema name="Stats" type="object">
-                    <schema name="BytesSent" type="unsignedInt" />
-                    <schema name="BytesReceived" type="unsignedInt" />
-                    <schema name="PacketSend" type="unsignedInt" />
-                    <schema name="PacketReceived" type="unsignedInt" />
-                    <schema name="ErrorReceived" type="unsignedInt" />
-                    <schema name="ConnectionUpTime" type="unsignedInt" />
-                    <schema name="PhyRate" type="unsignedInt" />
-                    <schema name="RxErrors" default="0" type="unsignedInt" />
-                    <schema name="Noise" type="int" />
+                    <schema name="BytesSent" getter="diagnose" type="unsignedInt" />
+                    <schema name="BytesReceived" getter="diagnose" type="unsignedInt" />
+                    <schema name="PacketSend" getter="diagnose" type="unsignedInt" />
+                    <schema name="PacketReceived" getter="diagnose" type="unsignedInt" />
+                    <schema name="ErrorReceived" getter="diagnose" type="unsignedInt" />
+                    <schema name="RxErrors" getter="diagnose" type="unsignedInt" />
+                    <schema name="ConnectionUpTime" getter="diagnose" type="unsignedInt" />
+                    <schema name="PhyRate" getter="diagnose" type="unsignedInt" />
+                    <schema name="Noise" getter="diagnose" type="int" />
                 </schema>
             </schema>
 
