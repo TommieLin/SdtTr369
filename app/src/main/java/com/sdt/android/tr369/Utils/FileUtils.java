@@ -1,7 +1,6 @@
 package com.sdt.android.tr369.Utils;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.SystemProperties;
 
 import com.sdt.diagnose.common.log.LogUtils;
@@ -21,26 +20,29 @@ public class FileUtils {
     private static final String TAG = "FileUtils";
     public static final String PLATFORM_TMS_TR369_MODEL_DEFAULT = "sdt_tms_tr369_model.default";
     public static final String PLATFORM_TMS_TR369_MODEL_XML = "sdt_tms_tr369_model.xml";
-    public static final String SYS_PROP_TR369_MODE_ISUPDATED = "persist.sys.tr369.mode.isUpdated";
+    public static final String SYS_PROP_TR369_SOFTWARE_VERSION = "persist.sys.tr369.software.version";
 
     public static void copyTr369AssetsToFile(Context context) {
         File modelFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_XML);
         File defaultFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_DEFAULT);
 
-        if (!modelFile.exists() || !defaultFile.exists()) {
+        String version = SystemProperties.get(SYS_PROP_TR369_SOFTWARE_VERSION, "");
+        String curSoftwareVersion = getSoftwareVersion();
+
+        /* 判断model是否需要更新 */
+        if (!curSoftwareVersion.equals(version)
+                || !modelFile.exists()
+                || !defaultFile.exists()) {
+            LogUtils.i(TAG, "It is detected that the Model file needs to be created.");
             copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
             copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
-        } else {
-            /* 判断model是否已经更新过了 */
-            boolean isUpdated = SystemProperties.getBoolean(SYS_PROP_TR369_MODE_ISUPDATED, false);
-            if (!isUpdated || "eng".equalsIgnoreCase(Build.TYPE)) {
-                SystemProperties.set(SYS_PROP_TR369_MODE_ISUPDATED, Boolean.TRUE.toString());
-                modelFile.delete();
-                defaultFile.delete();
-                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_XML, modelFile);
-                copyAssetFile(context, PLATFORM_TMS_TR369_MODEL_DEFAULT, defaultFile);
-            }
+            SystemProperties.set(SYS_PROP_TR369_SOFTWARE_VERSION, curSoftwareVersion);
         }
+    }
+
+    public static String getSoftwareVersion() {
+        long utc = SystemProperties.getLong("ro.build.date.utc", 1631947123L);
+        return String.valueOf(utc * 1000L);
     }
 
     private static void copyAssetFile(Context context, String inFileName, File outFile) {
