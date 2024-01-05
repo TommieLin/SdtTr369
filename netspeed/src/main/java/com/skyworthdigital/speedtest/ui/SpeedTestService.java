@@ -94,15 +94,16 @@ public class SpeedTestService extends Service {
                             Log.e(TAG, "pageInit error, 1: " + e.getMessage());
                         }
                     }
-                    st = new SpeedTest();
+                    st = new SpeedTest(SpeedTestService.this);
                     st.setSpeedTestConfig(config);
                     st.setTelemetryConfig(telemetryConfig);
                     c = readFileFromAssets("ServerList.json");
                     if (c.startsWith("\"") || c.startsWith("'")) { //fetch server list from URL
-                        if (! st.loadServerList(c.subSequence(1, c.length() - 1).toString())) {
+                        if (!st.loadServerList(c.subSequence(1, c.length() - 1).toString())) {
                             throw new Exception("Failed to load server list");
                         }
-                    } else { //use provided server list
+                    } else {
+                        //use provided server list
                         JSONArray a = new JSONArray(c);
                         if (a.length() == 0) throw new Exception("No test points");
                         ArrayList<TestPoint> s = new ArrayList<>();
@@ -117,6 +118,7 @@ public class SpeedTestService extends Service {
                     return;
                 }
                 TestPoint[] testPoints = st.getTestPoints();
+                Log.d(TAG, "testPoints length is " + testPoints.length + " and the firstOne is " + testPoints[0].toString());
                 st.selectServer(new SpeedTest.ServerSelectedHandler() {
                     @Override
                     public void onServerSelected(final TestPoint server) {
@@ -139,12 +141,21 @@ public class SpeedTestService extends Service {
     private void pageServerSelect(TestPoint selected, TestPoint[] servers) {
         availableServers = new ArrayList<>();
         for (TestPoint t : servers) {
-            if (t.getPing() != - 1) {
-                st.setSelectedServer(t);
-                mReadyCallback.isReady();
-                break;
+            if (t.getPing() != -1) {
+                availableServers.add(t);
             }
         }
+        int index = availableServers.indexOf(selected);
+        if (index >= 0) {
+            st.setSelectedServer(selected);
+        } else {
+            //如果通过ping选择的服务器节点不在可用节点内则默认选用第一个可用节点
+            if (availableServers.size() > 0) {
+                st.setSelectedServer(availableServers.get(0));
+            }
+        }
+        Log.d(TAG, "servers available servers size is " + availableServers.size());
+        mReadyCallback.isReady();
     }
 
     private void pageTest() {

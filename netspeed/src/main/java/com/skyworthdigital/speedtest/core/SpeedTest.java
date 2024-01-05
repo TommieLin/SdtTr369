@@ -1,5 +1,6 @@
 package com.skyworthdigital.speedtest.core;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.skyworthdigital.speedtest.core.config.SpeedTestConfig;
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 
 public class SpeedTest {
     private static final String TAG = "TR369 SpeedTest";
-    private ArrayList<TestPoint> servers = new ArrayList<>();
+    private final ArrayList<TestPoint> servers = new ArrayList<>();
     private TestPoint selectedServer = null;
     private SpeedTestConfig config = new SpeedTestConfig();
     private TelemetryConfig telemetryConfig = new TelemetryConfig();
@@ -29,9 +30,10 @@ public class SpeedTest {
     private int state = 0;
     private final Object mutex = new Object();
     private String originalExtra = "";
+    private final Context mContext;
 
-    public SpeedTest() {
-
+    public SpeedTest(Context context) {
+        mContext = context;
     }
 
     public void setSpeedTestConfig(SpeedTestConfig c) {
@@ -39,7 +41,7 @@ public class SpeedTest {
             if (state != 0) throw new IllegalStateException("Cannot change config at this moment");
             config = c.clone();
             String extra = config.getTelemetryExtra();
-            if (extra != null && ! extra.isEmpty()) originalExtra = extra;
+            if (extra != null && !extra.isEmpty()) originalExtra = extra;
         }
     }
 
@@ -183,6 +185,7 @@ public class SpeedTest {
         synchronized (mutex) {
             if (state == 2) throw new IllegalStateException("Server selection is in progress");
             if (t == null) throw new IllegalArgumentException("t is null");
+            Log.d(TAG, "setSelectedServer in the final choice is " + t.toString());
             selectedServer = t;
             state = 3;
         }
@@ -203,7 +206,7 @@ public class SpeedTest {
             state = 4;
             try {
                 JSONObject extra = new JSONObject();
-                if (originalExtra != null && ! originalExtra.isEmpty()) {
+                if (originalExtra != null && !originalExtra.isEmpty()) {
                     extra.put("extra", originalExtra);
                 }
                 extra.put("server", selectedServer.getName());
@@ -211,7 +214,7 @@ public class SpeedTest {
             } catch (Throwable e) {
                 Log.e(TAG, "start error, " + e.getMessage());
             }
-            st = new SpeedTestWorker(selectedServer, config, telemetryConfig) {
+            st = new SpeedTestWorker(selectedServer, config, telemetryConfig, mContext) {
                 @Override
                 public void onDownloadUpdate(double dl, double progress) {
                     callback.onDownloadUpdate(dl, progress);
@@ -264,7 +267,7 @@ public class SpeedTest {
         if (server == null || server.isEmpty() || shareURL == null || shareURL.isEmpty()) {
             return null;
         }
-        if (! server.endsWith("/")) server = server + "/";
+        if (!server.endsWith("/")) server = server + "/";
         while (shareURL.startsWith("/")) shareURL = shareURL.substring(1);
         if (server.startsWith("//")) server = "https:" + server;
         return server + shareURL;

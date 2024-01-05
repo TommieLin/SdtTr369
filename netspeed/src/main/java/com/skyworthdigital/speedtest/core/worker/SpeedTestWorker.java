@@ -1,5 +1,8 @@
 package com.skyworthdigital.speedtest.core.worker;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.skyworthdigital.speedtest.core.base.Connection;
 import com.skyworthdigital.speedtest.core.base.Utils;
 import com.skyworthdigital.speedtest.core.config.SpeedTestConfig;
@@ -14,23 +17,25 @@ import com.skyworthdigital.speedtest.core.upload.UploadStream;
 
 import org.json.JSONObject;
 
-
 import java.util.Locale;
 
 public abstract class SpeedTestWorker extends Thread {
-    private TestPoint backend;
-    private SpeedTestConfig config;
-    private TelemetryConfig telemetryConfig;
+    private static final String TAG = "TR369 SpeedTestWorker";
+    private final TestPoint backend;
+    private final SpeedTestConfig config;
+    private final TelemetryConfig telemetryConfig;
     private boolean stopASAP = false;
     private double dl = -1, ul = -1, ping = -1, jitter = -1;
     private String ipIsp = "";
-    private Logger log = new Logger();
+    private final Logger log = new Logger();
+    private final Context mContext;
 
     public SpeedTestWorker(TestPoint backend, SpeedTestConfig config,
-            TelemetryConfig telemetryConfig) {
+            TelemetryConfig telemetryConfig, Context context) {
         this.backend = backend;
         this.config = config == null ? new SpeedTestConfig() : config;
         this.telemetryConfig = telemetryConfig == null ? new TelemetryConfig() : telemetryConfig;
+        this.mContext = context;
         start();
     }
 
@@ -147,10 +152,12 @@ public abstract class SpeedTestWorker extends Thread {
                     double b = (2.5 * speed) / 100000.0;
                     bonusT += b > 200 ? 200 : b;
                 }
-                double progress = (t + bonusT) / (double) (config.getTimeDlMax() * 1000)*3;
+                double progress = (t + bonusT) / (double) (config.getTimeDlMax() * 1000) * 3;
                 speed = (speed * 8 * config.getOverheadCompensationFactor()) / (
                         config.getUseMebibits() ? 1048576.0 : 1000000.0);
                 dl = speed;
+                String actuallySpeed = format(dl);
+                Log.d(TAG, "actually download Speed is " + actuallySpeed);
                 //测试中
                 onDownloadUpdate(dl, progress > 1 ? 1 : progress);
             }
@@ -210,10 +217,12 @@ public abstract class SpeedTestWorker extends Thread {
                     double b = (2.5 * speed) / 100000.0;
                     bonusT += b > 200 ? 200 : b;
                 }
-                double progress = (t + bonusT) / (double) (config.getTimeUlMax() * 1000)*3;
+                double progress = (t + bonusT) / (double) (config.getTimeUlMax() * 1000) * 3;
                 speed = (speed * 8 * config.getOverheadCompensationFactor()) / (
                         config.getUseMebibits() ? 1048576.0 : 1000000.0);
                 ul = speed;
+                String ulSpeed = format(ul);
+                Log.d(TAG, "actually UL speed is " + ulSpeed);
                 onUploadUpdate(ul, progress > 1 ? 1 : progress);
             }
             Utils.sleep(200);
@@ -221,6 +230,18 @@ public abstract class SpeedTestWorker extends Thread {
         if (stopASAP) return;
         log.l("Upload: " + ul + " (took " + (System.currentTimeMillis() - start) + "ms)");
         onUploadUpdate(ul, 1);
+    }
+
+    private String format(double d) {
+        try {
+            Locale l = mContext.getResources().getConfiguration().getLocales().get(0);
+            if (d < 10) return String.format(l, "%.2f", d);
+            if (d < 100) return String.format(l, "%.1f", d);
+            return "" + Math.round(d);
+        } catch (Exception e) {
+            Log.e(TAG, "format error, " + e.getMessage());
+        }
+        return "";
     }
 
     private boolean pingCalled = false;
