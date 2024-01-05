@@ -209,20 +209,20 @@ public class SkyworthX {
         DbManager.setDBParam(path, value);
         if (path.contains("Enable")) {
             // value: 0->unlock, 1->lock
-            boolean isEnable = "1".equals(value);
-            String backgroundImageUrl = DbManager.getDBParam("Device.X_Skyworth.Lock.Background");
-            setLock(isEnable, backgroundImageUrl);
+            setLockStatus(value.equals("1"));
         }
         return true;
     }
 
-    private void setLock(boolean toLock, String imageUrl) {
+    private void setLockStatus(boolean toLock) {
 //        checkFloatPermission(GlobalContext.getContext());
         if (toLock) {
             SystemProperties.set("persist.sys.tr069.lock", "1");
             Intent intent = new Intent(GlobalContext.getContext(), LockUnlockActivity.class);
-            intent.putExtra("lockTip", "stb is locked");
-            intent.putExtra("imageUrl", imageUrl);
+            intent.putExtra("imageUrl",
+                    DbManager.getDBParam("Device.X_Skyworth.Lock.Background"));
+            intent.putExtra("whiteList",
+                    DbManager.getDBParam("Device.X_Skyworth.Lock.WhiteList"));
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP);
             GlobalContext.getContext().startActivity(intent);
         } else {

@@ -50,6 +50,11 @@ public class LockUnlockActivity extends Activity {
                 .fallback(R.drawable.lock_background_blank) // url为空的时候,显示的图片
                 .into(iv_lockBk);
         showDialog();
+
+        String whiteList = getIntent().getStringExtra("whiteList");
+        Intent service = new Intent(getApplicationContext(), ActivityStartWatcher.class);
+        service.putExtra("whiteList", whiteList);
+        startForegroundService(service);
     }
 
     @Override
@@ -62,6 +67,12 @@ public class LockUnlockActivity extends Activity {
     public void onStop() {
         super.onStop();
         DbManager.setDBParam("Device.X_Skyworth.Lock.Enable", "0");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(getApplicationContext(), ActivityStartWatcher.class));
     }
 
     // 按center键唤出提示打开网络设置的弹窗

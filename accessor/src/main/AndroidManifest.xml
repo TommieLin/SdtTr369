@@ -52,6 +52,11 @@
             android:name="com.sdt.diagnose.Device.X_Skyworth.LockUnlockActivity"
             android:theme="@style/Theme.Design.NoActionBar" />
 
+        <service
+            android:name="com.sdt.diagnose.Device.X_Skyworth.ActivityStartWatcher"
+            android:enabled="true"
+            android:exported="true" />
+
         <activity
             android:name="com.sdt.diagnose.command.ShortMessageActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
