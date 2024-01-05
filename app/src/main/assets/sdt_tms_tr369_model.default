@@ -102,6 +102,7 @@ Device.MQTT.Client.1.Subscription.1.QoS "2"
 
 ## 新盒子锁的状态
 Device.X_Skyworth.Lock.Enable "0"
+Device.X_Skyworth.Lock.WhiteList "[com.android.tv.settings, com.google.android.backdrop, com.sdt.android.tr369, com.sdt.rcupair]"
 
 ## 平台软件默认不开启logcat后台持续保存日志功能，按项目需求打开或关闭
 Device.X_Skyworth.Logcat.Background.Enable "1"

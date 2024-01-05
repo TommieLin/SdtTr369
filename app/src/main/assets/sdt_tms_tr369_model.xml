@@ -501,6 +501,7 @@
                     <schema name="NegativeButtonText" getter="diagnose" setter="diagnose" type="string" write="W" />
                     <schema name="PositiveButtonText" getter="diagnose" setter="diagnose" type="string" write="W" />
                 </schema>
+                <schema name="WhiteList" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Enable" getter="diagnose" inform="true" setter="diagnose" type="boolean" write="W" />
                 <schema name="CountDown" type="object">
                     <schema name="Enable" getter="diagnose" inform="true" setter="diagnose" type="boolean" write="W" />
