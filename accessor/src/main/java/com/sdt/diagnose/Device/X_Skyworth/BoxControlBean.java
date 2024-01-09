@@ -1,9 +1,9 @@
 package com.sdt.diagnose.Device.X_Skyworth;
 
 public class BoxControlBean {
-    public boolean isAllow = false;
-    public String confirmResultUrl = null;
-    public String transactionId = null;
+    private boolean isAllow = false;
+    private String confirmResultUrl = null;
+    private String transactionId = null;
 
     public static BoxControlBean instance;
 

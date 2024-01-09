@@ -50,6 +50,7 @@ import com.sdt.diagnose.common.bean.SpeedTestBean;
 import com.sdt.diagnose.common.bean.StandbyBean;
 import com.sdt.diagnose.common.configuration.Config;
 import com.sdt.diagnose.common.log.LogUtils;
+import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
 import com.skyworth.scrrtcsrv.Device;
 import com.skyworth.scrrtcsrv.RemoteControlAPI;
@@ -384,12 +385,16 @@ public class SkyworthX {
     }
 
     public boolean setRemoteControlEnable(String path, String val) {
-        LogUtils.d(TAG, "setRemoteControlEnable flag: " + BoxControlBean.getInstance().isAllow);
         if (Boolean.getBoolean(val) || Integer.parseInt(val) == 1) {
             if (checkRemoteControlParam()) {
-                if (!BoxControlBean.getInstance().isAllow) {
-                    getUserAllow();
-                }
+                /** Modification begins
+                 *  2024.01.08 [SWMD-1009] 平台移除远程屏幕的用户授权功能，项目如果需要则打开以下注释
+                 */
+                // LogUtils.d(TAG, "setRemoteControlEnable flag: " + BoxControlBean.getInstance().isAllow());
+                // if (!BoxControlBean.getInstance().isAllow()) {
+                //     getUserAllow();
+                // }
+                /** Modification ends */
 
                 HashMap<String, String> params = new HashMap<>();
                 params.put(GlobalContext.getContext().getString(R.string.socketio_url),
@@ -405,19 +410,34 @@ public class SkyworthX {
                 params.put(GlobalContext.getContext().getString(R.string.dev_name),
                         DeviceInfoUtils.getSerialNumber());
 
-                LogUtils.d(TAG, "setRemoteControlEnable isAllow: " + BoxControlBean.getInstance().isAllow());
-                if (BoxControlBean.getInstance().isAllow()) {
-                    RemoteControlAPI.start(GlobalContext.getContext(), params);
-                    BoxControlBean.getInstance().setAllow(false);
-                }
+                /** Modification begins
+                 *  2024.01.08 [SWMD-1009] 平台移除远程屏幕的用户授权功能，项目如果需要则打开以下注释
+                 */
+                // if (BoxControlBean.getInstance().isAllow()) {
+                //     RemoteControlAPI.start(GlobalContext.getContext(), params);
+                //     BoxControlBean.getInstance().setAllow(false);
+                // }
+                /** Modification ends */
+
+                /** Modification begins
+                 *  2024.01.08 [SWMD-1009] 平台移除远程屏幕的用户授权功能，项目如果需要则注释以下代码
+                 */
+                HttpsUtils.uploadAllowStatus(BoxControlBean.getInstance().getConfirmResultUrl(),
+                        1,
+                        "success",
+                        BoxControlBean.getInstance().getTransactionId());
+                RemoteControlAPI.start(GlobalContext.getContext(), params);
+                /** Modification ends */
+
                 SPUtils.getInstance(GlobalContext.getContext()).put(path, "1");
                 return true;
             }
         } else if (!Boolean.getBoolean(val) || Integer.parseInt(val) == 0) {
             RemoteControlAPI.stop(GlobalContext.getContext());
+            SPUtils.getInstance(GlobalContext.getContext()).put(path, "0");
+            return true;
         }
-        SPUtils.getInstance(GlobalContext.getContext()).put(path, "0");
-        return true;
+        return false;
     }
 
     @Tr369Get("Device.X_Skyworth.RemoteControl.")
