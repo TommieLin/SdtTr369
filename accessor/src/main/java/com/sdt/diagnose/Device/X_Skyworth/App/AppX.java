@@ -314,9 +314,15 @@ public class AppX implements IProtocolArray<AppInfo> {
     }
 
     private ArrayList<String> getBlockListPkgNames() {
-        String listFromDBParam = DbManager.getDBParam("Device.X_Skyworth.BlockListPkgNames");
-        Gson gson = new Gson();
-        return gson.fromJson(listFromDBParam, new TypeToken<List<String>>(){}.getType());
+        ArrayList<String> packageNames = null;
+        try {
+            String listFromDBParam = DbManager.getDBParam("Device.X_Skyworth.BlockListPkgNames");
+            Gson gson = new Gson();
+            packageNames = gson.fromJson(listFromDBParam, new TypeToken<List<String>>(){}.getType());
+        } catch (Exception e) {
+            LogUtils.e(TAG, "Failed to get block list. Error: " + e.getMessage());
+        }
+        return (packageNames != null) ? packageNames : new ArrayList<>();
     }
 
     private void setBlockListPkgNames(ArrayList<String> list) {
@@ -506,7 +512,8 @@ public class AppX implements IProtocolArray<AppInfo> {
             String array = SystemProperties.get("persist.sys.tr069.blacklist.part" + i, "");
             Gson gson = new Gson();
             ArrayList<String> packageNames = gson.fromJson(array, new TypeToken<List<String>>(){}.getType());
-            blacklist.addAll(packageNames);
+            if (packageNames != null)
+                blacklist.addAll(packageNames);
         }
         return new Gson().toJson(blacklist);
     }
@@ -588,7 +595,8 @@ public class AppX implements IProtocolArray<AppInfo> {
             String array = SystemProperties.get("persist.sys.tr069.whitelist.part" + i, "");
             Gson gson = new Gson();
             ArrayList<String> packageNames = gson.fromJson(array, new TypeToken<List<String>>(){}.getType());
-            whitelist.addAll(packageNames);
+            if (packageNames != null)
+                whitelist.addAll(packageNames);
         }
         return new Gson().toJson(whitelist);
     }
