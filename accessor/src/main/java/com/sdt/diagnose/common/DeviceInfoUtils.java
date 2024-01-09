@@ -1,14 +1,12 @@
 package com.sdt.diagnose.common;
 
 import android.app.ActivityManager;
-import android.app.backup.BackupManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.content.res.Configuration;
 import android.icu.text.TimeZoneFormat;
 import android.icu.text.TimeZoneNames;
 import android.os.Build;
@@ -37,14 +35,8 @@ import com.sdt.diagnose.common.net.HttpsUtils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -401,8 +393,7 @@ public class DeviceInfoUtils {
     public static String getLanguage() {
         Locale currentLocale = null;
         try {
-            currentLocale = ActivityManager.getService().getConfiguration()
-                    .getLocales().get(0);
+            currentLocale = ActivityManager.getService().getConfiguration().getLocales().get(0);
         } catch (RemoteException e) {
             LogUtils.e(TAG, "Could not retrieve locale, " + e.getMessage());
         }
@@ -413,40 +404,17 @@ public class DeviceInfoUtils {
     }
 
     public static boolean changeSystemLanguage(String language) {
-        // Locale mLocale = new Locale("en", "ZA");
         final List<LocalePicker.LocaleInfo> localeInfoList =
                 LocalePicker.getAllAssetLocales(GlobalContext.getContext(), false);
-        List<String> languageTags = new ArrayList<>();
-        for (int i = 0; i < localeInfoList.size(); i++) {
-            String languageTag = localeInfoList.get(i).getLocale().toLanguageTag();
-            languageTags.add(languageTag);
+        for (final LocalePicker.LocaleInfo localeInfo : localeInfoList) {
+            Locale locale = localeInfo.getLocale();
+            if (locale.toLanguageTag().equals(language)) {
+                LogUtils.d(TAG, "The language that will be switched to is: " + locale.toLanguageTag());
+                LocalePicker.updateLocale(locale);
+                return true;
+            }
         }
-        if (!languageTags.contains(language)) {
-            return false;
-        }
-        try {
-            String[] arr = language.split("-");
-            LogUtils.d(TAG, "changeSystemLanguage: " + language);
-            Locale mLocale = new Locale(arr[0], arr[1]);
-            Class iActivityManager = Class.forName("android.app.IActivityManager");
-            Class activityManagerNative = Class.forName("android.app.ActivityManagerNative");
-            Method getDefault = activityManagerNative.getDeclaredMethod("getDefault");
-            Object objIActMag = getDefault.invoke(activityManagerNative);
-            Method getConfiguration = iActivityManager.getDeclaredMethod("getConfiguration");
-            Configuration config = (Configuration) getConfiguration.invoke(objIActMag);
-            if (config == null) return false;
-            config.locale = mLocale;
-            Class clzConfig = Class.forName("android.content.res.Configuration");
-            java.lang.reflect.Field userSetLocale = clzConfig.getField("userSetLocale");
-            userSetLocale.set(config, true);
-            Class[] clzParams = {Configuration.class};
-            Method updateConfiguration = iActivityManager.getDeclaredMethod("updateConfiguration", clzParams);
-            updateConfiguration.invoke(objIActMag, config);
-            BackupManager.dataChanged("com.android.providers.settings");
-            return true;
-        } catch (Exception e) {
-            LogUtils.e(TAG, "changeSystemLanguage call failed, " + e.getMessage());
-        }
+        LogUtils.e(TAG, "The specified language cannot be found: " + language);
         return false;
     }
 
