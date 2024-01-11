@@ -339,7 +339,7 @@ int SK_TR369_Start_IPPing(dm_req_t *req, char *command_key, kv_vector_t *input_a
     SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
-    char status[16], ipAddressUsed[16], successCount[8], failureCount[8], avg[8], min[8], max[8], avg_ns[8], min_ns[8], max_ns[8];
+    char status[16], ipAddressUsed[16], successCount[8], failureCount[8], avg[8], min[8], max[8], avg_ns[16], min_ns[16], max_ns[16];
     SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.Status", status);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.IPAddressUsed", ipAddressUsed);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.IPPing.SuccessCount", successCount);
@@ -440,7 +440,7 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
     SK_TR369_API_SetParams("skyworth.tr369.event", "TraceRoute");
 
     // Save all results into the output arguments using KV_VECTOR_ functions
-    char status[32], responseTime[8];
+    char status[32], responseTime[16];
     SK_TR369_GetDBParam("Device.IP.Diagnostics.TraceRoute.Status", status);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.TraceRoute.ResponseTime", responseTime);
 
@@ -561,7 +561,7 @@ int SK_TR369_Start_DownloadDiagnostics(dm_req_t *req, char *command_key, kv_vect
     SK_TR369_API_SetParams("skyworth.tr369.event", param);
 
     // Save all results into the output arguments using KV_VECTOR_ functions
-    char status[32], BOMTime[32], EOMTime[32], testBytesReceived[8];
+    char status[32], BOMTime[32], EOMTime[32], testBytesReceived[16];
     SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.Status", status);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.BOMTime", BOMTime);
     SK_TR369_GetDBParam("Device.IP.Diagnostics.DownloadDiagnostics.EOMTime", EOMTime);
