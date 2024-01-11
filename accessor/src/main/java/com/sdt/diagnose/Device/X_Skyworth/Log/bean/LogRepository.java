@@ -55,7 +55,7 @@ public class LogRepository {
     private final int DEFAULT_PERIOD_MILLIS_TIME = 1800000;   // 默认三十分钟统计一次
     private boolean isAllowAutoUpload = false;
     private String mUploadUrl = null;
-    private final int MAX_LOG_RETENTION_DAYS = 3;   // 日志文件最大保存天数
+    private final int MAX_LOG_RETENTION_DAYS = 7;   // 日志文件最大保存天数
 
     private LogRepository() {
         setAutoUploadStatus();
@@ -113,13 +113,19 @@ public class LogRepository {
         return remainingMillis;
     }
 
-    public void setPeriodicMillisTime(String time) {
+    public boolean setPeriodicMillisTime(String time) {
         if (time != null &&
                 time.length() != 0 &&
                 Integer.parseInt(time) > 0) {
             setPeriodicMillisTime(Integer.parseInt(time) * 1000);
+            if (mHandler.hasMessages(MSG_START_SPLIT_LOG_FILE)) {
+                mHandler.removeMessages(MSG_START_SPLIT_LOG_FILE);
+            }
+            mHandler.sendEmptyMessageDelayed(MSG_START_SPLIT_LOG_FILE, mPeriodicMillisTime);
+            return (DbManager.setDBParam("Device.X_Skyworth.Logcat.AutoUpload.Interval", time) == 0);
         } else {
-            setPeriodicMillisTime(DEFAULT_PERIOD_MILLIS_TIME);
+            LogUtils.e(TAG, "Failed to set the automatic upload periodic time");
+            return false;
         }
     }
 
@@ -162,9 +168,14 @@ public class LogRepository {
     }
 
     private void autoUploadLogFile() {
-        if (mUploadUrl == null || mUploadUrl.isEmpty()) {
-            LogUtils.e(TAG, "The upload URL in the database is empty.");
-            return;
+        if (TextUtils.isEmpty(mUploadUrl)) {
+            LogUtils.e(TAG, "The upload URL in the class is empty");
+            String dbUrl = DbManager.getDBParam("Device.X_Skyworth.Logcat.AutoUpload.Url");
+            if (TextUtils.isEmpty(dbUrl)) {
+                LogUtils.e(TAG, "The upload URL in the database is empty");
+                return;
+            }
+            setAutoUploadUrl(dbUrl);
         }
 
         File folder = new File("/data/tcpdump/");
@@ -319,7 +330,7 @@ public class LogRepository {
 
         if (matcher.find()) {
             fileTime = matcher.group(1);
-            if (fileTime == null)  return false;
+            if (fileTime == null) return false;
             LogUtils.d(TAG, "isFileNeedToBeDeleted: fileTime: " + fileTime);
         } else {
             return false;
