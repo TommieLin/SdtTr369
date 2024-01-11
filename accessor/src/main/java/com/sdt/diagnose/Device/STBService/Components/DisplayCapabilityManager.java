@@ -51,8 +51,11 @@ public class DisplayCapabilityManager {
                     .put("smpte24hz", new Display.Mode(4096, 2160, 24.000002f))
                     .put("smpte23.976hz", new Display.Mode(4096, 2160, 23.976025f))
                     .put("1080p60hz", new Display.Mode(1920, 1080, 60.000004f))
+                    .put("1080i60hz", new Display.Mode(1920, 1080, 60.000004f))
                     .put("1080p59.94hz", new Display.Mode(1920, 1080, 59.94006f))
+                    .put("1080i59.94hz", new Display.Mode(1920, 1080, 59.94006f))
                     .put("1080p50hz", new Display.Mode(1920, 1080, 50.0f))
+                    .put("1080i50hz", new Display.Mode(1920, 1080, 50.0f))
                     .put("1080p24hz", new Display.Mode(1920, 1080, 24.000002f))
                     .put("1080p23.976hz", new Display.Mode(1920, 1080, 23.976025f))
                     .put("720p60hz", new Display.Mode(1280, 720, 60.000004f))
@@ -63,6 +66,9 @@ public class DisplayCapabilityManager {
                     .put("480p59.94hz", new Display.Mode(720, 480, 59.94006f))
                     .put("576cvbs", new Display.Mode(720, 576, 50.0f))
                     .put("480cvbs", new Display.Mode(720, 480, 60.000004f))
+                    .put("pal_m", new Display.Mode(720, 480, 60.000004f))
+                    .put("pal_n", new Display.Mode(720, 576, 50.0f))
+                    .put("ntsc_m", new Display.Mode(720, 480, 60.000004f))
                     .build();
 
     private boolean isContainsInFW(String sysCtrlMode) {
