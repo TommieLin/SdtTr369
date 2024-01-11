@@ -827,8 +827,7 @@ public class SkyworthX {
 
     @Tr369Set("Device.X_Skyworth.Logcat.AutoUpload.Interval")
     public boolean SK_TR369_SetAutoUploadInterval(String path, String value) {
-        LogRepository.getLogRepository().setPeriodicMillisTime(value);
-        return (DbManager.setDBParam("Device.X_Skyworth.Logcat.AutoUpload.Interval", value) == 0);
+        return LogRepository.getLogRepository().setPeriodicMillisTime(value);
     }
 
     @Tr369Get("Device.X_Skyworth.Logcat.AutoUpload.Url")
