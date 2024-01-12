@@ -35,12 +35,14 @@ import com.skyworth.scrrtcsrv.Device;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -351,7 +353,7 @@ public class Event {
             File file = new File(filePath);
             if (!file.exists() || !file.isFile()) {
                 String message = "The file under the specified path was not found.";
-                LogUtils.e(TAG, "uploadLogFile: " + message + ", path: " + filePath);
+                LogUtils.e(TAG, "uploadLogFile: " + message + " file path: " + filePath);
                 setUploadResponseDBParams("Error", message);
                 return;
             }
@@ -433,7 +435,7 @@ public class Event {
 
             if (con.getResponseCode() == 200) {
                 String message = "Successfully uploaded the file via https.";
-                LogUtils.e(TAG, "uploadLogFileByHttps: " + message + ", path: " + filePath);
+                LogUtils.e(TAG, "uploadLogFileByHttps: " + message + " file path: " + filePath);
                 setUploadResponseDBParams("Complete", message);
                 // 上传成功，只删除分段保存的那些文件
                 if (!filePath.contains(RAW_LOG_FILE)) {
@@ -503,7 +505,7 @@ public class Event {
 
             if (con.getResponseCode() == 200) {
                 String message = "Successfully uploaded the file via http.";
-                LogUtils.e(TAG, "uploadLogFileByHttp: " + message + ", path: " + filePath);
+                LogUtils.e(TAG, "uploadLogFileByHttp: " + message + " file path: " + filePath);
                 setUploadResponseDBParams("Complete", message);
                 // 上传成功，只删除分段保存的那些文件
                 if (!filePath.contains(RAW_LOG_FILE)) {
@@ -539,11 +541,7 @@ public class Event {
         String uploadUrl = params[INDEX_PARAM_3];
         switch (fileType) {
             case SCREENSHOT_TYPE:
-                if (!Device.isScreenOn()) {
-                    LogUtils.e(TAG, "The screen is not in use and there is no need to take a screenshot.");
-                    break;
-                }
-                ScreenShot2.getInstance().takeAndUpload(uploadUrl);
+                handleScreenCapture(uploadUrl);
                 break;
             case VIDEO_TYPE:
                 handleVideoFile(uploadUrl, delaySeconds);
@@ -562,11 +560,36 @@ public class Event {
         }
     }
 
-    private void handleVideoFile(String uploadUrl, String delaySeconds) {
+    private void handleScreenCapture(String uploadUrl) {
         if (!Device.isScreenOn()) {
-            LogUtils.e(TAG, "The screen is not in use and there is no need to perform screen recording.");
+            String message = "The user screen is not enabled and cannot take screen captures.";
+            LogUtils.e(TAG, "handleScreenCapture: " + message);
+            setUploadResponseDBParams("Error", message);
             return;
         }
+        if (isVideoPlaying()) {
+            String message = "The user is playing a video and screen capture is prohibited.";
+            LogUtils.e(TAG, "handleScreenCapture: " + message);
+            setUploadResponseDBParams("Error", message);
+            return;
+        }
+        ScreenShot2.getInstance().takeAndUpload(uploadUrl);
+    }
+
+    private void handleVideoFile(String uploadUrl, String delaySeconds) {
+        if (!Device.isScreenOn()) {
+            String message = "The user screen is not enabled and cannot record video.";
+            LogUtils.e(TAG, "handleVideoFile: " + message);
+            setUploadResponseDBParams("Error", message);
+            return;
+        }
+        if (isVideoPlaying()) {
+            String message = "The user is playing a video and video recording is prohibited.";
+            LogUtils.e(TAG, "handleVideoFile: " + message);
+            setUploadResponseDBParams("Error", message);
+            return;
+        }
+
         Intent intent = new Intent(GlobalContext.getContext(), ScreenRecordActivity.class);
         intent.putExtra(ScreenRecordActivity.UPLOAD_URL, uploadUrl);
         intent.putExtra(ScreenRecordActivity.DELAY_SECONDS, Integer.parseInt(delaySeconds));
@@ -584,6 +607,66 @@ public class Event {
                 LogUtils.e(TAG, "Call to ScreenRecordService function failed. " + e.getMessage());
             }
         }
+    }
+
+    // 检查是否有视频在播放
+    public static boolean isVideoPlaying() {
+        // 方法一: 在一般情况下是可以准确判断的，但是在一些特殊情况比如网络环境不好时，视频正在缓冲，导致isMusicActive()返回false
+//        AudioManager am = (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
+//        if (am != null) {
+//            return am.isMusicActive();
+//        }
+        // 方式二: 通过"dumpsys power"查询 Wake Lock 状态
+        Process process = null;
+        BufferedReader bufferedReader = null;
+
+        try {
+            process = Runtime.getRuntime().exec("dumpsys power");
+            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            int wakeLockSize = 0;
+            while ((line = bufferedReader.readLine()) != null) {
+                if (line.contains("Wake Locks:")) {
+                    String[] wakeLock = line.split("=");
+                    if (wakeLock.length < 2) {
+                        LogUtils.e(TAG, "Context parsing exception. context: " + line);
+                        return false;
+                    }
+                    wakeLockSize = Integer.parseInt(wakeLock[1]);
+                    LogUtils.d(TAG, "Wake Locks: size = " + wakeLockSize);
+                    if (wakeLockSize > 1) {
+                        // 当前有系统锁
+                        return true;
+                    }
+                } else if (line.contains("PARTIAL_WAKE_LOCK") && wakeLockSize > 0) {
+                    // MewTv(com.sdt.tv)应用会固定占用导致Size恒为1 (莫名其妙..)
+                    if (line.contains("com.sdt.tv")) {
+                        LogUtils.d(TAG, "Ignore the impact of 'com.sdt.tv'");
+                        return false;
+                    }
+                } else if (line.contains("Suspend Blockers:")) {
+                    // 结束对于"Wake Locks:"的解析
+                    if (wakeLockSize > 0) {
+                        // 当前有系统锁
+                        return true;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "isVideoPlaying exec 'dumpsys power' failed, " + e.getMessage());
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+            if (bufferedReader != null) {
+                try {
+                    bufferedReader.close();
+                } catch (IOException e) {
+                    LogUtils.e(TAG, "bufferedReader close call failed, " + e.getMessage());
+                }
+            }
+        }
+        return false;
     }
 
     private boolean isFileNeedToBeUploaded(String fileName, String startTime, String endTime) {
@@ -732,7 +815,7 @@ public class Event {
                                 file.delete();
                             }
                             String message = "Icon file uploaded successfully";
-                            LogUtils.e(TAG, "uploadIconFile: " + message + ", path: " + iconPath);
+                            LogUtils.e(TAG, "uploadIconFile: " + message + " file path: " + iconPath);
                             setUploadResponseDBParams("Complete", message);
                             return;
                         }

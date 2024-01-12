@@ -19,6 +19,7 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 
 import com.sdt.accessor.R;
+import com.sdt.diagnose.command.Event;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
@@ -165,9 +166,10 @@ public class ScreenRecordService extends Service {
             maxFileSize = Long.parseLong(maxUplaodFileSize);
         }
         if (fileSize >= maxFileSize) {
-            LogUtils.e(TAG, "The size of the file to be uploaded exceeds the limit."
-                    + " File size: " + fileSize + " > Max Size: " + maxFileSize);
             file.delete();
+            String message = "The target file is too large and cannot be uploaded.";
+            LogUtils.e(TAG, message + " File size: " + fileSize + " > Max Size: " + maxFileSize);
+            Event.setUploadResponseDBParams("Error", message);
             return;
         }
         // 开启新线程上传文件
@@ -249,7 +251,9 @@ public class ScreenRecordService extends Service {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 File file = new File(recordFilePath);
                 file.delete();
-                LogUtils.e(TAG, "Failed to upload video. Failure Message: " + e.getMessage());
+                String message = "Failed to upload video, " + e.getMessage();
+                LogUtils.e(TAG, "UploadFileCallback: " + message);
+                Event.setUploadResponseDBParams("Error", message);
                 synchronized (SYNC_OBJ) {
                     SYNC_OBJ.notify();
                 }
@@ -258,10 +262,20 @@ public class ScreenRecordService extends Service {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response)
                     throws IOException {
-                File file = new File(recordFilePath);
-                file.delete();
-                LogUtils.i(TAG, "Successfully uploaded video. Protocol: " + response.protocol()
-                        + ", Code: " + response.code());
+                if (response.code() == 200) {
+                    File file = new File(recordFilePath);
+                    file.delete();
+                    String message = "Successfully uploaded video file.";
+                    LogUtils.e(TAG, "UploadFileCallback: " + message
+                            + " Protocol: " + response.protocol()
+                            + ", Code: " + response.code());
+                    Event.setUploadResponseDBParams("Complete", message);
+                } else {
+                    String message = "Failed to upload video file. " + response.protocol()
+                            + " " + response.code() + " " + response.message();
+                    LogUtils.e(TAG, "UploadFileCallback: " + message);
+                    Event.setUploadResponseDBParams("Error", message);
+                }
                 synchronized (SYNC_OBJ) {
                     SYNC_OBJ.notify();
                 }

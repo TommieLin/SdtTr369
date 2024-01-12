@@ -5,6 +5,7 @@ import android.os.Environment;
 
 import androidx.annotation.NonNull;
 
+import com.sdt.diagnose.command.Event;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
@@ -51,7 +52,9 @@ public class ScreenShot2 {
     private boolean takeScreenshot() {
         File fileDir = new File(fileParentDirPath);
         if (!fileDir.exists() && !fileDir.mkdirs()) {
-            LogUtils.e(TAG, "Can't create file path.");
+            String message = "Unable to create folder.";
+            LogUtils.e(TAG, "takeScreenshot: " + message);
+            Event.setUploadResponseDBParams("Error", message);
             return false;
         }
         screenshotFilePath = String.format("%s/%s.png", fileParentDirPath, simpleDateFormat.format(new Date()));
@@ -61,27 +64,39 @@ public class ScreenShot2 {
 
     private void uploadScreenshot() {
         if (uploadUrl.startsWith("https")) {
-            HttpsUtils.uploadFile(uploadUrl, screenshotFilePath, false, new UploadFileCallback());
+            HttpsUtils.uploadFile(uploadUrl, screenshotFilePath, true, new UploadFileCallback());
         } else if (uploadUrl.startsWith("http")) {
-            HttpUtils.uploadFile(uploadUrl, screenshotFilePath, false, new UploadFileCallback());
+            HttpUtils.uploadFile(uploadUrl, screenshotFilePath, true, new UploadFileCallback());
         }
     }
 
     static class UploadFileCallback implements Callback {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-            LogUtils.e(TAG, "Failed to upload screenshot. Failure Message: " + e.getMessage());
             File file = new File(screenshotFilePath);
             file.delete();
+            String message = "Failed to upload screenshot, " + e.getMessage();
+            LogUtils.e(TAG, "UploadFileCallback: " + message);
+            Event.setUploadResponseDBParams("Error", message);
         }
 
         @Override
         public void onResponse(@NonNull Call call, @NonNull Response response)
                 throws IOException {
-            LogUtils.i(TAG, "Successfully uploaded screenshot. Protocol: " + response.protocol()
-                    + ", Code: " + response.code());
-            File file = new File(screenshotFilePath);
-            file.delete();
+            if (response.code() == 200) {
+                File file = new File(screenshotFilePath);
+                file.delete();
+                String message = "Successfully uploaded screenshot.";
+                LogUtils.e(TAG, "UploadFileCallback: " + message
+                        + " Protocol: " + response.protocol()
+                        + ", Code: " + response.code());
+                Event.setUploadResponseDBParams("Complete", message);
+            } else {
+                String message = "Failed to upload screenshot. " + response.protocol()
+                        + " " + response.code() + " " + response.message();
+                LogUtils.e(TAG, "UploadFileCallback: " + message);
+                Event.setUploadResponseDBParams("Error", message);
+            }
         }
     }
 }
