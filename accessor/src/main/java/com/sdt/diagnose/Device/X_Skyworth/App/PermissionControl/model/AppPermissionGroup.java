@@ -638,11 +638,13 @@ public final class AppPermissionGroup implements Comparable<AppPermissionGroup> 
         final int permissionCount = mPermissions.size();
         for (int i = 0; i < permissionCount; i++) {
             Permission permission = mPermissions.valueAt(i);
+            LogUtils.d(TAG, "permission getName: " + permission.getName());
             if (filterPermissions != null
                     && !ArrayUtils.contains(filterPermissions, permission.getName())) {
                 continue;
             }
             if (permission.isGrantedIncludingAppOp()) {
+                LogUtils.d(TAG, "areRuntimePermissionsGranted isGrantedIncludingAppOp: true");
                 return true;
             }
         }

@@ -9,11 +9,13 @@ import android.text.TextUtils;
 
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.model.AppPermissionGroup;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.utils.Utils;
+import com.sdt.diagnose.common.log.LogUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AppPermissionControl {
+    private static final String TAG = "AppPermissionControl";
     public static boolean changeRuntimePermissions(Context context, String appPackageName, String permissionGroupName, boolean isGrant) {
         if (isGrant) {
             return grantRuntimePermissions(context, appPackageName, permissionGroupName);
@@ -48,8 +50,15 @@ public class AppPermissionControl {
         final PackageInfo packageInfo;
         AppPermissionGroup group = null;
         PackageItemInfo groupInfo = Utils.getGroupInfo(permissionGroupName, context);
+        if (groupInfo == null) {
+            LogUtils.e(TAG, "getGroupInfo failed");
+            return null;
+        }
         List<PermissionInfo> groupPermInfos = Utils.getGroupPermissionInfos(permissionGroupName, context);
-        if (groupInfo == null || groupPermInfos == null) return null;
+        if (groupPermInfos == null) {
+            LogUtils.e(TAG, "getGroupPermissionInfos failed");
+            return null;
+        }
         PackageManager packageManager = context.getPackageManager();
         CharSequence groupLabel = groupInfo.loadLabel(packageManager);
         CharSequence fullGroupLabel = groupInfo.loadSafeLabel(packageManager, 0,
@@ -70,12 +79,14 @@ public class AppPermissionControl {
             packageInfo = pm.getPackageInfo(appPackageName,
                     PackageManager.GET_PERMISSIONS);
         } catch (PackageManager.NameNotFoundException e) {
-            return null;
-        }
-        if (packageInfo.requestedPermissions == null) {
+            LogUtils.e(TAG, "getPackageInfo error, " + e.getMessage());
             return null;
         }
 
+        if (packageInfo.requestedPermissions == null) {
+            LogUtils.e(TAG, "packageInfo.requestedPermissions is null");
+            return null;
+        }
         for (int j = 0; j < packageInfo.requestedPermissions.length; j++) {
             String requestedPerm = packageInfo.requestedPermissions[j];
             PermissionInfo requestedPermissionInfo = null;
