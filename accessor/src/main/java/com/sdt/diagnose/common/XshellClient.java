@@ -64,6 +64,16 @@ public class XshellClient {
     }
 
     public static void stop() {
+        if (forwardThread != null) {
+            forwardThread.interrupt();
+            forwardThread = null;
+        }
+
+        if (mSocket != null) {
+            mSocket.disconnect();
+            mSocket = null;
+        }
+
         try {
             if (ptyProcessOutputStream != null) ptyProcessOutputStream.close();
             if (ptyProcessInputStream != null) ptyProcessInputStream.close();
@@ -78,17 +88,7 @@ public class XshellClient {
             sPtyProcess.destroy();
             sPtyProcess = null;
         }
-
-        if (mSocket != null) {
-            mSocket.disconnect();
-            mSocket = null;
-        }
-        if (forwardThread != null) {
-            forwardThread.interrupt();
-            forwardThread = null;
-        }
     }
-
 
     private static void onConnected(Object[] objects) {
         LogUtils.i(TAG, "connected...");
@@ -96,7 +96,7 @@ public class XshellClient {
     }
 
     private static void onDisConnected(Object[] objects) {
-        LogUtils.i(TAG, "disconnect...");
+        LogUtils.e(TAG, "disconnect...");
         stop();
     }
 
@@ -111,7 +111,7 @@ public class XshellClient {
     }
 
     private static void onConnectError(Object[] objects) {
-        LogUtils.i(TAG, "onConnectError: " + objects[0].toString());
+        LogUtils.e(TAG, "onConnectError: " + objects[0].toString());
         stop();
     }
 
@@ -128,7 +128,7 @@ public class XshellClient {
                     mSocket.emit(Socket.EVENT_MESSAGE, AESUtil.encrypt(baos.toByteArray()));
                     baos = new ByteArrayOutputStream();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LogUtils.e(TAG, "ForwardThread run error, " + e.getMessage());
             }
             LogUtils.i(TAG, "ForwardThread end...");

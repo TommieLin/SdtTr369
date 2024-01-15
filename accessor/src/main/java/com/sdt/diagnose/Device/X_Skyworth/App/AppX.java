@@ -237,9 +237,14 @@ public class AppX implements IProtocolArray<AppInfo> {
                                     .get(Integer.parseInt(thirdParam) - 1)
                                     .getLabel().toString();
                         case "Granted":
-                            return Objects.requireNonNull(appPermissionGroup.get(paramsArr[0]))
-                                    .get(Integer.parseInt(thirdParam) - 1)
-                                    .areRuntimePermissionsGranted() + "";
+                            boolean isGranted = AppPermissionControl.areRuntimePermissionsGranted(
+                                    GlobalContext.getContext(),
+                                    t.getPackageName(),
+                                    Objects.requireNonNull(appPermissionGroup.get(paramsArr[0]))
+                                            .get(Integer.parseInt(thirdParam) - 1)
+                                            .getName()
+                            );
+                            return String.valueOf(isGranted);
                         case "CanModify":
                             return (!Objects.requireNonNull(appPermissionGroup.get(paramsArr[0]))
                                     .get(Integer.parseInt(thirdParam) - 1)
