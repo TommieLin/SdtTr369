@@ -93,6 +93,9 @@ public class OpenTR369Native {
     public static native String GetDefaultModelPath();
     public static native String GetMqttServerUrl();
     public static native int SetMqttServerUrl(String mqttServer);
+    public static native int SetMqttClientId(String clientId);
+    public static native int SetMqttUsername(String username);
+    public static native int SetMqttPassword(String password);
     public static native int SetMqttCaCertContext(String caCertContext);
     public static native int SetMqttClientPrivateKey(String clientPrivateKey);
     public static native int SetMqttClientCertContext(String clientCertContext);

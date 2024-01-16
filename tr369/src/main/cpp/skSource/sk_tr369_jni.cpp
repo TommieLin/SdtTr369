@@ -271,6 +271,39 @@ Java_com_sdt_opentr369_OpenTR369Native_SetMqttServerUrl(JNIEnv *env, jclass claz
 
 extern "C"
 JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttClientId(JNIEnv *env, jclass clazz,
+                                                       jstring client_id) {
+    // TODO: implement SetMqttClientId()
+    const char *const clientId = env->GetStringUTFChars(client_id, nullptr);
+    int ret = SK_TR369_SetMqttClientId(clientId);
+    env->ReleaseStringUTFChars(client_id, clientId);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttUsername(JNIEnv *env, jclass clazz,
+                                                       jstring username_str) {
+    // TODO: implement SetMqttUsername()
+    const char *const username = env->GetStringUTFChars(username_str, nullptr);
+    int ret = SK_TR369_SetMqttUsername(username);
+    env->ReleaseStringUTFChars(username_str, username);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_SetMqttPassword(JNIEnv *env, jclass clazz,
+                                                       jstring password_str) {
+    // TODO: implement SetMqttPassword()
+    const char *const password = env->GetStringUTFChars(password_str, nullptr);
+    int ret = SK_TR369_SetMqttPassword(password);
+    env->ReleaseStringUTFChars(password_str, password);
+    return ret;
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
 Java_com_sdt_opentr369_OpenTR369Native_SetMqttCaCertContext(JNIEnv *env, jclass clazz,
                                                             jstring ca_cert_context) {
     // TODO: implement SetMqttCaCertContext()

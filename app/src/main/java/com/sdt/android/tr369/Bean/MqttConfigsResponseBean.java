@@ -9,6 +9,15 @@ public class MqttConfigsResponseBean {
     @SerializedName("mqttServer")
     private String mqttServer;
 
+    @SerializedName("clientId")
+    private String clientId;
+
+    @SerializedName("username")
+    private String username;
+
+    @SerializedName("password")
+    private String password;
+
     @SerializedName("caCert")
     private CaCertBean caCert;
 
@@ -58,11 +67,38 @@ public class MqttConfigsResponseBean {
         this.enable = enable;
     }
 
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String toString() {
         return "MqttConfigsResponseBean{" +
                 "message='" + message + '\'' +
                 ", mqttServer='" + mqttServer + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
                 ", caCert=" + caCert +
                 ", clientCert=" + clientCert +
                 ", enable=" + enable +

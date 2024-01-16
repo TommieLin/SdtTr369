@@ -15,6 +15,12 @@ char *SK_TR369_GetDefaultModelPath();
 
 char *SK_TR369_GetMqttServerUrl();
 int SK_TR369_SetMqttServerUrl(const char *const);
+char *SK_TR369_GetMqttClientId();
+int SK_TR369_SetMqttClientId(const char *const);
+char *SK_TR369_GetMqttUsername();
+int SK_TR369_SetMqttUsername(const char *const);
+char *SK_TR369_GetMqttPassword();
+int SK_TR369_SetMqttPassword(const char *const);
 int SK_TR369_SetMqttCaCertContext(const char *const);
 int SK_TR369_SetMqttClientPrivateKey(const char *const);
 int SK_TR369_SetMqttClientCertContext(const char *const);

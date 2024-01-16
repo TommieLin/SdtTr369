@@ -188,8 +188,6 @@ public class SdtTr369Receiver extends BroadcastReceiver {
             return false;
         }
 
-        String mqttServer = bean.getMqttServer();
-
         CaCertBean caCert = bean.getCaCert();
         if (caCert == null) {
             LogUtils.e(TAG, "handleMqttResponseBody: The CA certificate data is abnormal");
@@ -213,17 +211,11 @@ public class SdtTr369Receiver extends BroadcastReceiver {
                 ? GzipUtils.dataHandleByUnGzip(clientCert.getCertContent())
                 : clientCert.getCertContent();
 
-        // 此打印信息释放版本时禁止打开
-//        LogUtils.d(TAG, "handleMqttResponseBody mqttServer: " + mqttServer
-//                + ", caCertCertContent: " + caCertContext
-//                + ", clientCertPrivateKey: " + clientPrivateKey
-//                + ", clientCertCertContent: " + clientCertContext);
-
-        return initMqttServerConfigs(mqttServer, caCertContext, clientPrivateKey, clientCertContext);
+        return initMqttServerConfigs(bean, caCertContext, clientPrivateKey, clientCertContext);
     }
 
-    private boolean initMqttServerConfigs(String mqttServer, String caCertContext, String clientPrivateKey, String clientCertContext) {
-        if (TextUtils.isEmpty(mqttServer)
+    private boolean initMqttServerConfigs(MqttConfigsResponseBean bean, String caCertContext, String clientPrivateKey, String clientCertContext) {
+        if (bean == null
                 || TextUtils.isEmpty(caCertContext)
                 || TextUtils.isEmpty(clientPrivateKey)
                 || TextUtils.isEmpty(clientCertContext)) {
@@ -231,9 +223,45 @@ public class SdtTr369Receiver extends BroadcastReceiver {
             return false;
         }
 
+        String mqttServer = bean.getMqttServer();
+        String clientId = bean.getClientId();
+        String username = bean.getUsername();
+        String password = bean.getPassword();
+
+        if (TextUtils.isEmpty(mqttServer)
+                || TextUtils.isEmpty(clientId)
+                || TextUtils.isEmpty(username)
+                || TextUtils.isEmpty(password)) {
+            LogUtils.e(TAG, "initMqttServerConfigs: Configuration parameters are empty");
+        }
+
+        // 此打印信息释放版本时禁止打开
+//        LogUtils.d(TAG, "initMqttServerConfigs mqttServer: " + mqttServer
+//                + ", clientId: " + clientId
+//                + ", username: " + username
+//                + ", password: " + password
+//                + ", caCertCertContent: " + caCertContext
+//                + ", clientCertPrivateKey: " + clientPrivateKey
+//                + ", clientCertCertContent: " + clientCertContext);
+
         int err = OpenTR369Native.SetMqttServerUrl(mqttServer);
         if (err != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the mqtt server url");
+            return false;
+        }
+        err = OpenTR369Native.SetMqttClientId(clientId);
+        if (err != 0) {
+            LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client Id");
+            return false;
+        }
+        err = OpenTR369Native.SetMqttUsername(username);
+        if (err != 0) {
+            LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client username");
+            return false;
+        }
+        err = OpenTR369Native.SetMqttPassword(password);
+        if (err != 0) {
+            LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client password");
             return false;
         }
         err = OpenTR369Native.SetMqttCaCertContext(caCertContext);
