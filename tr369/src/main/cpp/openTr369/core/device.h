@@ -241,8 +241,9 @@ int DEVICE_SELF_TEST_Init(void);
 #endif
 
 int DEVICE_MQTT_Init(void);
-int DEVICE_MQTT_SetDefaultsByEndpointId(void);
-int DEVICE_MQTT_SetDefaultsByConfigFile(void);
+int DEVICE_MQTT_SetDefaultTopic(void);
+int DEVICE_MQTT_SetDefaultServer(void);
+int DEVICE_MQTT_SetDefaultClient(void);
 int DEVICE_MQTT_Start(void);
 void DEVICE_MQTT_Stop(void);
 int DEVICE_MQTT_StartAllClients(void);

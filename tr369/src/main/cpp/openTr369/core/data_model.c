@@ -231,19 +231,27 @@ int DATA_MODEL_Init(void)
     }
 
 #ifdef ENABLE_MQTT
-    // Set default values related to EndpointId for database parameters
-    err = DEVICE_MQTT_SetDefaultsByEndpointId();
+    // Set the default value of the Topic node based on EndpointId
+    err = DEVICE_MQTT_SetDefaultTopic();
     if (err != USP_ERR_OK)
     {
-        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultsByEndpointId error(%d).", __FUNCTION__, err);
+        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultTopic error(%d).", __FUNCTION__, err);
         return err;
     }
 
-    // Set default values for database parameters related to the configuration file
-    err = DEVICE_MQTT_SetDefaultsByConfigFile();
+    // Set the default value of the Mqtt Server node according to the data delivered by the server
+    err = DEVICE_MQTT_SetDefaultServer();
     if (err != USP_ERR_OK)
     {
-        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultsByConfigFile error(%d).", __FUNCTION__, err);
+        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultServer error(%d).", __FUNCTION__, err);
+        return err;
+    }
+
+    // Set the default value of the Mqtt Client node according to the data delivered by the server
+    err = DEVICE_MQTT_SetDefaultClient();
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: DEVICE_MQTT_SetDefaultClient error(%d).", __FUNCTION__, err);
         return err;
     }
 #endif

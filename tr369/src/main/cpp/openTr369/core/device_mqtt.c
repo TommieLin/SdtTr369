@@ -90,14 +90,19 @@ static client_t mqtt_client_params[MAX_MQTT_CLIENTS];
 static char *endpoint_id_path = "Device.LocalAgent.EndpointID";
 static char *response_topic_path = "Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured";
 static char *short_msg_topic_path = "Device.MQTT.Client.1.Subscription.1.Topic";
-static char *client_id_path = "Device.MQTT.Client.1.ClientID";
 static char *broker_address_path = "Device.MQTT.Client.1.BrokerAddress";
 static char *broker_port_path = "Device.MQTT.Client.1.BrokerPort";
 static char *transport_protocol_path = "Device.MQTT.Client.1.TransportProtocol";
+static char *client_id_path = "Device.MQTT.Client.1.ClientID";
+static char *client_username_path = "Device.MQTT.Client.1.Username";
+static char *client_password_path = "Device.MQTT.Client.1.Password";
 
 //------------------------------------------------------------------------------
 // String, specify a string containing the MQTT server URL.
 char *mqtt_server_url = NULL;
+char *mqtt_client_id = NULL;
+char *mqtt_client_username = NULL;
+char *mqtt_client_password = NULL;
 
 //------------------------------------------------------------------------------
 // Forward declarations. Note these are not static, because we need them in the symbol table for USP_LOG_Callstack() to show them
@@ -258,19 +263,18 @@ int DEVICE_MQTT_Init(void)
 
 /*********************************************************************//**
 **
-** DEVICE_MQTT_SetDefaultsByEndpointId
+** DEVICE_MQTT_SetDefaultTopic
 **
-** Set default values related to EndpointId for database parameters:
+** Set the default value of the Topic node based on EndpointId. Related nodes:
 **      1. Device.LocalAgent.MTP.1.MQTT.ResponseTopicConfigured
-**      2. Device.MQTT.Client.1.ClientID
-**      3. Device.MQTT.Client.1.Subscription.1.Topic (SMS topic)
+**      2. Device.MQTT.Client.1.Subscription.1.Topic (SMS topic)
 **
 ** \param   None
 **
 ** \return  USP_ERR_OK if successful
 **
 **************************************************************************/
-int DEVICE_MQTT_SetDefaultsByEndpointId(void)
+int DEVICE_MQTT_SetDefaultTopic(void)
 {
     char endpoint_id[MAX_DM_SHORT_VALUE_LEN];
     char response_topic[MAX_DM_SHORT_VALUE_LEN];
@@ -296,15 +300,7 @@ int DEVICE_MQTT_SetDefaultsByEndpointId(void)
         return err;
     }
 
-    // 2. Register the default value of ClientID
-    err = DATA_MODEL_SetParameterInDatabase(client_id_path, endpoint_id);
-    if (err != USP_ERR_OK)
-    {
-        USP_LOG_Error("%s: Unable to set client_id", __FUNCTION__);
-        return err;
-    }
-
-    // 3. Register the default value of Subscription.1.Topic
+    // 2. Register the default value of Subscription.1.Topic
     err = DATA_MODEL_SetParameterInDatabase(short_msg_topic_path, short_msg_topic);
     if (err != USP_ERR_OK)
     {
@@ -317,9 +313,10 @@ int DEVICE_MQTT_SetDefaultsByEndpointId(void)
 
 /*********************************************************************//**
 **
-** DEVICE_MQTT_SetDefaultsByConfigFile
+** DEVICE_MQTT_SetDefaultServer
 **
-** Set default values for database parameters related to the configuration file:
+** Set the default value of the Mqtt Server node according to the data delivered by the server.
+** Related nodes:
 **      1. Device.MQTT.Client.1.BrokerAddress
 **      2. Device.MQTT.Client.1.BrokerPort
 **      3. Device.MQTT.Client.1.TransportProtocol
@@ -329,7 +326,7 @@ int DEVICE_MQTT_SetDefaultsByEndpointId(void)
 ** \return  USP_ERR_OK if successful
 **
 **************************************************************************/
-int DEVICE_MQTT_SetDefaultsByConfigFile(void)
+int DEVICE_MQTT_SetDefaultServer(void)
 {
     // Read the global variable of the MQTT server URL
     if ((mqtt_server_url == NULL) || (*mqtt_server_url == '\0') || (strcmp(mqtt_server_url, "null") == 0))
@@ -414,6 +411,71 @@ int DEVICE_MQTT_SetDefaultsByConfigFile(void)
     if (err != USP_ERR_OK)
     {
         USP_LOG_Error("%s: Unable to set transport_protocol", __FUNCTION__);
+        return err;
+    }
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** DEVICE_MQTT_SetDefaultClient
+**
+** Set the default value of the Mqtt Client node according to the data delivered by the server.
+** Related nodes:
+**      1. Device.MQTT.Client.1.ClientID
+**      2. Device.MQTT.Client.1.Username
+**      3. Device.MQTT.Client.1.Password
+**
+** \param   None
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int DEVICE_MQTT_SetDefaultClient(void)
+{
+    // 1. Read the global variable of the MQTT client ID
+    if ((mqtt_client_id == NULL) || (*mqtt_client_id == '\0') || (strcmp(mqtt_client_id, "null") == 0))
+    {
+        USP_LOG_Error("%s: Failed to read the MQTT client ID", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Debug("%s: The client ID that needs to be subscribed is %s", __FUNCTION__, mqtt_client_id);
+
+    int err = DATA_MODEL_SetParameterInDatabase(client_id_path, mqtt_client_id);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set client_id", __FUNCTION__);
+        return err;
+    }
+
+    // 2. Read the global variable of the MQTT client username
+    if ((mqtt_client_username == NULL) || (*mqtt_client_username == '\0') || (strcmp(mqtt_client_username, "null") == 0))
+    {
+        USP_LOG_Error("%s: Failed to read the MQTT client username", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Debug("%s: The client username that needs to be subscribed is %s", __FUNCTION__, mqtt_client_username);
+
+    err = DATA_MODEL_SetParameterInDatabase(client_username_path, mqtt_client_username);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set client_username", __FUNCTION__);
+        return err;
+    }
+
+    // 3. Read the global variable of the MQTT client password
+    if ((mqtt_client_password == NULL) || (*mqtt_client_password == '\0') || (strcmp(mqtt_client_password, "null") == 0))
+    {
+        USP_LOG_Error("%s: Failed to read the MQTT client password", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    USP_LOG_Debug("%s: The client password that needs to be subscribed is %s", __FUNCTION__, mqtt_client_password);
+
+    err = DATA_MODEL_SetParameterInDatabase(client_password_path, mqtt_client_password);
+    if (err != USP_ERR_OK)
+    {
+        USP_LOG_Error("%s: Unable to set client_password", __FUNCTION__);
         return err;
     }
 

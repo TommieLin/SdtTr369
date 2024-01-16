@@ -485,6 +485,150 @@ char *SK_TR369_GetMqttServerUrl()
 
 /*********************************************************************//**
 **
+** SK_TR369_SetMqttClientId
+**
+** Set the client ID used to connect to the MQTT service
+**
+** \param   mqtt_server - Pointer to the client ID
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttClientId(const char *const client_id)
+{
+    if (mqtt_client_id != NULL)
+    {
+        free(mqtt_client_id);
+        mqtt_client_id = NULL;
+    }
+
+    unsigned int len = strlen(client_id);
+    mqtt_client_id = (char *) malloc(len + 1);
+    if (mqtt_client_id == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(mqtt_client_id, client_id, len);
+    mqtt_client_id[len] = '\0';
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_GetMqttClientId
+**
+** Get the client ID used to connect to the MQTT service
+**
+** \param   None
+**
+** \return  Pointer to the MQTT server URL
+**
+**************************************************************************/
+char *SK_TR369_GetMqttClientId()
+{
+    return mqtt_client_id;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetMqttUsername
+**
+** Set the client username used to connect to the MQTT service
+**
+** \param   mqtt_server - Pointer to the client username
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttUsername(const char *const username)
+{
+    if (mqtt_client_username != NULL)
+    {
+        free(mqtt_client_username);
+        mqtt_client_username = NULL;
+    }
+
+    unsigned int len = strlen(username);
+    mqtt_client_username = (char *) malloc(len + 1);
+    if (mqtt_client_username == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(mqtt_client_username, username, len);
+    mqtt_client_username[len] = '\0';
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_GetMqttUsername
+**
+** Get the client username used to connect to the MQTT service
+**
+** \param   None
+**
+** \return  Pointer to the MQTT server URL
+**
+**************************************************************************/
+char *SK_TR369_GetMqttUsername()
+{
+    return mqtt_client_username;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_SetMqttPassword
+**
+** Set the client password used to connect to the MQTT service
+**
+** \param   mqtt_server - Pointer to the client password
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_SetMqttPassword(const char *const password)
+{
+    if (mqtt_client_password != NULL)
+    {
+        free(mqtt_client_password);
+        mqtt_client_password = NULL;
+    }
+
+    unsigned int len = strlen(password);
+    mqtt_client_password = (char *) malloc(len + 1);
+    if (mqtt_client_password == NULL)
+    {
+        return USP_ERR_SK_MALLOC_FAILURE;
+    }
+
+    strncpy(mqtt_client_password, password, len);
+    mqtt_client_password[len] = '\0';
+
+    return USP_ERR_OK;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_GetMqttPassword
+**
+** Get the client password used to connect to the MQTT service
+**
+** \param   None
+**
+** \return  Pointer to the MQTT server URL
+**
+**************************************************************************/
+char *SK_TR369_GetMqttPassword()
+{
+    return mqtt_client_password;
+}
+
+/*********************************************************************//**
+**
 ** SK_TR369_SetMqttCaCertContext
 **
 ** Set the CA certificate.
@@ -832,6 +976,24 @@ void SK_TR369_Stop()
     {
         free(mqtt_server_url);
         mqtt_server_url = NULL;
+    }
+
+    if (mqtt_client_id != NULL)
+    {
+        free(mqtt_client_id);
+        mqtt_client_id = NULL;
+    }
+
+    if (mqtt_client_username != NULL)
+    {
+        free(mqtt_client_username);
+        mqtt_client_username = NULL;
+    }
+
+    if (mqtt_client_password != NULL)
+    {
+        free(mqtt_client_password);
+        mqtt_client_password = NULL;
     }
 
     if (usp_trust_store_str != NULL)

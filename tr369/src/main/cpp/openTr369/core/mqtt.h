@@ -161,5 +161,8 @@ int MQTT_GetAgentResponseTopicDiscovered(int instance, char *buf, int len);
 //-----------------------------------------------------------------------------------------------
 // Global variables initialized through the Java layer.
 extern char *mqtt_server_url;
+extern char *mqtt_client_id;
+extern char *mqtt_client_username;
+extern char *mqtt_client_password;
 
 #endif
