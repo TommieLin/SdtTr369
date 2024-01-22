@@ -233,6 +233,7 @@ public class SdtTr369Receiver extends BroadcastReceiver {
                 || TextUtils.isEmpty(username)
                 || TextUtils.isEmpty(password)) {
             LogUtils.e(TAG, "initMqttServerConfigs: Configuration parameters are empty");
+            return false;
         }
 
         // 此打印信息释放版本时禁止打开
