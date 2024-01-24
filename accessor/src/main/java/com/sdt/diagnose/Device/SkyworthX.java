@@ -35,7 +35,7 @@ import com.sdt.diagnose.Device.X_Skyworth.Log.bean.LogRepository;
 import com.sdt.diagnose.Device.X_Skyworth.LogManager;
 import com.sdt.diagnose.Device.X_Skyworth.SkyworthXManager;
 import com.sdt.diagnose.Device.X_Skyworth.SystemDataStat;
-import com.sdt.diagnose.DiagnoseServiceManager;
+import com.sdt.diagnose.SpeedTestServiceManager;
 import com.sdt.diagnose.common.ApplicationUtils;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.DreamBackend;
@@ -479,11 +479,11 @@ public class SkyworthX {
             SpeedTestBean.getInstance().setUrl(value);
         } else if (path.contains("TransactionId")) {
             SpeedTestBean.getInstance().setTransactionId(value);
-            if (SpeedTestBean.getInstance().getEnable().equals("1")
+            if ("1".equals(SpeedTestBean.getInstance().getEnable())
                     && !TextUtils.isEmpty(SpeedTestBean.getInstance().getUrl())
                     && !TextUtils.isEmpty(SpeedTestBean.getInstance().getTransactionId())) {
                 LogUtils.d(TAG, "Wait to call bindSpeedTestService function");
-                DiagnoseServiceManager.getInstance().bindSpeedTestService();
+                SpeedTestServiceManager.getInstance().bindSpeedTestService();
             }
         }
         return true;

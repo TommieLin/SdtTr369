@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.PowerManager;
@@ -35,14 +36,12 @@ import com.skyworth.scrrtcsrv.Device;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -452,7 +451,7 @@ public class Event {
             }
         } catch (Exception e) {
             String message = "Failed to upload file via https, " + e.getMessage();
-            LogUtils.e(TAG, "uploadLogFileByHttp: " + message);
+            LogUtils.e(TAG, "uploadLogFileByHttps: " + message);
             setUploadResponseDBParams("Error", message);
         }
     }
@@ -612,61 +611,62 @@ public class Event {
     // 检查是否有视频在播放
     public static boolean isVideoPlaying() {
         // 方法一: 在一般情况下是可以准确判断的，但是在一些特殊情况比如网络环境不好时，视频正在缓冲，导致isMusicActive()返回false
-//        AudioManager am = (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
-//        if (am != null) {
-//            return am.isMusicActive();
-//        }
-        // 方式二: 通过"dumpsys power"查询 Wake Lock 状态
-        Process process = null;
-        BufferedReader bufferedReader = null;
-
-        try {
-            process = Runtime.getRuntime().exec("dumpsys power");
-            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            int wakeLockSize = 0;
-            while ((line = bufferedReader.readLine()) != null) {
-                if (line.contains("Wake Locks:")) {
-                    String[] wakeLock = line.split("=");
-                    if (wakeLock.length < 2) {
-                        LogUtils.e(TAG, "Context parsing exception. context: " + line);
-                        return false;
-                    }
-                    wakeLockSize = Integer.parseInt(wakeLock[1]);
-                    LogUtils.d(TAG, "Wake Locks: size = " + wakeLockSize);
-                    if (wakeLockSize > 1) {
-                        // 当前有系统锁
-                        return true;
-                    }
-                } else if (line.contains("PARTIAL_WAKE_LOCK") && wakeLockSize > 0) {
-                    // MewTv(com.sdt.tv)应用会固定占用导致Size恒为1 (莫名其妙..)
-                    if (line.contains("com.sdt.tv")) {
-                        LogUtils.d(TAG, "Ignore the impact of 'com.sdt.tv'");
-                        return false;
-                    }
-                } else if (line.contains("Suspend Blockers:")) {
-                    // 结束对于"Wake Locks:"的解析
-                    if (wakeLockSize > 0) {
-                        // 当前有系统锁
-                        return true;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "isVideoPlaying exec 'dumpsys power' failed, " + e.getMessage());
-        } finally {
-            if (process != null) {
-                process.destroy();
-            }
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    LogUtils.e(TAG, "bufferedReader close call failed, " + e.getMessage());
-                }
-            }
+        AudioManager am = (AudioManager) GlobalContext.getContext().getSystemService(Context.AUDIO_SERVICE);
+        if (am != null) {
+            return am.isMusicActive();
         }
         return false;
+        // 方式二: 通过"dumpsys power"查询 Wake Lock 状态
+//        Process process = null;
+//        BufferedReader bufferedReader = null;
+//
+//        try {
+//            process = Runtime.getRuntime().exec("dumpsys power");
+//            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            String line;
+//            int wakeLockSize = 0;
+//            while ((line = bufferedReader.readLine()) != null) {
+//                if (line.contains("Wake Locks:")) {
+//                    String[] wakeLock = line.split("=");
+//                    if (wakeLock.length < 2) {
+//                        LogUtils.e(TAG, "Context parsing exception. context: " + line);
+//                        return false;
+//                    }
+//                    wakeLockSize = Integer.parseInt(wakeLock[1]);
+//                    LogUtils.d(TAG, "Wake Locks: size = " + wakeLockSize);
+//                    if (wakeLockSize > 1) {
+//                        // 当前有系统锁
+//                        return true;
+//                    }
+//                } else if (line.contains("PARTIAL_WAKE_LOCK") && wakeLockSize > 0) {
+//                    // MewTv(com.sdt.tv)应用会固定占用导致Size恒为1 (莫名其妙..)
+//                    if (line.contains("com.sdt.tv")) {
+//                        LogUtils.d(TAG, "Ignore the impact of 'com.sdt.tv'");
+//                        return false;
+//                    }
+//                } else if (line.contains("Suspend Blockers:")) {
+//                    // 结束对于"Wake Locks:"的解析
+//                    if (wakeLockSize > 0) {
+//                        // 当前有系统锁
+//                        return true;
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            LogUtils.e(TAG, "isVideoPlaying exec 'dumpsys power' failed, " + e.getMessage());
+//        } finally {
+//            if (process != null) {
+//                process.destroy();
+//            }
+//            if (bufferedReader != null) {
+//                try {
+//                    bufferedReader.close();
+//                } catch (IOException e) {
+//                    LogUtils.e(TAG, "bufferedReader close call failed, " + e.getMessage());
+//                }
+//            }
+//        }
+//        return false;
     }
 
     private boolean isFileNeedToBeUploaded(String fileName, String startTime, String endTime) {
