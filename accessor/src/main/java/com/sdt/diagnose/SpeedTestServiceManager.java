@@ -15,22 +15,22 @@ import com.sdt.diagnose.common.net.HttpsUtils;
 import com.skyworthdigital.speedtest.ui.SpeedTestService;
 
 
-public class DiagnoseServiceManager {
-    private static final String TAG = "DiagnoseServiceManager";
-    private static DiagnoseServiceManager instance = null;
-    public SpeedTestService service;
+public class SpeedTestServiceManager {
+    private static final String TAG = "SpeedTestServiceManager";
+    private static SpeedTestServiceManager instance = null;
     private final Context mContext;
     Handler handler;
     HandlerThread handlerThread;
+    SpeedTestService service;
 
-    protected DiagnoseServiceManager() {
+    protected SpeedTestServiceManager() {
         mContext = GlobalContext.getContext();
     }
 
-    public static DiagnoseServiceManager getInstance() {
-        synchronized (DiagnoseServiceManager.class) {
+    public static SpeedTestServiceManager getInstance() {
+        synchronized (SpeedTestServiceManager.class) {
             if (instance == null) {
-                instance = new DiagnoseServiceManager();
+                instance = new SpeedTestServiceManager();
             }
             return instance;
         }
@@ -78,18 +78,14 @@ public class DiagnoseServiceManager {
                                         SpeedTestBean.getInstance().getTransactionId(),
                                         "true");
                             }
-                            SpeedTestBean.getInstance().setUrl("");
-                            SpeedTestBean.getInstance().setTransactionId("");
-                            SpeedTestBean.getInstance().setEnable("0");
-                            LogUtils.d(TAG, "unbindService");
-                            mContext.unbindService(serviceConnection);
+                            unbindSpeedTestService();
                         }
                     });
                 }
 
                 @Override
                 public void setDownloadSpeed(String mDownloadSpeed) {
-                    if (SpeedTestBean.getInstance().getEnable().equals("1")) {
+                    if ("1".equals(SpeedTestBean.getInstance().getEnable())) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -112,7 +108,7 @@ public class DiagnoseServiceManager {
 
                 @Override
                 public void setUploadSpeed(String mUploadSpeed) {
-                    if (SpeedTestBean.getInstance().getEnable().equals("1")) {
+                    if ("1".equals(SpeedTestBean.getInstance().getEnable())) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -137,12 +133,23 @@ public class DiagnoseServiceManager {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            LogUtils.e(TAG, "onServiceDisconnected...");
+            unbindSpeedTestService();
         }
     };
 
     public void bindSpeedTestService() {
+        LogUtils.d(TAG, "bindSpeedTestService");
         Intent intent = new Intent(mContext, SpeedTestService.class);
         mContext.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    public void unbindSpeedTestService() {
+        LogUtils.d(TAG, "unbindSpeedTestService");
+        SpeedTestBean.getInstance().setUrl("");
+        SpeedTestBean.getInstance().setTransactionId("");
+        SpeedTestBean.getInstance().setEnable("0");
+        mContext.unbindService(serviceConnection);
     }
 
     public void startNetSpeedTest() {

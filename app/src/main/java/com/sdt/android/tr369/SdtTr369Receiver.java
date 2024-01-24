@@ -18,9 +18,11 @@ import com.sdt.android.tr369.Bean.ClientCertBean;
 import com.sdt.android.tr369.Bean.MqttConfigsResponseBean;
 import com.sdt.android.tr369.Utils.FileUtils;
 import com.sdt.android.tr369.Utils.GzipUtils;
+import com.sdt.diagnose.SpeedTestServiceManager;
 import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.NetworkUtils;
+import com.sdt.diagnose.common.bean.SpeedTestBean;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.opentr369.OpenTR369Native;
@@ -87,6 +89,12 @@ public class SdtTr369Receiver extends BroadcastReceiver {
             } else {
                 LogUtils.e(TAG, "Not connected to the network.");
                 mHandler.removeMessages(MSG_REQUEST_MQTT_CONFIGS);
+                // 检测网络测速任务是否正在执行，如果在执行则停止测速
+                if ("1".equals(SpeedTestBean.getInstance().getEnable())
+                        && !TextUtils.isEmpty(SpeedTestBean.getInstance().getUrl())
+                        && !TextUtils.isEmpty(SpeedTestBean.getInstance().getTransactionId())) {
+                    SpeedTestServiceManager.getInstance().unbindSpeedTestService();
+                }
             }
         }
     }
@@ -245,42 +253,34 @@ public class SdtTr369Receiver extends BroadcastReceiver {
 //                + ", clientCertPrivateKey: " + clientPrivateKey
 //                + ", clientCertCertContent: " + clientCertContext);
 
-        int err = OpenTR369Native.SetMqttServerUrl(mqttServer);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttServerUrl(mqttServer) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the mqtt server url");
             return false;
         }
-        err = OpenTR369Native.SetMqttClientId(clientId);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttClientId(clientId) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client Id");
             return false;
         }
-        err = OpenTR369Native.SetMqttUsername(username);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttUsername(username) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client username");
             return false;
         }
-        err = OpenTR369Native.SetMqttPassword(password);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttPassword(password) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client password");
             return false;
         }
-        err = OpenTR369Native.SetMqttCaCertContext(caCertContext);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttCaCertContext(caCertContext) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the CA certificate");
             return false;
         }
-        err = OpenTR369Native.SetMqttClientPrivateKey(clientPrivateKey);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttClientPrivateKey(clientPrivateKey) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client private key");
             return false;
         }
-        err = OpenTR369Native.SetMqttClientCertContext(clientCertContext);
-        if (err != 0) {
+        if (OpenTR369Native.SetMqttClientCertContext(clientCertContext) != 0) {
             LogUtils.e(TAG, "initMqttServerConfigs: Failed to set the client certificate");
             return false;
         }
-
         LogUtils.d(TAG, "initMqttServerConfigs: The MQTT parameters have been set");
         return true;
     }
