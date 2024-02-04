@@ -559,25 +559,26 @@
             <schema name="Array" getter="diagnose" inform="true" type="string" />
             <schema name="ArrayRecordInterval" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
 
-            <schema name="AppNumberOfEntries" app_inform="true" table="Device.X_Skyworth.App.{i}" type="multipleNumber" />
+            <schema name="AppNumberOfEntries" table="Device.X_Skyworth.App.{i}" type="multipleNumber" />
             <schema name="App.{i}" type="multipleObject">
-                <schema name="Type" app_inform="true" getter="diagnose" type="string" />
-                <schema name="PackageName" app_inform="true" constraint="512" getter="diagnose" type="string" />
-                <schema name="Name" app_inform="true" constraint="64" getter="diagnose" type="string" />
-                <schema name="Version" app_inform="true" constraint="64" getter="diagnose" type="string" />
-                <schema name="BlockStatus" app_inform="true" getter="diagnose" setter="diagnose" type="boolean" write="W" />
-                <schema name="BlockEnable" app_inform="true" getter="diagnose" type="boolean" />
-                <schema name="StopEnable" app_inform="true" getter="diagnose" type="boolean" />
-                <schema name="Size" app_inform="true" getter="diagnose" type="int" />
-                <schema name="Running" app_inform="true" getter="diagnose" setter="diagnose" type="boolean" write="W" />
-                <schema name="LastUpdatedTime" app_inform="true" getter="diagnose" type="string" />
-                <schema name="MemoryUsage" app_inform="true" getter="diagnose" type="string" />
-                <schema name="StorageUsage" app_inform="true" getter="diagnose" type="string" />
-                <schema name="Uptime" app_inform="true" getter="diagnose" type="string" />
-                <schema name="TotalUptime" app_inform="true" getter="diagnose" type="string" />
-                <schema name="RunningTimes" app_inform="true" getter="diagnose" type="string" />
-                <schema name="LastStartTime" app_inform="true" getter="diagnose" type="string" />
-                <schema name="CpuUsage" app_inform="true" getter="diagnose" type="string" />
+                <schema name="Type" getter="diagnose" type="string" />
+                <schema name="PackageName" constraint="512" getter="diagnose" type="string" />
+                <schema name="Name" constraint="64" getter="diagnose" type="string" />
+                <schema name="Version" constraint="64" getter="diagnose" type="string" />
+                <schema name="BlockStatus" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                <schema name="BlockEnable" getter="diagnose" type="boolean" />
+                <schema name="StopEnable" getter="diagnose" type="boolean" />
+                <schema name="Size" getter="diagnose" type="int" />
+                <schema name="Running" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                <schema name="isUpdatedSystem" getter="diagnose" type="string" />
+                <schema name="LastUpdatedTime" getter="diagnose" type="string" />
+                <schema name="MemoryUsage" getter="diagnose" type="string" />
+                <schema name="StorageUsage" getter="diagnose" type="string" />
+                <schema name="Uptime" getter="diagnose" type="string" />
+                <schema name="TotalUptime" getter="diagnose" type="string" />
+                <schema name="RunningTimes" getter="diagnose" type="string" />
+                <schema name="LastStartTime" getter="diagnose" type="string" />
+                <schema name="CpuUsage" getter="diagnose" type="string" />
                 <schema name="ClearData" getter="diagnose" setter="diagnose" type="boolean" write="W" />
                 <schema name="PermissionsNumberOfEntries" table="Device.X_Skyworth.App.{i}.Permissions.{i}"
                     type="multipleNumber" />

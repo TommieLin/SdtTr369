@@ -111,7 +111,6 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
 
         if (mBluetoothDevices != null) {
             if (!mBluetoothDevices.isEmpty()) {
-                DbManager.delMultiObject("Device.X_Skyworth.BluetoothDevice");
                 mBluetoothDevices.clear();
             }
             mBluetoothDevices = null;
@@ -120,6 +119,10 @@ public class BluetoothDeviceX implements IProtocolArray<BluetoothDeviceInfo> {
         mBluetoothDevices = new BluetoothDeviceManager(GlobalContext.getContext());
         int size = mBluetoothDevices.getList().size();
         LogUtils.d(TAG, "Get the number of Bluetooth devices: " + size);
-        if (size > 0) DbManager.addMultiObject("Device.X_Skyworth.BluetoothDevice", size);
+        if (size > 0) {
+            DbManager.updateMultiObject("Device.X_Skyworth.BluetoothDevice", size);
+        } else {
+            DbManager.delMultiObject("Device.X_Skyworth.BluetoothDevice");
+        }
     }
 }

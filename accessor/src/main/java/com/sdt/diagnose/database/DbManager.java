@@ -20,6 +20,10 @@ public class DbManager {
         return OpenTR369Native.AddMultiObject(path, num);
     }
 
+    public static int updateMultiObject(String path, int num) {
+        return OpenTR369Native.UpdateMultiObject(path, num);
+    }
+
     public static int showData(String cmd) {
         return OpenTR369Native.ShowData(cmd);
     }

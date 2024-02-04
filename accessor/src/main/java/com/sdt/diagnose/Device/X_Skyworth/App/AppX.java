@@ -72,7 +72,6 @@ public class AppX implements IProtocolArray<AppInfo> {
     public static void updateAppList() {
         if (mAppsManager != null) {
             if (!mAppsManager.isEmpty()) {
-                DbManager.delMultiObject("Device.X_Skyworth.App");
                 mAppsManager.clear();
             }
             mAppsManager = null;
@@ -81,11 +80,13 @@ public class AppX implements IProtocolArray<AppInfo> {
         int size = mAppsManager.getList().size();
         LogUtils.d(TAG, "Get the number of App List: " + size);
         if (size > 0) {
-            DbManager.addMultiObject("Device.X_Skyworth.App", size);
+            DbManager.updateMultiObject("Device.X_Skyworth.App", size);
             for (int i = 0; i < size; i++) {
                 AppInfo appInfo = mAppsManager.getList().get(i);
                 addPermission(appInfo, String.valueOf(i + 1), false);
             }
+        } else {
+            DbManager.delMultiObject("Device.X_Skyworth.App");
         }
     }
 
@@ -142,9 +143,9 @@ public class AppX implements IProtocolArray<AppInfo> {
             }
         }
         String path = "Device.X_Skyworth.App." + paramsArr + ".Permissions";
-        LogUtils.d(TAG, "addPermission path: " + path + ", mGroups.size(): " + mGroups.size());
+        LogUtils.d(TAG, "addPermission path: " + path + ", Groups size: " + mGroups.size());
         if (mGroups.size() > 0 && !isAdded) {
-            DbManager.addMultiObject(path, mGroups.size());
+            DbManager.updateMultiObject(path, mGroups.size());
         }
     }
 
@@ -171,9 +172,6 @@ public class AppX implements IProtocolArray<AppInfo> {
         switch (secondParam) {
             case "Type":
                 return t.isSystem() ? "System" : "ThirdParty";
-            case "isUpdatedSystem":
-                LogUtils.d(TAG, "isUpdatedSystem: " + t.isUpdatedSystem());
-                return t.isUpdatedSystem() ? "1" : "0";
             case "PackageName":
                 return t.getPackageName();
             case "Name":
@@ -188,6 +186,9 @@ public class AppX implements IProtocolArray<AppInfo> {
                 return t.isCanShowEnable() ? "1" : "0";
             case "Size":
                 return String.valueOf(t.getTotalSize());
+            case "isUpdatedSystem":
+                LogUtils.d(TAG, "isUpdatedSystem: " + t.isUpdatedSystem());
+                return t.isUpdatedSystem() ? "1" : "0";
             case "LastUpdatedTime":
                 return t.getLastUpdateTime();
             case "StopEnable":

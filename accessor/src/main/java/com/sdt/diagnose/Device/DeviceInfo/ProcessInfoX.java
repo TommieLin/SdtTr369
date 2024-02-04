@@ -76,7 +76,6 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
     public static void updateProcessList() {
         if (mProcessManager != null) {
             if (!mProcessManager.isEmpty()) {
-                DbManager.delMultiObject("Device.DeviceInfo.ProcessStatus.Process");
                 mProcessManager.clear();
             }
             mProcessManager = null;
@@ -84,6 +83,10 @@ public class ProcessInfoX implements IProtocolArray<ProcessInfo> {
         mProcessManager = new ProcessManager(GlobalContext.getContext());
         int size = mProcessManager.getList().size();
         LogUtils.d(TAG, "Get the number of Process list: " + size);
-        if (size > 0) DbManager.addMultiObject("Device.DeviceInfo.ProcessStatus.Process", size);
+        if (size > 0) {
+            DbManager.updateMultiObject("Device.DeviceInfo.ProcessStatus.Process", size);
+        } else {
+            DbManager.delMultiObject("Device.DeviceInfo.ProcessStatus.Process");
+        }
     }
 }
