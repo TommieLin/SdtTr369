@@ -412,7 +412,7 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
 {
     int i, err = USP_ERR_OK;
     // Input variables
-    char *input_host, *input_timeout, *input_max_hop_count, *input_size;
+    char *input_host, *input_timeout, *input_max_hop_count;
 
     // Extract the input arguments using KV_VECTOR_ functions
     input_host = USP_ARG_Get(input_args, "Host", "");
@@ -435,7 +435,6 @@ int SK_TR369_Start_TraceRoute(dm_req_t *req, char *command_key, kv_vector_t *inp
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.Host", input_host);
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.Timeout", input_timeout);
     SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.MaxHopCount", input_max_hop_count);
-    SK_TR369_SetDBParam("Device.IP.Diagnostics.TraceRoute.DataBlockSize", input_size);
 
     SK_TR369_API_SetParams("skyworth.tr369.event", "TraceRoute");
 
@@ -681,17 +680,13 @@ int SK_TR369_SetDefaultProcessStatus(void)
 {
     int err = USP_ERR_OK;
     char num_buf[MAX_DM_INSTANCE_ORDER] = {0};
-    err = SK_TR369_DelMultiObject("Device.DeviceInfo.ProcessStatus.Process");
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
+
     SK_TR369_API_GetParams("Device.DeviceInfo.ProcessStatus.ProcessNumberOfEntries", num_buf, sizeof(num_buf));
     int num = atoi(num_buf);
     USP_LOG_Info("%s: Get ProcessNumberOfEntries: %s (%d)", __FUNCTION__, num_buf, num);
     if (num > 0)
     {
-        err = SK_TR369_AddMultiObject("Device.DeviceInfo.ProcessStatus.Process", num);
+        err = SK_TR369_UpdateMultiObject("Device.DeviceInfo.ProcessStatus.Process", num);
         if (err != USP_ERR_OK)
         {
             return err;
@@ -715,17 +710,13 @@ int SK_TR369_SetDefaultNeighboringWiFi(void)
 {
     int err = USP_ERR_OK;
     char num_buf[MAX_DM_INSTANCE_ORDER] = {0};
-    err = SK_TR369_DelMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result");
-    if (err != USP_ERR_OK)
-    {
-        return err;
-    }
+
     SK_TR369_API_GetParams("Device.WiFi.NeighboringWiFiDiagnostic.ResultNumberOfEntries", num_buf, sizeof(num_buf));
     int num = atoi(num_buf);
     USP_LOG_Info("%s: Get ResultNumberOfEntries: %s (%d)", __FUNCTION__, num_buf, num);
     if (num > 0)
     {
-        err = SK_TR369_AddMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result", num);
+        err = SK_TR369_UpdateMultiObject("Device.WiFi.NeighboringWiFiDiagnostic.Result", num);
         if (err != USP_ERR_OK)
         {
             return err;

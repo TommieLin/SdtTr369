@@ -795,38 +795,46 @@ int SK_TR369_AddMultiObject(const char *param, int num)
 **
 ** Note: This action will delete all data at once.
 **
-** \param   param - Name of the MultiObject type node to be deleted.
+** \param   param - Name of MultiObject type node to be deleted.
+** \param   sum - Total number of current MultiObject type nodes.
+** \param   num - Number of MultiObject type nodes to be deleted.
 **
 ** \return  USP_ERR_OK if successful
 **
 **************************************************************************/
-int SK_TR369_DeleteInstance(const char *param)
+int SK_TR369_DeleteInstance(const char *param, int sum, int num)
 {
     int i, err;
-    int_vector_t iv;
+    dm_trans_vector_t trans;
 
-    INT_VECTOR_Init(&iv);
-    err = DATA_MODEL_GetInstances(param, &iv);
+    // Exit if unable to start a transaction
+    err = DM_TRANS_Start(&trans);
     if (err != USP_ERR_OK)
     {
-        goto exit;
+        DM_TRANS_Abort();
+        return err;
     }
 
-    for (i = 0; i < iv.num_entries; i++)
+    for (i = 0; i < num; i++)
     {
+        int count = sum - i;
+        if (count <= 0) break;
+
         char path[MAX_DM_PATH] = {0};
-        USP_SNPRINTF(path, sizeof(path), "%s.%d", param, iv.vector[i]);
+        USP_SNPRINTF(path, sizeof(path), "%s.%d", param, count);
         USP_LOG_Debug("%s: The node to be deleted is: %s", __FUNCTION__, path);
+
         err = DATA_MODEL_DeleteInstance(path, 0);
-        if (err != USP_ERR_OK)
-        {
-            break;
-        }
+        if (err != USP_ERR_OK) break;
     }
 
-exit:
-    INT_VECTOR_Destroy(&iv);
-    return err;
+    // Exit if unable to commit the transaction
+    err = DM_TRANS_Commit();
+    if (err != USP_ERR_OK)
+    {
+        return err;
+    }
+    return USP_ERR_OK;
 }
 
 /*********************************************************************//**
@@ -844,9 +852,6 @@ exit:
 **************************************************************************/
 int SK_TR369_DelMultiObject(const char *param)
 {
-    int err;
-    dm_trans_vector_t trans;
-
     if (param == NULL)
     {
         USP_LOG_Error("%s: Parameters are empty, the command cannot be recognized.", __FUNCTION__);
@@ -854,28 +859,73 @@ int SK_TR369_DelMultiObject(const char *param)
     }
     USP_LOG_Info("%s: The parameters to be executed are: \"%s\"", __FUNCTION__, param);
 
-    // Exit if unable to start a transaction
-    err = DM_TRANS_Start(&trans);
+    int_vector_t iv;
+    INT_VECTOR_Init(&iv);
+    int err = DATA_MODEL_GetInstances(param, &iv);
     if (err != USP_ERR_OK)
     {
-        DM_TRANS_Abort();
-        return err;
+        USP_LOG_Error("%s: Failed to obtain instances.", __FUNCTION__);
+        goto exit;
     }
 
-    err = SK_TR369_DeleteInstance(param);
+    err = SK_TR369_DeleteInstance(param, iv.num_entries, iv.num_entries);
     if (err != USP_ERR_OK)
     {
-        DM_TRANS_Abort();
-        return err;
+        USP_LOG_Error("%s: Failed to delete instances.", __FUNCTION__);
+        goto exit;
     }
 
-    // Exit if unable to commit the transaction
-    err = DM_TRANS_Commit();
+exit:
+    INT_VECTOR_Destroy(&iv);
+    return err;
+}
+
+/*********************************************************************//**
+**
+** SK_TR369_UpdateMultiObject
+**
+** An interface provided for external use to update nodes of MultiObject type.
+**
+** \param   param - Name of the MultiObject type node to be updated.
+** \param   num - Number of MultiObject type nodes to be updated.
+**
+** \return  USP_ERR_OK if successful
+**
+**************************************************************************/
+int SK_TR369_UpdateMultiObject(const char *param, int num)
+{
+    if (num < 0)
+    {
+        USP_LOG_Error("%s: The quantity to be updated is abnormal.", __FUNCTION__);
+        return USP_ERR_INTERNAL_ERROR;
+    }
+    int err;
+    int_vector_t iv;
+
+    INT_VECTOR_Init(&iv);
+    err = DATA_MODEL_GetInstances(param, &iv);
     if (err != USP_ERR_OK)
     {
-        return err;
+        goto exit;
     }
-    return USP_ERR_OK;
+
+    if (num == iv.num_entries)
+    {
+        USP_LOG_Debug("%s: The quantity is consistent and does not need to be updated.", __FUNCTION__);
+        err = USP_ERR_OK;
+    }
+    else if (num > iv.num_entries)
+    {
+        err = SK_TR369_AddMultiObject(param, num - iv.num_entries);
+    }
+    else
+    {
+        err = SK_TR369_DeleteInstance(param, iv.num_entries, iv.num_entries - num);
+    }
+
+exit:
+    INT_VECTOR_Destroy(&iv);
+    return err;
 }
 
 /*********************************************************************//**

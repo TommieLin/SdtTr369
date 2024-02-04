@@ -640,3 +640,14 @@ Java_com_sdt_opentr369_OpenTR369Native_DelMultiObject(JNIEnv *env, jclass clazz,
     env->ReleaseStringUTFChars(path, param);
     return ret;
 }
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_com_sdt_opentr369_OpenTR369Native_UpdateMultiObject(JNIEnv *env, jclass clazz, jstring path,
+                                                         jint num) {
+    // TODO: implement UpdateMultiObject()
+    const char *param = env->GetStringUTFChars(path, nullptr);
+    int ret = SK_TR369_UpdateMultiObject(param, num);
+    env->ReleaseStringUTFChars(path, param);
+    return ret;
+}
