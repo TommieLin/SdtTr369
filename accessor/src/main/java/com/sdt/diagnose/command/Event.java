@@ -98,8 +98,6 @@ public class Event {
     private static final SimpleDateFormat df = new SimpleDateFormat(format);
     public static final String RAW_LOG_FILE = "logcat_tr369.log";
     private static final String LOG_SOURCE_DIR_PATH = "/data/tcpdump/";
-    private static final String LOG_SOURCE_FILE_PATH = LOG_SOURCE_DIR_PATH + RAW_LOG_FILE;
-
 
     @Tr369Set("skyworth.tr369.event")
     public boolean SK_TR369_SetEventParams(String path, String value) {
@@ -733,9 +731,6 @@ public class Event {
             setUploadResponseDBParams("Error", message);
             return;
         } else if (filterStartTime.isEmpty() || filterEndTime.isEmpty()) {
-//            File file = new File(LOG_SOURCE_FILE_PATH);
-//            uploadLogFile(filterUrl, file.getAbsolutePath(), 1);
-//            return;
             for (File file : files) {
                 if (file.isFile()) {
                     String fileName = file.getName();
@@ -765,7 +760,9 @@ public class Event {
                 fileCounts--;
             }
         } else {
-            uploadLogFile(filterUrl, "", 0);
+            String message = "No such file or directory.";
+            LogUtils.e(TAG, "handleLogFile: " + message);
+            setUploadResponseDBParams("Error", message);
         }
 
     }

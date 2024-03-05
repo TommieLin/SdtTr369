@@ -1,6 +1,7 @@
 package com.sdt.diagnose.Device.STBService.Components;
 
 import android.os.Build;
+import android.provider.Settings;
 
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
@@ -14,6 +15,11 @@ import java.util.List;
 
 public class HdmiX {
     private static final String TAG = "HdmiX";
+    public static final String SETTINGS_HDMI_CONTROL_ENABLED = "hdmi_control_enabled";
+    public static final String SETTINGS_ONE_TOUCH_PLAY = "hdmi_control_one_touch_play_enabled";
+    public static final String SETTINGS_AUTO_POWER_OFF = "hdmi_control_auto_device_off_enabled";
+    public static final String SETTINGS_AUTO_LANGUAGE_CHANGE = "hdmi_control_auto_language_change_enabled";
+    public static final String SETTINGS_HDMI_VOLUME_CONTROL = "hdmi_control_volume_control_enabled";
     private static final int HDMI_NUMBER_ENTRIES = 1;
     CmsExtraServiceManager mCmsExtraServiceManager = CmsExtraServiceManager.getInstance(GlobalContext.getContext());
     private ModelX.Type mStbModelType = null;
@@ -75,11 +81,6 @@ public class HdmiX {
         return status;
     }
 
-    /**
-     * @param path
-     * @param val  -1:正常输出，1：关闭输出
-     * @return
-     */
     @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.Enable")
     public boolean SK_TR369_SetHdmiEnable(String path, String val) {
         boolean isEnable = false;
@@ -105,7 +106,6 @@ public class HdmiX {
                 LogUtils.e(TAG, "setHdmiEnable: CmsExtraServiceManager call failed, " + e.getMessage());
             }
         }
-
         return false;
     }
 
@@ -348,19 +348,134 @@ public class HdmiX {
         return Boolean.toString(isSupport);
     }
 
+    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.CecSwitch")
+    public String SK_TR369_GetHdmiCecSwitchStatus() {
+        int enable = Settings.Global.getInt(
+                GlobalContext.getContext().getContentResolver(), SETTINGS_HDMI_CONTROL_ENABLED, 1);
+        return String.valueOf(enable);
+    }
+
+    @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.CecSwitch")
+    public boolean SK_TR369_SetHdmiCecSwitchStatus(String path, String value) {
+        try {
+            if (Boolean.parseBoolean(value) || Integer.parseInt(value) == 1) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_HDMI_CONTROL_ENABLED, 1);
+            } else if ((!Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_HDMI_CONTROL_ENABLED, 0);
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setHdmiCecSwitchStatus: parse value failed, " + e.getMessage());
+        }
+        return false;
+    }
+
+    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.CecOneKeyPlay")
+    public String SK_TR369_GetHdmiCecOneKeyPlayStatus() {
+        int enable = Settings.Global.getInt(
+                GlobalContext.getContext().getContentResolver(), SETTINGS_ONE_TOUCH_PLAY, 0);
+        return String.valueOf(enable);
+    }
+
+    @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.CecOneKeyPlay")
+    public boolean SK_TR369_SetHdmiCecOneKeyPlayStatus(String path, String value) {
+        try {
+            if (Boolean.parseBoolean(value) || Integer.parseInt(value) == 1) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_ONE_TOUCH_PLAY, 1);
+            } else if ((!Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_ONE_TOUCH_PLAY, 0);
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setHdmiCecOneKeyPlayStatus: parse value failed, " + e.getMessage());
+        }
+        return false;
+    }
+
+    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.CecAutoPowerOff")
+    public String SK_TR369_GetHdmiCecAutoPowerOffStatus() {
+        int enable = Settings.Global.getInt(
+                GlobalContext.getContext().getContentResolver(), SETTINGS_AUTO_POWER_OFF, 0);
+        return String.valueOf(enable);
+    }
+
+    @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.CecAutoPowerOff")
+    public boolean SK_TR369_SetHdmiCecAutoPowerOffStatus(String path, String value) {
+        try {
+            if (Boolean.parseBoolean(value) || Integer.parseInt(value) == 1) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_AUTO_POWER_OFF, 1);
+            } else if ((!Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_AUTO_POWER_OFF, 0);
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setHdmiCecAutoPowerOffStatus: parse value failed, " + e.getMessage());
+        }
+        return false;
+    }
+
+    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.CecVolumeControl")
+    public String SK_TR369_GetHdmiCecVolumeControlStatus() {
+        int enable = Settings.Global.getInt(
+                GlobalContext.getContext().getContentResolver(), SETTINGS_HDMI_VOLUME_CONTROL, 0);
+        return String.valueOf(enable);
+    }
+
+    @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.CecVolumeControl")
+    public boolean SK_TR369_SetHdmiCecVolumeControlStatus(String path, String value) {
+        try {
+            if (Boolean.parseBoolean(value) || Integer.parseInt(value) == 1) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_HDMI_VOLUME_CONTROL, 1);
+            } else if ((!Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_HDMI_VOLUME_CONTROL, 0);
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setHdmiCecVolumeControlStatus: parse value failed, " + e.getMessage());
+        }
+        return false;
+    }
+
+    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.CecAutoChangeLanguage")
+    public String SK_TR369_GetHdmiCecAutoChangeLanguageStatus() {
+        int enable = Settings.Global.getInt(
+                GlobalContext.getContext().getContentResolver(), SETTINGS_AUTO_LANGUAGE_CHANGE, 0);
+        return String.valueOf(enable);
+    }
+
+    @Tr369Set("Device.Services.STBService.1.Components.HDMI.1.CecAutoChangeLanguage")
+    public boolean SK_TR369_SetHdmiCecAutoChangeLanguageStatus(String path, String value) {
+        try {
+            if (Boolean.parseBoolean(value) || Integer.parseInt(value) == 1) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_AUTO_LANGUAGE_CHANGE, 1);
+            } else if ((!Boolean.parseBoolean(value)) || Integer.parseInt(value) == 0) {
+                return Settings.Global.putInt(
+                        GlobalContext.getContext().getContentResolver(), SETTINGS_AUTO_LANGUAGE_CHANGE, 0);
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "setHdmiCecAutoChangeLanguageStatus: parse value failed, " + e.getMessage());
+        }
+        return false;
+    }
+
     @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.HDMI3DPresent")
     public String SK_TR369_GetHdmiDisplayHDMI3DPresent() {
         //TODO amlogic 不支持
         return Boolean.FALSE.toString();
     }
 
-    //    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.VideoLatency")
+    // @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.VideoLatency")
     public String SK_TR369_GetHdmiDisplayDevVideoLatency() {
         //TODO amlogic 不支持
         return Boolean.FALSE.toString();
     }
 
-    //    @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.AutoLipSyncSupport")
+    // @Tr369Get("Device.Services.STBService.1.Components.HDMI.1.DisplayDevice.AutoLipSyncSupport")
     public String SK_TR369_GetHdmiDisplayDevAutoLipSyncSupport() {
         //TODO amlogic 不支持
         return Boolean.FALSE.toString();
