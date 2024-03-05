@@ -304,7 +304,6 @@
             </schema>
         </schema>
 
-        <!-- 过期协议 -->
         <schema name="LAN" type="object">
             <schema name="AddressingType" getter="diagnose" setter="diagnose" type="string" write="W" />
             <schema name="IPAddress" getter="diagnose" inform="true" setter="diagnose" type="string" write="W" />
@@ -348,6 +347,11 @@
                             <!-- <schema name="VideoLatency" type="unsignedInt" getter="diagnose"/>-->
                             <!-- <schema name="HDMI3DPresent" type="string" getter="diagnose"/>-->
                         </schema>
+                        <schema name="CecSwitch" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                        <schema name="CecOneKeyPlay" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                        <schema name="CecAutoPowerOff" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                        <schema name="CecVolumeControl" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                        <schema name="CecAutoChangeLanguage" getter="diagnose" setter="diagnose" type="boolean" write="W" />
                     </schema>
 
                     <schema name="AudioOutputNumberOfEntries"
@@ -501,13 +505,7 @@
                     <schema name="NegativeButtonText" getter="diagnose" setter="diagnose" type="string" write="W" />
                     <schema name="PositiveButtonText" getter="diagnose" setter="diagnose" type="string" write="W" />
                 </schema>
-                <schema name="WhiteList" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Enable" getter="diagnose" inform="true" setter="diagnose" type="boolean" write="W" />
-                <schema name="CountDown" type="object">
-                    <schema name="Enable" getter="diagnose" inform="true" setter="diagnose" type="boolean" write="W" />
-                    <schema name="FirstLongTerm" getter="diagnose" setter="diagnose" type="int" write="W" />
-                    <schema name="SecondLongTerm" getter="diagnose" setter="diagnose" type="int" write="W" />
-                </schema>
             </schema>
             <schema name="MqttServer" type="object">
                 <schema name="Url" getter="diagnose" setter="diagnose" type="string" write="W" />
@@ -520,11 +518,7 @@
             </schema>
             <schema name="Mute" getter="diagnose" setter="diagnose" type="boolean" write="W" />
             <schema name="Volume" getter="diagnose" setter="diagnose" type="int" write="W" />
-            <schema name="ChangeProgram" setter="diagnose" type="string" write="W" />
-            <schema name="SearchProgram" setter="diagnose" type="int" write="W" />
             <schema name="ScreenSaver" getter="diagnose" type="int" />
-            <schema name="Build" getter="diagnose" type="string" />
-            <schema name="background" getter="diagnose" type="string" />
             <schema name="PatchLevel" getter="diagnose" type="string" />
             <schema name="AndroidVersion" getter="diagnose" type="string" />
             <schema name="AndroidTVOS" constraint="64" getter="diagnose" inform="true" type="string" />
@@ -590,11 +584,20 @@
                 </schema>
             </schema>
 
-            <schema name="AppBatchBlock" getter="diagnose" setter="diagnose" type="string" write="W" />
-            <schema name="AppBatchUnBlock" getter="diagnose" setter="diagnose" type="string" write="W" />
-            <schema name="AppBlackList" getter="diagnose" setter="diagnose" type="string" write="W" />
-            <schema name="AppWhiteList" getter="diagnose" setter="diagnose" type="string" write="W" />
-            <schema name="BlockListPkgNames" getter="diagnose" setter="diagnose" type="string" write="W" />
+            <schema name="AppBatch" type="object">
+                <schema name="LockList" type="object">
+                    <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                    <schema name="List" getter="diagnose" setter="diagnose" type="string" write="W" />
+                </schema>
+                <schema name="BlackList" type="object">
+                    <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                    <schema name="List" getter="diagnose" setter="diagnose" type="string" write="W" />
+                </schema>
+                <schema name="WhiteList" type="object">
+                    <schema name="Enable" getter="diagnose" setter="diagnose" type="boolean" write="W" />
+                    <schema name="List" getter="diagnose" setter="diagnose" type="string" write="W" />
+                </schema>
+            </schema>
 
             <schema name="SyncParamInterval" getter="diagnose" setter="diagnose" type="unsignedInt" write="W" />
 

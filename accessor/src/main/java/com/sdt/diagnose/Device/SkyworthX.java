@@ -208,7 +208,7 @@ public class SkyworthX {
             return false;
         }
         DbManager.setDBParam(path, value);
-        if (path.contains("Enable")) {
+        if (path.contains("Lock.Enable")) {
             // value: 0->unlock, 1->lock
             setLockStatus(value.equals("1"));
         }
@@ -222,8 +222,6 @@ public class SkyworthX {
             Intent intent = new Intent(GlobalContext.getContext(), LockUnlockActivity.class);
             intent.putExtra("imageUrl",
                     DbManager.getDBParam("Device.X_Skyworth.Lock.Background"));
-            intent.putExtra("whiteList",
-                    DbManager.getDBParam("Device.X_Skyworth.Lock.WhiteList"));
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TOP);
             GlobalContext.getContext().startActivity(intent);
         } else {

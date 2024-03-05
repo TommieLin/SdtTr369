@@ -304,7 +304,7 @@ public class LogRepository {
             for (File file : files) {
                 if (file.isFile()) {
                     String fileName = file.getName();
-                    if (fileName.contains("logcat_tr369_") && fileName.contains(".txt")) {
+                    if (fileName.contains("logcat_tr369")) {
                         long fileSize = file.length();
                         filesInfo.add(setLogFilesInfoMap(fileName, fileSize));
                     }

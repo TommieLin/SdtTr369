@@ -50,11 +50,6 @@ public class LockUnlockActivity extends Activity {
                 .fallback(R.drawable.lock_background_blank) // url为空的时候,显示的图片
                 .into(iv_lockBk);
         showDialog();
-
-        String whiteList = getIntent().getStringExtra("whiteList");
-        Intent service = new Intent(getApplicationContext(), ActivityStartWatcher.class);
-        service.putExtra("whiteList", whiteList);
-        startForegroundService(service);
     }
 
     @Override
@@ -70,14 +65,8 @@ public class LockUnlockActivity extends Activity {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stopService(new Intent(getApplicationContext(), ActivityStartWatcher.class));
-    }
-
-    // 按center键唤出提示打开网络设置的弹窗
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // 按center键唤出提示打开网络设置的弹窗
         if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER) {
             showDialog();
         }

@@ -1,12 +1,16 @@
 package com.sdt.diagnose.Device.X_Skyworth.App;
 
+import static com.sdt.diagnose.Device.X_Skyworth.ActivityStartWatcher.TYPE_BLACKLIST;
+import static com.sdt.diagnose.Device.X_Skyworth.ActivityStartWatcher.TYPE_UNDEFINED;
+import static com.sdt.diagnose.Device.X_Skyworth.ActivityStartWatcher.TYPE_WHITELIST;
+
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.SuspendDialogInfo;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -14,9 +18,9 @@ import android.util.ArrayMap;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sdt.accessor.R;
 import com.sdt.annotations.Tr369Get;
 import com.sdt.annotations.Tr369Set;
+import com.sdt.diagnose.Device.X_Skyworth.ActivityStartWatcher;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.AppPermissionControl;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.model.AppPermissionGroup;
 import com.sdt.diagnose.Device.X_Skyworth.App.PermissionControl.model.Permission;
@@ -35,7 +39,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +71,9 @@ public class AppX implements IProtocolArray<AppInfo> {
     public List<UsageStats> totalList;
     final static Map<String, ArrayList<AppPermissionGroup>> appPermissionGroup = new HashMap<>();
     private static AppsManager mAppsManager = null;
+    private static final String PROP_TMS_APP_FIREWALL_TYPE = "persist.sys.tms.app.firewall.type";
+    private static final String PROP_TMS_APP_FIREWALL_NUM = "persist.sys.tms.app.firewall.number";
+    private static final String PROP_TMS_APP_FIREWALL_PART = "persist.sys.tms.app.firewall.part";
 
     public static void updateAppList() {
         if (mAppsManager != null) {
@@ -319,345 +325,6 @@ public class AppX implements IProtocolArray<AppInfo> {
         return false;
     }
 
-    private ArrayList<String> getBlockListPkgNames() {
-        ArrayList<String> packageNames = null;
-        try {
-            String listFromDBParam = DbManager.getDBParam("Device.X_Skyworth.BlockListPkgNames");
-            Gson gson = new Gson();
-            packageNames = gson.fromJson(listFromDBParam, new TypeToken<List<String>>(){}.getType());
-        } catch (Exception e) {
-            LogUtils.e(TAG, "Failed to get block list. Error: " + e.getMessage());
-        }
-        return (packageNames != null) ? packageNames : new ArrayList<>();
-    }
-
-    private void setBlockListPkgNames(ArrayList<String> list) {
-        String listToDBParam = list.toString();
-        DbManager.setDBParam("Device.X_Skyworth.BlockListPkgNames", listToDBParam);
-    }
-
-    @Tr369Get("Device.X_Skyworth.AppBatchBlock")
-    public String SK_TR369_GetAppBatchBlock(String path) {
-        return new Gson().toJson(getBlockListPkgNames());
-    }
-
-    @Tr369Get("Device.X_Skyworth.AppBatchUnBlock")
-    public String SK_TR369_GetAppBatchUnBlock(String path) {
-        ArrayList<String> blockListPkgNames = getBlockListPkgNames();
-        ArrayList<String> whiteListPkgNames = new ArrayList<>();
-
-        final PackageManager pm = GlobalContext.getContext().getPackageManager();
-        List<PackageInfo> packlist = pm.getInstalledPackages(PackageManager.GET_ACTIVITIES);
-
-        for (int i = 0; i < packlist.size(); i++) {
-            PackageInfo pkgInfo = packlist.get(i);
-            // 过滤掉无Activity的应用
-            if (pkgInfo.activities == null || pkgInfo.activities.length < 1)
-                continue;
-            final String pkgName = pkgInfo.packageName;
-            // 过滤掉不可以被open的应用
-            if (!ApplicationUtils.canOpen(pm, pkgName))
-                continue;
-            // 过滤掉已被挂起的应用
-            if (blockListPkgNames.contains(pkgName))
-                continue;
-            whiteListPkgNames.add(pkgName);
-        }
-        LogUtils.d(TAG, "whiteListPkgNames: " + whiteListPkgNames);
-        return new Gson().toJson(whiteListPkgNames);
-    }
-
-    @Tr369Set("Device.X_Skyworth.AppBatchBlock")
-    public boolean SK_TR369_SetAppBatchBlock(String path, String value) {
-        ArrayList<String> blockListPkgNames = getBlockListPkgNames();
-
-        ArrayList<String> packageNames;
-        try {
-            Gson gson = new Gson();
-            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-            if (packageNames == null) {
-                LogUtils.e(TAG, "The JSON data is empty");
-                return false;
-            }
-            // 过滤空字符串或为null的元素
-            packageNames.removeIf(TextUtils::isEmpty);
-            LogUtils.i(TAG, "Wait to suspend application: " + packageNames);
-            if (packageNames.isEmpty()) {
-                LogUtils.i(TAG, "The content of packageNames is empty and no subsequent operations are required");
-                return true;
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
-            return false;
-        }
-
-        PackageManager packageManager = GlobalContext.getContext().getPackageManager();
-        SuspendDialogInfo suspendDialogInfo = new SuspendDialogInfo.Builder()
-                .setTitle(R.string.app_suspend_dialog_title)
-                .setMessage(R.string.app_suspend_dialog_message)
-                .build();
-
-        try {
-            String[] failedPackages = packageManager.setPackagesSuspended(
-                    packageNames.toArray(new String[0]), true, null, null, suspendDialogInfo);
-
-            if (failedPackages.length != 0) {
-                // 处理未成功挂起的应用程序，未成功挂起的应用将被移出黑名单全局变量
-                LogUtils.e(TAG, "Failed to suspend App: " + Arrays.toString(failedPackages));
-                for (String packageName : failedPackages) {
-                    packageNames.remove(packageName);
-                }
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "setAppBatchBlock error, " + e.getMessage());
-            return false;
-        }
-
-        for (String packageName : packageNames) {
-            if (TextUtils.isEmpty(packageName)) {
-                LogUtils.d(TAG, "packageName is empty, skip this time");
-                continue;
-            }
-            if (!blockListPkgNames.contains(packageName)) {
-                // 此处判断新挂起的应用是否已经在黑名单全局变量中，如果不在则新加到全局变量中
-                blockListPkgNames.add(packageName);
-            }
-        }
-
-        setBlockListPkgNames(blockListPkgNames);
-        return true;
-    }
-
-    @Tr369Set("Device.X_Skyworth.AppBatchUnBlock")
-    public boolean SK_TR369_SetAppBatchUnBlock(String path, String value) {
-        ArrayList<String> blockListPkgNames = getBlockListPkgNames();
-
-        ArrayList<String> packageNames;
-        try {
-            Gson gson = new Gson();
-            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-            if (packageNames == null) {
-                LogUtils.e(TAG, "The JSON data is empty");
-                return false;
-            }
-            // 过滤空字符串或为null的元素
-            packageNames.removeIf(TextUtils::isEmpty);
-            LogUtils.i(TAG, "Wait to cancel pending application: " + packageNames);
-            if (packageNames.isEmpty()) {
-                LogUtils.i(TAG, "The content of packageNames is empty and no subsequent operations are required");
-                return true;
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
-            return false;
-        }
-
-        PackageManager packageManager = GlobalContext.getContext().getPackageManager();
-
-        try {
-            String[] failedPackages = packageManager.setPackagesSuspended(
-                    packageNames.toArray(new String[0]), false, null, null, (SuspendDialogInfo) null);
-
-            for (String packageName : packageNames) {
-                if (TextUtils.isEmpty(packageName)) {
-                    LogUtils.d(TAG, "packageName is empty, skip this time");
-                    continue;
-                }
-                if (blockListPkgNames.contains(packageName)) {
-                    if (failedPackages.length != 0) {
-                        // 如果某个应用解除挂起失败，包名仍然留在黑名单全局变量中
-                        if (Arrays.asList(failedPackages).contains(packageName)) {
-                            LogUtils.e(TAG, "Unsuspended application failed: " + packageName);
-                            continue;
-                        }
-                    }
-                    // 成功解除挂起的应用将被移出黑名单
-                    blockListPkgNames.remove(packageName);
-                }
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "setAppBatchUnBlock error, " + e.getMessage());
-            return false;
-        }
-
-        setBlockListPkgNames(blockListPkgNames);
-        return true;
-    }
-
-    private void clearAppBlackList() {
-        int numBlacklist = SystemProperties.getInt("persist.sys.tr069.blacklist.number", 0);
-        for (int i = 1; i <= numBlacklist; ++i) {
-            SystemProperties.set("persist.sys.tr069.blacklist.part" + i, "");
-        }
-        SystemProperties.set("persist.sys.tr069.blacklist.number", "0");
-    }
-
-    private void clearAppWhiteList() {
-        int numWhitelist = SystemProperties.getInt("persist.sys.tr069.whitelist.number", 0);
-        for (int i = 1; i <= numWhitelist; ++i) {
-            SystemProperties.set("persist.sys.tr069.whitelist.part" + i, "");
-        }
-        SystemProperties.set("persist.sys.tr069.whitelist.number", "0");
-    }
-
-    private void setBlackListData(int num, String data) {
-        SystemProperties.set("persist.sys.tr069.blacklist.number", String.valueOf(num));
-        SystemProperties.set("persist.sys.tr069.blacklist.part" + num, data);
-    }
-
-    private void setWhiteListData(int num, String data) {
-        SystemProperties.set("persist.sys.tr069.whitelist.number", String.valueOf(num));
-        SystemProperties.set("persist.sys.tr069.whitelist.part" + num, data);
-    }
-
-    @Tr369Get("Device.X_Skyworth.AppBlackList")
-    public String SK_TR369_GetAppBlackList(String path) {
-        int numBlacklist = SystemProperties.getInt("persist.sys.tr069.blacklist.number", 0);
-        ArrayList<String> blacklist = new ArrayList<>();
-        for (int i = 1; i <= numBlacklist; ++i) {
-            String array = SystemProperties.get("persist.sys.tr069.blacklist.part" + i, "");
-            Gson gson = new Gson();
-            ArrayList<String> packageNames = gson.fromJson(array, new TypeToken<List<String>>(){}.getType());
-            if (packageNames != null)
-                blacklist.addAll(packageNames);
-        }
-        return new Gson().toJson(blacklist);
-    }
-
-    @Tr369Set("Device.X_Skyworth.AppBlackList")
-    public boolean SK_TR369_SetAppBlackList(String path, String value) {
-        clearAppWhiteList();
-        clearAppBlackList();
-
-        ArrayList<String> packageNames;
-        try {
-            Gson gson = new Gson();
-            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-            if (packageNames == null) {
-                LogUtils.e(TAG, "The JSON data is empty");
-                return false;
-            }
-            // 过滤空字符串或为null的元素
-            packageNames.removeIf(TextUtils::isEmpty);
-            LogUtils.i(TAG, "Waiting for blacklist to be set: " + packageNames);
-            if (packageNames.isEmpty()) {
-                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
-                return true;
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
-            return false;
-        }
-
-        // 由于单个系统属性Set长度不能超过91，所以需要将包名数组拆分，依次存入不同的系统属性
-        int numBlacklist = 0;
-        if (value.length() > 91) {
-            ArrayList<String> blacklist = new ArrayList<>();
-            for (String packageName : packageNames) {
-                if (TextUtils.isEmpty(packageName)) {
-                    LogUtils.d(TAG, "packageName is empty, skip this time");
-                    continue;
-                }
-                if (packageName.length() + blacklist.toString().length() > 85) {
-                    numBlacklist++;
-                    setBlackListData(numBlacklist, new Gson().toJson(blacklist));
-                    blacklist.clear();
-                }
-                blacklist.add(packageName);
-            }
-            if (!blacklist.isEmpty()) {
-                numBlacklist++;
-                setBlackListData(numBlacklist, new Gson().toJson(blacklist));
-            }
-        } else {
-            setBlackListData(1, new Gson().toJson(packageNames));
-        }
-
-        // Black功能需要额外检测包名是否已安装，已安装则需要进行卸载，只卸载非预置APPs
-        final PackageManager pm = GlobalContext.getContext().getPackageManager();
-        List<PackageInfo> packlist = pm.getInstalledPackages(0);
-        for (int i = 0; i < packlist.size(); i++) {
-            PackageInfo pkgInfo = packlist.get(i);
-            final String pkgName = pkgInfo.packageName;
-            if (packageNames.contains(pkgName)) {
-                final ApplicationInfo info = pkgInfo.applicationInfo;
-                if (!info.isSystemApp()) {
-                    ApplicationUtils.uninstall(pkgName);
-                    LogUtils.d(TAG, "Uninstallation process completed.");
-                } else {
-                    LogUtils.i(TAG, "This application is a system app and cannot be uninstalled.");
-                }
-            }
-        }
-
-        return true;
-    }
-
-    @Tr369Get("Device.X_Skyworth.AppWhiteList")
-    public String SK_TR369_GetAppWhiteList(String path) {
-        int numWhitelist = SystemProperties.getInt("persist.sys.tr069.whitelist.number", 0);
-        ArrayList<String> whitelist = new ArrayList<>();
-        for (int i = 1; i <= numWhitelist; ++i) {
-            String array = SystemProperties.get("persist.sys.tr069.whitelist.part" + i, "");
-            Gson gson = new Gson();
-            ArrayList<String> packageNames = gson.fromJson(array, new TypeToken<List<String>>(){}.getType());
-            if (packageNames != null)
-                whitelist.addAll(packageNames);
-        }
-        return new Gson().toJson(whitelist);
-    }
-
-    @Tr369Set("Device.X_Skyworth.AppWhiteList")
-    public boolean SK_TR369_SetAppWhiteList(String path, String value) {
-        clearAppBlackList();
-        clearAppWhiteList();
-
-        ArrayList<String> packageNames;
-        try {
-            Gson gson = new Gson();
-            packageNames = gson.fromJson(value, new TypeToken<List<String>>(){}.getType());
-            if (packageNames == null) {
-                LogUtils.e(TAG, "The JSON data is empty");
-                return false;
-            }
-            // 过滤空字符串或为null的元素
-            packageNames.removeIf(TextUtils::isEmpty);
-            LogUtils.i(TAG, "Waiting for whitelist to be set: " + packageNames);
-            if (packageNames.isEmpty()) {
-                LogUtils.i(TAG, "The packageNames content is empty and no subsequent operations are required");
-                return true;
-            }
-        } catch (Exception e) {
-            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
-            return false;
-        }
-
-        // 由于单个系统属性Set长度不能超过91，所以需要将包名数组拆分，依次存入不同的系统属性
-        int numWhitelist = 0;
-        if (value.length() > 91) {
-            ArrayList<String> whitelist = new ArrayList<>();
-            for (String packageName : packageNames) {
-                if (TextUtils.isEmpty(packageName)) {
-                    LogUtils.d(TAG, "packageName is empty, skip this time");
-                    continue;
-                }
-                if (packageName.length() + whitelist.toString().length() > 85) {
-                    numWhitelist++;
-                    setWhiteListData(numWhitelist, new Gson().toJson(whitelist));
-                    whitelist.clear();
-                }
-                whitelist.add(packageName);
-            }
-            if (!whitelist.isEmpty()) {
-                numWhitelist++;
-                setWhiteListData(numWhitelist, new Gson().toJson(whitelist));
-            }
-        } else {
-            setWhiteListData(1, new Gson().toJson(packageNames));
-        }
-        return true;
-    }
-
     /**
      * 从 path 中获取到 i ，然后获取到App list 中第 i 个 app
      *
@@ -789,6 +456,197 @@ public class AppX implements IProtocolArray<AppInfo> {
             }
         }
         return (command.contains("cpuinfo")) ? String.valueOf(cpuUsage) : "0";
+    }
+
+    private void clearAppFirewallList() {
+        int numFirewallList = SystemProperties.getInt(PROP_TMS_APP_FIREWALL_NUM, 0);
+        for (int i = 1; i <= numFirewallList; ++i) {
+            SystemProperties.set(PROP_TMS_APP_FIREWALL_PART + i, "");
+        }
+        SystemProperties.set(PROP_TMS_APP_FIREWALL_NUM, "0");
+    }
+
+    private void setAppFirewallList(int num, String data) {
+        SystemProperties.set(PROP_TMS_APP_FIREWALL_NUM, String.valueOf(num));
+        SystemProperties.set(PROP_TMS_APP_FIREWALL_PART + num, data);
+    }
+
+    private boolean parseAppFirewallList(int type, String list) {
+        ArrayList<String> packageNames;
+        try {
+            Gson gson = new Gson();
+            packageNames = gson.fromJson(list, new TypeToken<List<String>>(){}.getType());
+            if (packageNames == null) {
+                LogUtils.e(TAG, "The JSON data is empty");
+                return false;
+            }
+            // 过滤空字符串或为null的元素
+            packageNames.removeIf(TextUtils::isEmpty);
+            LogUtils.d(TAG, "Waiting for firewall list to be set: " + packageNames);
+            if (packageNames.isEmpty()) {
+                LogUtils.d(TAG, "The content of packageNames is empty.");
+                // 黑名单功能不允许列表为空，为空代表不启用黑名单功能
+                if (type == TYPE_BLACKLIST) {
+                    LogUtils.i(TAG, "The blacklist is empty and no further action is required.");
+                    return false;
+                }
+                // 白名单功能允许列表为空
+                return true;
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
+            return false;
+        }
+
+        // 由于单个系统属性Set长度不能超过91，所以需要将包名数组拆分，依次存入不同的系统属性
+        int numPropPart = 0;
+        if (list.length() > 91) {
+            ArrayList<String> firewallList = new ArrayList<>();
+            for (String packageName : packageNames) {
+                if (TextUtils.isEmpty(packageName)) {
+                    LogUtils.d(TAG, "packageName is empty, skip this time");
+                    continue;
+                }
+                if (packageName.length() + firewallList.toString().length() > 85) {
+                    numPropPart++;
+                    setAppFirewallList(numPropPart, new Gson().toJson(firewallList));
+                    firewallList.clear();
+                }
+                firewallList.add(packageName);
+            }
+            if (!firewallList.isEmpty()) {
+                numPropPart++;
+                setAppFirewallList(numPropPart, new Gson().toJson(firewallList));
+            }
+        } else {
+            setAppFirewallList(1, new Gson().toJson(packageNames));
+        }
+        return true;
+    }
+
+    private boolean setAppLockListStatus(boolean enable) {
+        if (enable) {
+            String lockList = DbManager.getDBParam("Device.X_Skyworth.AppBatch.LockList.List");
+            LogUtils.d(TAG, "setAppLockListStatus lockList: " + lockList);
+            if (TextUtils.isEmpty(lockList)) {
+                return true;
+            }
+            // 限制应用启动
+            Intent service = new Intent(GlobalContext.getContext(), ActivityStartWatcher.class);
+            service.putExtra("lockType", TYPE_BLACKLIST);
+            service.putExtra("lockList", lockList);
+            GlobalContext.getContext().startForegroundService(service);
+        } else {
+            GlobalContext.getContext().stopService(
+                    new Intent(GlobalContext.getContext(), ActivityStartWatcher.class));
+        }
+        return true;
+    }
+
+    private boolean setAppBlackListStatus(boolean enable) {
+        if (enable) {
+            String blackList = DbManager.getDBParam("Device.X_Skyworth.AppBatch.BlackList.List");
+            LogUtils.d(TAG, "setAppBlackListStatus blackList: " + blackList);
+            if (TextUtils.isEmpty(blackList)) {
+                return true;
+            }
+            // 1. 卸载应用
+            final PackageManager pm = GlobalContext.getContext().getPackageManager();
+            List<PackageInfo> packlist = pm.getInstalledPackages(0);
+            for (int i = 0; i < packlist.size(); i++) {
+                PackageInfo pkgInfo = packlist.get(i);
+                final String pkgName = pkgInfo.packageName;
+                if (blackList.contains(pkgName)) {
+                    final ApplicationInfo info = pkgInfo.applicationInfo;
+                    if (!info.isSystemApp()) {
+                        ApplicationUtils.uninstall(pkgName);
+                        LogUtils.d(TAG, "Uninstallation process completed");
+                    } else {
+                        LogUtils.i(TAG, "This application is a system app and cannot be uninstalled");
+                    }
+                }
+            }
+            // 2. 限制应用启动
+            Intent service = new Intent(GlobalContext.getContext(), ActivityStartWatcher.class);
+            service.putExtra("lockType", TYPE_BLACKLIST);
+            service.putExtra("lockList", blackList);
+            GlobalContext.getContext().startForegroundService(service);
+            // 3. 禁止应用安装
+            clearAppFirewallList();
+            if (parseAppFirewallList(TYPE_BLACKLIST, blackList)) {
+                SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_BLACKLIST));
+            } else {
+                SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
+                return false;
+            }
+        } else {
+            // 1. 取消限制应用启动
+            GlobalContext.getContext().stopService(
+                    new Intent(GlobalContext.getContext(), ActivityStartWatcher.class));
+            // 2. 取消禁止应用安装
+            SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
+            clearAppFirewallList();
+        }
+        return true;
+    }
+
+    private boolean setAppWhiteListStatus(boolean enable) {
+        if (enable) {
+            String whiteList = DbManager.getDBParam("Device.X_Skyworth.AppBatch.WhiteList.List");
+            LogUtils.d(TAG, "setAppWhiteListStatus whiteList: " + whiteList);
+            // 禁止应用安装
+            clearAppFirewallList();
+            if (TextUtils.isEmpty(whiteList) || parseAppFirewallList(TYPE_WHITELIST, whiteList)) {
+                SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_WHITELIST));
+            } else {
+                SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
+                return false;
+            }
+        } else {
+            // 取消禁止应用安装
+            SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
+            clearAppFirewallList();
+        }
+        return true;
+    }
+
+    @Tr369Set("Device.X_Skyworth.AppBatch.")
+    public boolean SK_TR369_SetAppBatchParams(String path, String value) {
+        DbManager.setDBParam(path, value);
+        if (path.contains("LockList.Enable")) {
+            // value: 0->close, 1->open
+            return setAppLockListStatus("1".equals(value));
+        } else if (path.contains("BlackList.Enable")) {
+            // value: 0->close, 1->open
+            boolean enable = "1".equals(value);
+            if (enable) {
+                String whiteListStatus = DbManager.getDBParam(
+                        "Device.X_Skyworth.AppBatch.WhiteList.Enable");
+                if ("1".equals(whiteListStatus)) {
+                    setAppWhiteListStatus(false);
+                    DbManager.setDBParam("Device.X_Skyworth.AppBatch.WhiteList.Enable", "0");
+                }
+            }
+            return setAppBlackListStatus(enable);
+        } else if (path.contains("WhiteList.Enable")) {
+            // value: 0->close, 1->open
+            boolean enable = "1".equals(value);
+            if (enable) {
+                String blackListStatus = DbManager.getDBParam(
+                        "Device.X_Skyworth.AppBatch.BlackList.Enable");
+                if ("1".equals(blackListStatus)) {
+                    setAppBlackListStatus(false);
+                    DbManager.setDBParam("Device.X_Skyworth.AppBatch.BlackList.Enable", "0");
+                }
+            }
+            return setAppWhiteListStatus(enable);
+        }
+        return true;
+    }
+
+    @Tr369Get("Device.X_Skyworth.AppBatch.")
+    public String SK_TR369_GetAppBatchParams(String path) {
+        return DbManager.getDBParam(path);
     }
 
 }
