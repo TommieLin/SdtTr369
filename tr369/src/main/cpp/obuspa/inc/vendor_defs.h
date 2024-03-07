@@ -83,7 +83,7 @@
 
 // Location of the database file to use, if none is specified on the command line when invoking this executable
 // NOTE: As the database needs to be stored persistently, this should be changed to a directory which is not cleared on boot up
-#define OBUSPA_LOCAL_STATE_DIR              "/data/user/0/com.sdt.android.tr369/"
+#define OBUSPA_LOCAL_STATE_DIR              "/data/user/0/com.sdt.android.tr369/files/"
 #define DEFAULT_DATABASE_FILE               OBUSPA_LOCAL_STATE_DIR "sdt_tms_usp.db"
 
 // Location of unix domain stream file used for CLI communication between client and server

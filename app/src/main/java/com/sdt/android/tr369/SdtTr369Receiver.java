@@ -108,13 +108,13 @@ public class SdtTr369Receiver extends BroadcastReceiver {
 
     private void startTr369Protocol() {
         FileUtils.copyTr369AssetsToFile(mContext);
-        String defaultFilePath = mContext.getDataDir().getPath() + "/" + FileUtils.PLATFORM_TMS_TR369_MODEL_DEFAULT;
+        String defaultFilePath = mContext.getFilesDir().getPath() + "/" + FileUtils.PLATFORM_TMS_TR369_MODEL_DEFAULT;
         LogUtils.d(TAG, "startTr369Protocol defaultFilePath: " + defaultFilePath);
 
         int ret = OpenTR369Native.SetDefaultModelPath(defaultFilePath);
         LogUtils.d(TAG, "startTr369Protocol SetDefaultModelPath ret: " + ret);
 
-        String modelFile = mContext.getDataDir().getPath() + "/" + FileUtils.PLATFORM_TMS_TR369_MODEL_XML;
+        String modelFile = mContext.getFilesDir().getPath() + "/" + FileUtils.PLATFORM_TMS_TR369_MODEL_XML;
         ret = OpenTR369Native.OpenTR369Init(modelFile);
         LogUtils.d(TAG, "startTr369Protocol ret: " + ret);
 
