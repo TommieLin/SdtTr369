@@ -23,8 +23,8 @@ public class FileUtils {
     public static final String SYS_PROP_TR369_SOFTWARE_VERSION = "persist.sys.tr369.software.version";
 
     public static void copyTr369AssetsToFile(Context context) {
-        File modelFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_XML);
-        File defaultFile = new File(context.getDataDir(), PLATFORM_TMS_TR369_MODEL_DEFAULT);
+        File modelFile = new File(context.getFilesDir(), PLATFORM_TMS_TR369_MODEL_XML);
+        File defaultFile = new File(context.getFilesDir(), PLATFORM_TMS_TR369_MODEL_DEFAULT);
 
         String version = SystemProperties.get(SYS_PROP_TR369_SOFTWARE_VERSION, "");
         String curSoftwareVersion = getSoftwareVersion();
