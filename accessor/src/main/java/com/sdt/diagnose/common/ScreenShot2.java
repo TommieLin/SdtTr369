@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -53,7 +52,6 @@ public class ScreenShot2 {
             return false;
         }
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         screenshotFilePath = String.format("%s/%s.png", dirPath, dateFormat.format(new Date()));
         LogUtils.d(TAG, "screenshot file path: " + screenshotFilePath);
 
