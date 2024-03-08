@@ -1,8 +1,5 @@
 package com.sdt.diagnose.common;
 
-import android.os.Build;
-import android.os.Environment;
-
 import androidx.annotation.NonNull;
 
 import com.sdt.diagnose.command.Event;
@@ -14,6 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -24,11 +23,6 @@ public class ScreenShot2 {
     private static ScreenShot2 mScreenShot2;
     private static String screenshotFilePath;
     private static String uploadUrl;
-
-    private static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-    private static final String fileParentDirPath = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ?
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_SCREENSHOTS).toString() :
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString();
 
     public static ScreenShot2 getInstance() {
         synchronized (ScreenShot2.class) {
@@ -50,15 +44,20 @@ public class ScreenShot2 {
     }
 
     private boolean takeScreenshot() {
-        File fileDir = new File(fileParentDirPath);
+        String dirPath = GlobalContext.getContext().getCacheDir().getPath();
+        File fileDir = new File(dirPath);
         if (!fileDir.exists() && !fileDir.mkdirs()) {
             String message = "Unable to create folder.";
             LogUtils.e(TAG, "takeScreenshot: " + message);
             Event.setUploadResponseDBParams("Error", message);
             return false;
         }
-        screenshotFilePath = String.format("%s/%s.png", fileParentDirPath, simpleDateFormat.format(new Date()));
-        NetWorkSpeedUtils.runShellCommand("/system/bin/screencap -p " + screenshotFilePath);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        screenshotFilePath = String.format("%s/%s.png", dirPath, dateFormat.format(new Date()));
+        LogUtils.d(TAG, "screenshot file path: " + screenshotFilePath);
+
+        ShellUtils.execCommand("/system/bin/screencap -p " + screenshotFilePath, false, false);
         return true;
     }
 
@@ -73,8 +72,6 @@ public class ScreenShot2 {
     static class UploadFileCallback implements Callback {
         @Override
         public void onFailure(@NonNull Call call, @NonNull IOException e) {
-            File file = new File(screenshotFilePath);
-            file.delete();
             String message = "Failed to upload screenshot, " + e.getMessage();
             LogUtils.e(TAG, "UploadFileCallback: " + message);
             Event.setUploadResponseDBParams("Error", message);

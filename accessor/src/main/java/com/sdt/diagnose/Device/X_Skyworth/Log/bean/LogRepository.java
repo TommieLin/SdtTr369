@@ -178,7 +178,7 @@ public class LogRepository {
             setAutoUploadUrl(dbUrl);
         }
 
-        File folder = new File("/data/tcpdump/");
+        File folder = new File(LOG_SOURCE_DIR_PATH);
         if (!folder.exists() || !folder.isDirectory()) {
             return;
         }
@@ -295,7 +295,7 @@ public class LogRepository {
     public String getLogList() {
         final List<HashMap<String, String>> filesInfo = new ArrayList<>();
 
-        File folder = new File("/data/tcpdump/");
+        File folder = new File(LOG_SOURCE_DIR_PATH);
         if (!folder.exists() || !folder.isDirectory()) {
             return filesInfo.toString();
         }
@@ -346,7 +346,7 @@ public class LogRepository {
     }
 
     public boolean deleteLogFiles(String filterTime) {
-        File folder = new File("/data/tcpdump/");
+        File folder = new File(LOG_SOURCE_DIR_PATH);
         if (!folder.exists() || !folder.isDirectory()) {
             return false;
         }
