@@ -35,10 +35,10 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     private static final String TAG = "ExternalAppUpgradeReceiver";
 
     // 接收来自SkyUpdate.apk的广播，接收下载/安装APP的状态
-    private static final String ACTION_BOOT_DIAGNOSE_APP_DOWNLOAD
-            = "com.skyworth.diagnose.Broadcast.DownloadStatus";
-    private static final String ACTION_BOOT_DIAGNOSE_APP_UPGRADE
-            = "com.skyworth.diagnose.Broadcast.UpgradeStatus";
+    public static final String ACTION_BOOT_DIAGNOSE_APP_DOWNLOAD =
+            "com.skyworth.diagnose.Broadcast.DownloadStatus";
+    public static final String ACTION_BOOT_DIAGNOSE_APP_UPGRADE =
+            "com.skyworth.diagnose.Broadcast.UpgradeStatus";
 
     // 上报APP下载和安装状态的接口，IP和Port由Device.X_Skyworth.ManagementServer.Url决定
     private static final String URL_DOWNLOAD_RESULT_REPORT = "/appList/downloadResult";
@@ -52,7 +52,6 @@ public class ExternalAppUpgradeReceiver extends BroadcastReceiver {
     private static int mRetryCount = 0;
     private static final int MSG_REQUEST_RETRY = 3309;
     private static boolean isRequestSuccess = false;
-    private static boolean isClearNeeded = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {

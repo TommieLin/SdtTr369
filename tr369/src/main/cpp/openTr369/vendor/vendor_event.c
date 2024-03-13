@@ -76,6 +76,7 @@ static char *download_file_input_args[] =
 static char *x_event_output_args[] =
 {
     "Status",
+    "Message",
 };
 
 /*********************************************************************//**

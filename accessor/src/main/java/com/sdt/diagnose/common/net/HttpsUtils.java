@@ -6,6 +6,8 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.sdt.diagnose.Device.X_Skyworth.LogManager;
+import com.sdt.diagnose.Tr369PathInvoke;
+import com.sdt.diagnose.command.Event;
 import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.FileUtils;
 import com.sdt.diagnose.common.bean.LogResponseBean;
@@ -13,11 +15,19 @@ import com.sdt.diagnose.common.bean.NotificationBean;
 import com.sdt.diagnose.common.bean.StandbyBean;
 import com.sdt.diagnose.common.log.LogUtils;
 
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -206,6 +216,88 @@ public class HttpsUtils {
                         + ", message: " + response.message());
             }
         });
+    }
+
+    public static void uploadLogFile(String uploadUrl, String filePath, int fileCount) {
+        try {
+            URL url = new URL(uploadUrl);
+            HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+            // 允许Input、Output，不使用Cache
+            con.setDoInput(true);
+            con.setDoOutput(true);
+            con.setUseCaches(false);
+            SSLSocketFactory sslSocketFactory = new CreateSSL().getSSLSocketFactory();
+            con.setSSLSocketFactory(sslSocketFactory);
+            con.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    String val = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Hostname");
+                    return val.isEmpty() || hostname.equals(val);
+                }
+            });
+            con.setConnectTimeout(50000);
+            con.setReadTimeout(50000);
+            // 设置传送的method=POST
+            con.setRequestMethod("POST");
+            // 在一次TCP连接中可以持续发送多份数据而不会断开连接
+            con.setRequestProperty("Connection", "Keep-Alive");
+            // 设置编码
+            con.setRequestProperty("Charset", "UTF-8");
+            // text/plain能上传纯文本文件的编码格式
+            con.setRequestProperty("Content-Type", "text/plain");
+
+            // 指定剩余待上传文件
+            String remainingFileCount = String.valueOf(fileCount);
+            con.setRequestProperty("RemainingFileCount", remainingFileCount);
+            // 指定当前上传的文件名
+            String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+            con.setRequestProperty("Filename", fileName);
+
+            if (fileCount > 0) {
+                // 设置DataOutputStream
+                DataOutputStream ds = new DataOutputStream(con.getOutputStream());
+                // 取得文件的FileInputStream
+                FileInputStream fStream = new FileInputStream(filePath);
+                // 设置每次写入1024bytes
+                int bufferSize = 1024;
+                byte[] buffer = new byte[bufferSize];
+
+                int length = -1;
+                // 从文件读取数据至缓冲区
+                while ((length = fStream.read(buffer)) != -1) {
+                    // 将资料写入DataOutputStream中 对于有中文的文件需要使用GBK编码格式
+                    // ds.write(new String(buffer, 0, length).getBytes("GBK"));
+                    ds.write(buffer, 0, length);
+                }
+                ds.flush();
+                fStream.close();
+                ds.close();
+            }
+
+            if (con.getResponseCode() == 200) {
+                String message = "Successfully uploaded the file via https.";
+                LogUtils.e(TAG, "uploadLogFile: " + message + " file path: " + filePath);
+                Event.setUploadResponseDBParams("Complete", message);
+                // 上传成功，只删除分段保存的那些文件
+                if (!filePath.contains(Event.RAW_LOG_FILE)) {
+                    File file = new File(filePath);
+                    if (file.exists()) {
+                        LogUtils.d(TAG, "Wait to delete file: " + filePath);
+                        file.delete();
+                    }
+                }
+            } else {
+                String message = "The response code obtained via https is: " + con.getResponseCode();
+                LogUtils.e(TAG, "uploadLogFile: " + message);
+                Event.setUploadResponseDBParams("Error", message);
+            }
+            con.disconnect();
+
+        } catch (Exception e) {
+            String message = "Failed to upload file via https, " + e.getMessage();
+            LogUtils.e(TAG, "uploadLogFile: " + message);
+            Event.setUploadResponseDBParams("Error", message);
+        }
     }
 
     public static void noticeResponse(String url, HashMap<String, String> param) {

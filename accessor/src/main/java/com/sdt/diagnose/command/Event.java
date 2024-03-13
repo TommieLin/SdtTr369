@@ -12,13 +12,13 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.TrafficStats;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
 import com.sdt.annotations.Tr369Set;
-import com.sdt.diagnose.Tr369PathInvoke;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.ScreenRecordActivity;
@@ -26,7 +26,6 @@ import com.sdt.diagnose.common.ScreenRecordService;
 import com.sdt.diagnose.common.ScreenShot2;
 import com.sdt.diagnose.common.ShellUtils;
 import com.sdt.diagnose.common.log.LogUtils;
-import com.sdt.diagnose.common.net.CreateSSL;
 import com.sdt.diagnose.common.net.HttpUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
@@ -36,14 +35,10 @@ import com.skyworth.scrrtcsrv.Device;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,11 +48,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -80,6 +70,7 @@ public class Event {
     private static final String SCREENSHOT_TYPE = "X Skyworth Screenshot File";
     private static final String VIDEO_TYPE = "X Skyworth Video File";
     private static final String APP_ICON_TYPE = "X Skyworth App Icon File";
+    private static final String BUG_REPORT_TYPE = "X Skyworth Bug Report File";
     private static final String Config_File = "1 Vendor Configuration File";
     private static final String Log_File = "2 Vendor Log File";
     private static final String ACTION_BOOT_EXTERNAL_SYS = "com.skw.ota.update.ExternalSysUpdate";
@@ -98,6 +89,13 @@ public class Event {
     private static final SimpleDateFormat df = new SimpleDateFormat(format);
     public static final String RAW_LOG_FILE = "logcat_tr369.log";
     private static final String LOG_SOURCE_DIR_PATH = "/data/tcpdump/";
+
+    private static final String BUGREPORT_DIR = "bugreports";
+    private static final String INTENT_BUGREPORT_REQUESTED =
+            "com.android.internal.intent.action.BUGREPORT_REQUESTED";
+    private static final String SHELL_APP_PACKAGE = "com.android.shell";
+    private static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
+    private static final String EXTRA_TMS_BUGREPORT_DIR = "android.intent.extra.tms.BUGREPORT_DIR";
 
     @Tr369Set("skyworth.tr369.event")
     public boolean SK_TR369_SetEventParams(String path, String value) {
@@ -359,167 +357,14 @@ public class Event {
                     + ", size: " + fileSize
                     + ", count: " + fileCount
                     + " to " + uploadUrl);
-            URL url = new URL(uploadUrl);
-            if (url.toString().contains("https")) {
-                HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-                uploadLogFileByHttps(con, filePath, fileCount);
-                con.disconnect();
+            if (uploadUrl.contains("https")) {
+                HttpsUtils.uploadLogFile(uploadUrl, filePath, fileCount);
             } else {
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                uploadLogFileByHttp(con, filePath, fileCount);
-                con.disconnect();
+                HttpUtils.uploadLogFile(uploadUrl, filePath, fileCount);
             }
         } catch (Exception e) {
             String message = "Failed to upload log files, " + e.getMessage();
             LogUtils.e(TAG, "uploadLogFile: " + message);
-            setUploadResponseDBParams("Error", message);
-        }
-    }
-
-    private static void uploadLogFileByHttps(HttpsURLConnection con, String filePath, int fileCount) {
-        try {
-            // 允许Input、Output，不使用Cache
-            con.setDoInput(true);
-            con.setDoOutput(true);
-            con.setUseCaches(false);
-            SSLSocketFactory sslSocketFactory = new CreateSSL().getSSLSocketFactory();
-            con.setSSLSocketFactory(sslSocketFactory);
-            con.setHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    String val = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Hostname");
-                    return val.isEmpty() || hostname.equals(val);
-                }
-            });
-            con.setConnectTimeout(50000);
-            con.setReadTimeout(50000);
-            // 设置传送的method=POST
-            con.setRequestMethod("POST");
-            //在一次TCP连接中可以持续发送多份数据而不会断开连接
-            con.setRequestProperty("Connection", "Keep-Alive");
-            //设置编码
-            con.setRequestProperty("Charset", "UTF-8");
-            //text/plain能上传纯文本文件的编码格式
-            con.setRequestProperty("Content-Type", "text/plain");
-
-            // 指定剩余待上传文件
-            String remainingFileCount = String.valueOf(fileCount);
-            con.setRequestProperty("RemainingFileCount", remainingFileCount);
-            // 指定当前上传的文件名
-            String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-            con.setRequestProperty("Filename", fileName);
-
-            if (fileCount > 0) {
-                // 设置DataOutputStream
-                DataOutputStream ds = new DataOutputStream(con.getOutputStream());
-                // 取得文件的FileInputStream
-                FileInputStream fStream = new FileInputStream(filePath);
-                // 设置每次写入1024bytes
-                int bufferSize = 1024;
-                byte[] buffer = new byte[bufferSize];
-
-                int length = -1;
-                // 从文件读取数据至缓冲区
-                while ((length = fStream.read(buffer)) != -1) {
-                    // 将资料写入DataOutputStream中 对于有中文的文件需要使用GBK编码格式
-                    // ds.write(new String(buffer, 0, length).getBytes("GBK"));
-                    ds.write(buffer, 0, length);
-                }
-                ds.flush();
-                fStream.close();
-                ds.close();
-            }
-
-            if (con.getResponseCode() == 200) {
-                String message = "Successfully uploaded the file via https.";
-                LogUtils.e(TAG, "uploadLogFileByHttps: " + message + " file path: " + filePath);
-                setUploadResponseDBParams("Complete", message);
-                // 上传成功，只删除分段保存的那些文件
-                if (!filePath.contains(RAW_LOG_FILE)) {
-                    File file = new File(filePath);
-                    if (file.exists()) {
-                        LogUtils.d(TAG, "Https: Wait to delete file: " + filePath);
-                        file.delete();
-                    }
-                }
-            } else {
-                String message = "The response code obtained via https is: " + con.getResponseCode();
-                LogUtils.e(TAG, "uploadLogFileByHttps: " + message);
-                setUploadResponseDBParams("Error", message);
-            }
-        } catch (Exception e) {
-            String message = "Failed to upload file via https, " + e.getMessage();
-            LogUtils.e(TAG, "uploadLogFileByHttps: " + message);
-            setUploadResponseDBParams("Error", message);
-        }
-    }
-
-    private static void uploadLogFileByHttp(HttpURLConnection con, String filePath, int fileCount) {
-        try {
-            // 允许Input、Output，不使用Cache
-            con.setDoInput(true);
-            con.setDoOutput(true);
-            con.setUseCaches(false);
-            con.setConnectTimeout(50000);
-            con.setReadTimeout(50000);
-            // 设置传送的method=POST
-            con.setRequestMethod("POST");
-            //在一次TCP连接中可以持续发送多份数据而不会断开连接
-            con.setRequestProperty("Connection", "Keep-Alive");
-            //设置编码
-            con.setRequestProperty("Charset", "UTF-8");
-            //text/plain能上传纯文本文件的编码格式
-            con.setRequestProperty("Content-Type", "text/plain");
-
-            // 指定剩余待上传文件
-            String remainingFileCount = String.valueOf(fileCount);
-            con.setRequestProperty("RemainingFileCount", remainingFileCount);
-            // 指定当前上传的文件名
-            String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-            con.setRequestProperty("Filename", fileName);
-
-            if (fileCount > 0) {
-                // 设置DataOutputStream
-                DataOutputStream ds = new DataOutputStream(con.getOutputStream());
-
-                // 取得文件的FileInputStream
-                FileInputStream fStream = new FileInputStream(filePath);
-                // 设置每次写入1024bytes
-                int bufferSize = 1024;
-                byte[] buffer = new byte[bufferSize];
-
-                int length = -1;
-                // 从文件读取数据至缓冲区
-                while ((length = fStream.read(buffer)) != -1) {
-                    // 将资料写入DataOutputStream中
-                    //ds.write(new String(buffer,0,length).getBytes("GBK"));
-                    ds.write(buffer, 0, length);
-                }
-                ds.flush();
-                fStream.close();
-                ds.close();
-            }
-
-            if (con.getResponseCode() == 200) {
-                String message = "Successfully uploaded the file via http.";
-                LogUtils.e(TAG, "uploadLogFileByHttp: " + message + " file path: " + filePath);
-                setUploadResponseDBParams("Complete", message);
-                // 上传成功，只删除分段保存的那些文件
-                if (!filePath.contains(RAW_LOG_FILE)) {
-                    File file = new File(filePath);
-                    if (file.exists()) {
-                        LogUtils.d(TAG, "Http: Wait to delete file: " + filePath);
-                        file.delete();
-                    }
-                }
-            } else {
-                String message = "The response code obtained via http is: " + con.getResponseCode();
-                LogUtils.e(TAG, "uploadLogFileByHttp: " + message);
-                setUploadResponseDBParams("Error", message);
-            }
-        } catch (Exception e) {
-            String message = "Failed to upload file via http, " + e.getMessage();
-            LogUtils.e(TAG, "uploadLogFileByHttp: " + message);
             setUploadResponseDBParams("Error", message);
         }
     }
@@ -553,6 +398,9 @@ public class Event {
                 break;
             case APP_ICON_TYPE:
                 uploadIconFile(uploadUrl);
+                break;
+            case BUG_REPORT_TYPE:
+                handleBugReport(uploadUrl);
                 break;
         }
     }
@@ -860,6 +708,34 @@ public class Event {
         } else if (uploadUrl.startsWith("http")) {
             HttpUtils.uploadFile(uploadUrl, filePath, true, callback);
         }
+    }
+
+    private void handleBugReport(String uploadUrl) {
+        File bugreportsDir = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS),
+                BUGREPORT_DIR);
+        if (!bugreportsDir.exists()) {
+            LogUtils.i(TAG, "Creating directory " + bugreportsDir
+                    + " to store bugreports and screenshots");
+            if (!bugreportsDir.mkdir()) {
+                LogUtils.e(TAG, "Could not create directory " + bugreportsDir);
+                return;
+            }
+        }
+        DbManager.setDBParam("Device.X_Skyworth.BugReport.Url", uploadUrl);
+
+        Intent triggerShellBugreport = new Intent();
+        triggerShellBugreport.setAction(INTENT_BUGREPORT_REQUESTED);
+        triggerShellBugreport.setPackage(SHELL_APP_PACKAGE);
+        triggerShellBugreport.putExtra(EXTRA_BUGREPORT_TYPE, "bugreportfull");
+        triggerShellBugreport.putExtra(EXTRA_TMS_BUGREPORT_DIR, bugreportsDir.getPath());
+        triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        GlobalContext.getContext().sendBroadcast(triggerShellBugreport);
+
+        String message = "Bug Report task execution begins";
+        LogUtils.d(TAG, "handleBugReport: " + message + ", file path: " + bugreportsDir.getPath());
+        setUploadResponseDBParams("Complete", message);
     }
 
     private void factoryReset() {
