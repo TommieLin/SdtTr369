@@ -19,6 +19,9 @@ import android.text.TextUtils;
 import androidx.annotation.NonNull;
 
 import com.sdt.annotations.Tr369Set;
+import com.sdt.diagnose.Device.X_Skyworth.App.AppX;
+import com.sdt.diagnose.Tr369PathInvoke;
+import com.sdt.diagnose.common.DeviceInfoUtils;
 import com.sdt.diagnose.common.GlobalContext;
 import com.sdt.diagnose.common.NetworkUtils;
 import com.sdt.diagnose.common.ScreenRecordActivity;
@@ -34,6 +37,7 @@ import com.sdt.diagnose.traceroute.TraceRouteManager;
 import com.skyworth.scrrtcsrv.Device;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -42,6 +46,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -255,29 +260,67 @@ public class Event {
 
     private void upgradeSw(String[] params) {
         int paramLen = params.length;
-        String upgradeUrl;
+        String upgradeJson;
         String upgradeFileType;
         LogUtils.d(TAG, "upgradeSw params.length: " + params.length);
-
         if (paramLen > INDEX_PARAM_2) {
-            upgradeUrl = params[INDEX_PARAM_1];
+            upgradeJson = params[INDEX_PARAM_1];
             upgradeFileType = params[INDEX_PARAM_2];
-            LogUtils.d(TAG, "upgradeSw: fileUrl: " + upgradeUrl
+            LogUtils.d(TAG, "upgradeSw: upgradeJson: " + upgradeJson
                     + ", fileType: " + upgradeFileType);
-            Intent intent = new Intent();
-            intent.setPackage("com.sdt.ota");
-            //如果是.zip结尾表示是系统升级,.apk结尾表示是app升级
-            if (upgradeUrl.contains(".zip")) {
-                intent.setAction(ACTION_BOOT_EXTERNAL_SYS);
-                intent.putExtra(OTA_NEW_PARAMS, upgradeUrl);
-                intent.putExtra(OTA_PKG_NAME, GlobalContext.getContext().getPackageName());
-            } else if (upgradeUrl.contains(".apk")) {
-                intent.setAction(ACTION_BOOT_EXTERNAL_APP);
-                intent.putExtra(OTA_NEW_PARAMS, upgradeUrl);
-                intent.putExtra(OTA_PKG_NAME, GlobalContext.getContext().getPackageName());
+            // 如果是.zip结尾表示是系统升级,.apk结尾表示是app升级
+            if (upgradeJson.contains(".zip")) {
+                handleSysUpgradeRequest(upgradeJson);
+            } else if (upgradeJson.contains(".apk")) {
+                handleAppUpgradeRequest(upgradeJson);
             }
-            GlobalContext.getContext().sendBroadcast(intent);
         }
+    }
+
+    private void handleSysUpgradeRequest(String upgradeJson) {
+        Intent intent = new Intent();
+        intent.setPackage("com.sdt.ota");
+        intent.setAction(ACTION_BOOT_EXTERNAL_SYS);
+        intent.putExtra(OTA_NEW_PARAMS, upgradeJson);
+        intent.putExtra(OTA_PKG_NAME, GlobalContext.getContext().getPackageName());
+        GlobalContext.getContext().sendBroadcast(intent);
+    }
+
+    private void handleAppUpgradeRequest(String upgradeJson) {
+        try {
+            JSONObject jsonObject = new JSONObject(upgradeJson);
+            String planId = jsonObject.getString("reference");
+            String packageName = jsonObject.getString("packageName");
+            if (!AppX.isPkgAllowedToInstall(packageName)) {
+                // 检查黑白名单，判断是否允许下载，不允许则通知服务器更新失败
+                LogUtils.e(TAG, "TMS Warning: Installation of Package {"
+                        + packageName + "} is prohibited");
+                HashMap<String, String> params = new HashMap<>();
+                params.put("planId", planId);
+                params.put("deviceId", DeviceInfoUtils.getSerialNumber());
+                params.put("operatorCode", DeviceInfoUtils.getOperatorName());
+                params.put("status", "false");
+                params.put("msg", "Application installation is prohibited");
+                String url = Tr369PathInvoke.getInstance().getString(
+                        "Device.X_Skyworth.ManagementServer.Url");
+                if (!url.isEmpty()) {
+                    HttpsUtils.noticeResponse(url + "/appList/downloadResult", params);
+                } else {
+                    LogUtils.e(TAG, "ManagementServer URL is empty.");
+                }
+                return;
+            }
+        } catch (Exception e) {
+            LogUtils.e(TAG, "handleAppUpgradeRequest error, " + e.getMessage());
+            return;
+        }
+        // 通知com.sdt.ota进行应用安装或更新
+        Intent intent = new Intent();
+        intent.setPackage("com.sdt.ota");
+        intent.setAction(ACTION_BOOT_EXTERNAL_APP);
+        intent.putExtra(OTA_NEW_PARAMS, upgradeJson);
+        intent.putExtra(OTA_PKG_NAME, GlobalContext.getContext().getPackageName());
+        GlobalContext.getContext().sendBroadcast(intent);
     }
 
     private void downloadFile(String[] params) {
