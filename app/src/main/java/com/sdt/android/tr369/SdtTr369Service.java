@@ -22,6 +22,7 @@ import android.os.SystemProperties;
 import androidx.annotation.NonNull;
 
 import com.sdt.android.tr369.Receiver.BluetoothMonitorReceiver;
+import com.sdt.android.tr369.Receiver.BugreportReceiver;
 import com.sdt.android.tr369.Receiver.ExternalAppUpgradeReceiver;
 import com.sdt.android.tr369.Receiver.NetflixEsnReceiver;
 import com.sdt.android.tr369.Receiver.PackageReceiver;
@@ -56,6 +57,7 @@ public class SdtTr369Service extends Service {
     private ShutdownReceiver mShutdownReceiver = null;
     private ExternalAppUpgradeReceiver mExternalAppUpgradeReceiver = null;
     private NetflixEsnReceiver mNetflixEsnReceiver = null;
+    private BugreportReceiver mBugreportReceiver = null;
     private HandlerThread mHandlerThread = null;
     private Handler mHandler = null;
     public static final int MSG_START_TR369_SERVICE = 3300;
@@ -187,8 +189,8 @@ public class SdtTr369Service extends Service {
             mExternalAppUpgradeReceiver = new ExternalAppUpgradeReceiver();
         }
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.skyworth.diagnose.Broadcast.DownloadStatus");
-        intentFilter.addAction("com.skyworth.diagnose.Broadcast.UpgradeStatus");
+        intentFilter.addAction(ExternalAppUpgradeReceiver.ACTION_BOOT_DIAGNOSE_APP_DOWNLOAD);
+        intentFilter.addAction(ExternalAppUpgradeReceiver.ACTION_BOOT_DIAGNOSE_APP_UPGRADE);
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(mExternalAppUpgradeReceiver, intentFilter);
     }
@@ -201,6 +203,16 @@ public class SdtTr369Service extends Service {
         registerReceiver(mNetflixEsnReceiver, intentFilter, "com.netflix.ninja.permission.ESN", null);
     }
 
+    private void registerBugreportReceiver() {
+        if (mBugreportReceiver == null) {
+            mBugreportReceiver = new BugreportReceiver();
+        }
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BugreportReceiver.ACTION_TMS_BUGREPORT_FINISH);
+        intentFilter.addAction(BugreportReceiver.ACTION_TMS_BUGREPORT_ERROR);
+        registerReceiver(mBugreportReceiver, intentFilter);
+    }
+
     @Override
     public void onDestroy() {
         LogUtils.d(TAG, "onDestroy");
@@ -211,6 +223,7 @@ public class SdtTr369Service extends Service {
         if (mShutdownReceiver != null) unregisterReceiver(mShutdownReceiver);
         if (mExternalAppUpgradeReceiver != null) unregisterReceiver(mExternalAppUpgradeReceiver);
         if (mNetflixEsnReceiver != null) unregisterReceiver(mNetflixEsnReceiver);
+        if (mBugreportReceiver != null) unregisterReceiver(mBugreportReceiver);
 
         if (mHandler != null) {
             mHandler.sendEmptyMessage(MSG_STOP_TR369_SERVICE);
@@ -231,6 +244,7 @@ public class SdtTr369Service extends Service {
         registerShutdownReceiver();
         registerExternalAppUpdateReceiver();
         registerNetflixEsnReceiver();
+        registerBugreportReceiver();
 
         // 开机同步后台logcat状态
         LogRepository.getLogRepository().startCommand(LogCmd.CatchLog, "sky_log_tr369_logcat.sh");

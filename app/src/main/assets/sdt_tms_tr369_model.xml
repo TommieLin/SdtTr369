@@ -687,6 +687,9 @@
             <schema name="Netflix" type="object">
                 <schema name="ESN" getter="diagnose" type="string" />
             </schema>
+            <schema name="BugReport" type="object">
+                <schema name="Url" getter="diagnose" setter="diagnose" type="string" write="W" />
+            </schema>
 
         </schema>
 
