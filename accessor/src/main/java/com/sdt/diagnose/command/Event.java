@@ -122,15 +122,11 @@ public class Event {
                 downloadFile(strings);
                 break;
             case UPGRADE_FILE:
-                //发送升级广播
+                // 发送升级广播
                 upgradeSw(strings);
                 break;
             case IP_PING:
-                try {
-                    ping(strings);
-                } catch (Exception e) {
-                    LogUtils.e(TAG, "IP_PING event execution failed, " + e.getMessage());
-                }
+                ping(strings);
                 break;
             case TRACE_ROUTE:
                 TraceRoute traceroute = TraceRouteManager.getInstance().getTraceRoute();
@@ -139,11 +135,7 @@ public class Event {
                 traceroute.executeTraceroute();
                 break;
             case DOWNLOAD_DIAGNOSTICS:
-                try {
-                    calcNetSpeed(strings);
-                } catch (Exception e) {
-                    LogUtils.e(TAG, "DOWNLOAD_DIAGNOSTICS event execution failed, " + e.getMessage());
-                }
+                calcNetSpeed(strings);
                 break;
             case SHORT_MESSAGE:
                 LogUtils.d(TAG, "SHORT_MESSAGE String: " + value);
