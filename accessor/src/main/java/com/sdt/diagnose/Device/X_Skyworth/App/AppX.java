@@ -584,8 +584,11 @@ public class AppX implements IProtocolArray<AppInfo> {
             GlobalContext.getContext().stopService(
                     new Intent(GlobalContext.getContext(), ActivityStartWatcher.class));
             // 2. 取消禁止应用安装
-            SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
-            clearAppFirewallList();
+            if (SystemProperties.getInt(PROP_TMS_APP_FIREWALL_TYPE, TYPE_UNDEFINED) ==
+                    TYPE_BLACKLIST) {
+                SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
+                clearAppFirewallList();
+            }
         }
         return true;
     }
@@ -604,8 +607,11 @@ public class AppX implements IProtocolArray<AppInfo> {
             }
         } else {
             // 取消禁止应用安装
-            SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
-            clearAppFirewallList();
+            if (SystemProperties.getInt(PROP_TMS_APP_FIREWALL_TYPE, TYPE_UNDEFINED) ==
+                    TYPE_WHITELIST) {
+                SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
+                clearAppFirewallList();
+            }
         }
         return true;
     }
@@ -647,6 +653,30 @@ public class AppX implements IProtocolArray<AppInfo> {
     @Tr369Get("Device.X_Skyworth.AppBatch.")
     public String SK_TR369_GetAppBatchParams(String path) {
         return DbManager.getDBParam(path);
+    }
+
+    public static boolean isPkgAllowedToInstall(String packageName) {
+        int firewallType = SystemProperties.getInt(PROP_TMS_APP_FIREWALL_TYPE, TYPE_UNDEFINED);
+
+        int numPropPart = SystemProperties.getInt(PROP_TMS_APP_FIREWALL_NUM, 0);
+        if (numPropPart <= 0) {
+            return firewallType != TYPE_WHITELIST;
+        }
+
+        String packageList = "";
+        for (int i = 1; i <= numPropPart; ++i) {
+            String packageNames = SystemProperties.get(PROP_TMS_APP_FIREWALL_PART + i, "");
+            if (!packageNames.isEmpty()) {
+                packageList += packageNames;
+            }
+        }
+        if (firewallType == TYPE_WHITELIST && !packageList.contains(packageName)) {
+            return false;
+        } else if (firewallType == TYPE_BLACKLIST && packageList.contains(packageName)) {
+            return false;
+        }
+
+        return true;
     }
 
 }
