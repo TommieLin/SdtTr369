@@ -126,7 +126,7 @@ public class SdtTr369Service extends Service {
         registerSdtTr369Receiver();
 
         // 初始化FTI停留时间监控程序
-        new FTIMonitor();
+        new FTIMonitor(getContentResolver());
     }
 
     private void registerSdtTr369Receiver() {

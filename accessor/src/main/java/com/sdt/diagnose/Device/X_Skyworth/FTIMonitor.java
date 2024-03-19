@@ -1,9 +1,11 @@
 package com.sdt.diagnose.Device.X_Skyworth;
 
+import android.content.ContentResolver;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -23,26 +25,47 @@ public class FTIMonitor {
     private static final String TAG = "FTIMonitor";
     private final Handler mHandler;
     private final HandlerThread mThread;
-    private static long mTimeSpent = 0;  // 之前已度过的时间（用于还在FTI阶段但重启后，需要接着上次的时间）
-    private static long mCycles = 0; // 监控循环的次数
-    private static final int MSG_START_MONITOR_FTI_DURATION = 3304;
-    private static final int DEFAULT_PERIOD_SECOND_TIME = 30;    // 默认30s监控一次
+    private final ContentResolver mResolver;
+    private FTIContentObserver mContentObserver = null;
+    private static long mTimeSpentAtLastBoot = 0;  // 之前已花费的时间（用于还在FTI阶段但重启后，需要接着上次的时间）
+    public static final int MSG_START_MONITOR_FTI_DURATION = 3314;
+    public static final int MSG_STOP_MONITOR_FTI_DURATION = 3315;
+    private static final int DEFAULT_PERIOD_SECOND_TIME = 60;    // 默认60s监控一次
 
-    public FTIMonitor() {
+    public FTIMonitor(ContentResolver resolver) {
+        mResolver = resolver;
         mThread = new HandlerThread("FTIMonitorThread", Process.THREAD_PRIORITY_BACKGROUND);
         mThread.start();
         mHandler =
                 new Handler(mThread.getLooper()) {
                     @Override
                     public void handleMessage(@NonNull Message msg) {
-                        if (msg.what == MSG_START_MONITOR_FTI_DURATION) {
-                            // 开始监控用户在开机向导停留的时间
-                            startMonitorFTIDuration();
+                        switch (msg.what) {
+                            case MSG_START_MONITOR_FTI_DURATION:
+                                mHandler.removeMessages(MSG_START_MONITOR_FTI_DURATION);
+                                LogUtils.d(TAG, "MSG_START_MONITOR_FTI_DURATION");
+                                startMonitorFTIDuration();
+                                break;
+                            case MSG_STOP_MONITOR_FTI_DURATION:
+                                mHandler.removeMessages(MSG_STOP_MONITOR_FTI_DURATION);
+                                LogUtils.d(TAG, "MSG_STOP_MONITOR_FTI_DURATION");
+                                stopMonitorFTIDuration();
+                                break;
+                            default:
+                                break;
                         }
                     }
                 };
         if (!isUserSetupComplete()) {
-            updateFTIDurationSpent();
+            LogUtils.i(TAG, "The FTI setup is not completed...");
+            initTimeSpent();
+            mContentObserver = new FTIContentObserver(mHandler);
+            if (mResolver != null) {
+                mResolver.registerContentObserver(
+                        Settings.Secure.getUriFor(Settings.Secure.USER_SETUP_COMPLETE),
+                        false,
+                        mContentObserver);
+            }
             mHandler.sendEmptyMessage(MSG_START_MONITOR_FTI_DURATION);
         }
     }
@@ -52,31 +75,45 @@ public class FTIMonitor {
                 Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0;
     }
 
-    public static void updateFTIDurationSpent() {
-        String timeSpent = SystemProperties.get("persist.sys.tr369.FTI.residence.duration", "");
-        mCycles = 0;
+    public static void initTimeSpent() {
+        String timeSpent = SystemProperties.get("persist.sys.tr369.FTI.residence.duration", "0");
         try {
             if (timeSpent.length() != 0 && Long.parseLong(timeSpent) > 0) {
-                mTimeSpent = Long.parseLong(timeSpent);
+                mTimeSpentAtLastBoot = Long.parseLong(timeSpent);
                 return;
             }
         } catch (NumberFormatException e) {
-            LogUtils.e(TAG, "updateFTIDurationSpent error, " + e.getMessage());
+            LogUtils.e(TAG, "initTimeSpent error, " + e.getMessage());
         }
-        mTimeSpent = 0;
+        mTimeSpentAtLastBoot = 0;
     }
 
     private void startMonitorFTIDuration() {
-        long duration = mTimeSpent + (mCycles * DEFAULT_PERIOD_SECOND_TIME);
-        if (duration < 0) duration = 0;
-        SystemProperties.set("persist.sys.tr369.FTI.residence.duration", String.valueOf(duration));
+        updateFTIDuration();
 
         if (isUserSetupComplete()) {
-            LogUtils.d(TAG, "The monitored FTI residence duration time is: " + duration + "s");
-            mHandler.removeMessages(MSG_START_MONITOR_FTI_DURATION);
+            mHandler.sendEmptyMessage(MSG_STOP_MONITOR_FTI_DURATION);
         } else {
-            mCycles++;
             mHandler.sendEmptyMessageDelayed(MSG_START_MONITOR_FTI_DURATION, DEFAULT_PERIOD_SECOND_TIME * 1000);
         }
+    }
+
+    private void stopMonitorFTIDuration() {
+        mHandler.removeMessages(MSG_START_MONITOR_FTI_DURATION);
+        updateFTIDuration();
+        if (mResolver != null) {
+            mResolver.unregisterContentObserver(mContentObserver);
+        }
+    }
+
+    private void updateFTIDuration() {
+        // 本次开机后在FTI阶段花费的时长（单位：秒）
+        long timeSpentAtThisBoot = SystemClock.elapsedRealtime() / 1000;
+        // 此设备在FTI阶段花费的总时长（单位：秒）
+        long duration = mTimeSpentAtLastBoot + timeSpentAtThisBoot;
+        SystemProperties.set("persist.sys.tr369.FTI.residence.duration", String.valueOf(duration));
+        LogUtils.d(TAG, "Last FTI stay: " + mTimeSpentAtLastBoot
+                + ", current FTI stay: " + timeSpentAtThisBoot
+                + ", total FTI stay: " + duration);
     }
 }

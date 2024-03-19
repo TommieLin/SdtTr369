@@ -587,13 +587,13 @@ public class SkyworthX {
     @Tr369Get("Device.X_Skyworth.FTI.ResidenceDuration")
     public String SK_TR369_GetFTIResidenceDuration() {
         // FTI停留时间 (单位: 秒)
-        return SystemProperties.get("persist.sys.tr369.FTI.residence.duration", "");
+        return SystemProperties.get("persist.sys.tr369.FTI.residence.duration", "0");
     }
 
     @Tr369Set("Device.X_Skyworth.FTI.ResidenceDuration")
     public boolean SK_TR369_SetFTIResidenceDuration(String path, String value) {
         SystemProperties.set("persist.sys.tr369.FTI.residence.duration", value);
-        FTIMonitor.updateFTIDurationSpent();
+        FTIMonitor.initTimeSpent();
         return true;
     }
 
