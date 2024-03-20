@@ -122,6 +122,12 @@ public class ActivityStartWatcher extends Service {
         return true;
     }
 
+    private void showWatcherAlertDialog() {
+        Intent intent = new Intent(this, WatcherAlertActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
     private class ActivityListener extends IActivityController.Stub {
         public ActivityListener() {
             LogUtils.d(TAG, "ActivityListener start...");
@@ -133,9 +139,11 @@ public class ActivityStartWatcher extends Service {
             LogUtils.d(TAG, "activityStarting: " + comp + ", pkg: " + pkg);
             if (mActivityLockType == TYPE_WHITELIST && !mActivityLockList.contains(pkg)) {
                 LogUtils.e(TAG, "STB Lock - Activity{" + pkg + "} is not on the whitelist");
+                showWatcherAlertDialog();
                 return false;
             } else if (mActivityLockType == TYPE_BLACKLIST && mActivityLockList.contains(pkg)) {
                 LogUtils.e(TAG, "STB Lock - Activity{" + pkg + "} is on the blacklist");
+                showWatcherAlertDialog();
                 return false;
             }
             return true;
