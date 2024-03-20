@@ -312,7 +312,7 @@ public class SystemDataStat {
                 String[] numbers = line.replaceAll("\\.", "").trim().split("\\s+");
                 LogUtils.d(TAG, "Interface: " + numbers[0] + ", status: " + numbers[1] +
                         ", link: " + numbers[2] + ", level: " + numbers[3] + ", noise: " + numbers[4]);
-                wifiSnr = Integer.parseInt(numbers[2]);
+                wifiSnr = Integer.parseInt(numbers[3]) - Integer.parseInt(numbers[4]);
             }
         } catch (Exception e) {
             LogUtils.e(TAG, "getWifiSNR Exception error: " + e.getMessage());
