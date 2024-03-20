@@ -58,6 +58,10 @@
             android:exported="true" />
 
         <activity
+            android:name="com.sdt.diagnose.Device.X_Skyworth.WatcherAlertActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <activity
             android:name="com.sdt.diagnose.command.ShortMessageActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
 
