@@ -93,6 +93,11 @@ public class SkyworthX {
         return DeviceInfoUtils.getBuildInfo(); // about - build
     }
 
+    @Tr369Get("Device.X_Skyworth.BuildVersion")
+    public String SK_TR369_GetBuildVersion() {
+        return DeviceInfoUtils.getBuildVersion();
+    }
+
     @Tr369Get("Device.X_Skyworth.PatchLevel")
     public String SK_TR369_GetPatchLevel() {
         return DeviceInfoUtils.getAndroidSecurityPatchLevel(); // about - Android security patch level

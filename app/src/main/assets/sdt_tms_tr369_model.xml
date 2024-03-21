@@ -521,7 +521,8 @@
             <schema name="ScreenSaver" getter="diagnose" type="int" />
             <schema name="PatchLevel" getter="diagnose" type="string" />
             <schema name="AndroidVersion" getter="diagnose" type="string" />
-            <schema name="AndroidTVOS" constraint="64" getter="diagnose" inform="true" type="string" />
+            <schema name="AndroidTVOS" getter="diagnose" inform="true" type="string" />
+            <schema name="BuildVersion" getter="diagnose" type="string" />
             <schema name="BluetoothMac" getter="diagnose" type="string" />
             <schema name="DeviceName" getter="diagnose" type="string" />
             <schema name="OperatorName" getter="diagnose" type="string" />
