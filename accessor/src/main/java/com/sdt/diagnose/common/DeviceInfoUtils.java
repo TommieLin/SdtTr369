@@ -154,6 +154,14 @@ public class DeviceInfoUtils {
         return Build.DISPLAY;
     }
 
+    public static String getBuildVersion() {
+        return Build.VERSION.INCREMENTAL;
+    }
+
+    public static String getHardware() {
+        return Build.HARDWARE;
+    }
+
     static String getSecurityPatch() {
         String patch = Build.VERSION.SECURITY_PATCH;
         if (!"".equals(patch)) {
