@@ -35,6 +35,10 @@ import com.sdt.diagnose.common.net.HttpsUtils;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -67,6 +71,30 @@ public class DeviceInfoUtils {
 
     public static String getSerialNumber() {
         return Build.getSerial();
+    }
+
+    public static String getChipID() {
+        try {
+            InputStream is = Files.newInputStream(Paths.get("/proc/cpuinfo"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String line = reader.readLine();
+            while (line != null) {
+                // LogUtils.d(TAG, "Read a line from the /proc/cpuinfo file: " + line);
+                if (line.startsWith("Serial")) {
+                    int index = line.indexOf(":");
+                    if (index != -1) {
+                        String serial = line.substring(index + 1).trim();
+                        LogUtils.d(TAG, "Serial: " + serial);
+                        return serial;
+                    }
+                }
+                line = reader.readLine(); // 读取下一行
+            }
+
+        } catch (IOException e) {
+            LogUtils.e(TAG, "getChipID error: " + e.getMessage());
+        }
+        return "";
     }
 
     public static String extractNumbers(String input, int desiredLength) {
