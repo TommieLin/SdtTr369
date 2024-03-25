@@ -31,6 +31,11 @@ public class DeviceInfoX {
         return DeviceInfoUtils.getSerialNumber(); // about - Status - Serial Number
     }
 
+    @Tr369Get("Device.DeviceInfo.ChipID")
+    public String SK_TR369_GetChipID() {
+        return DeviceInfoUtils.getChipID();
+    }
+
     @Tr369Get("Device.DeviceInfo.ModelName,Device.DeviceInfo.ModelID,Device.DeviceInfo.ProductClass")
     public String SK_TR369_GetModelName() {
         return DeviceInfoUtils.getDeviceModel(); // about - Model

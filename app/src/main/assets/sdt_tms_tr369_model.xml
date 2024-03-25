@@ -11,6 +11,7 @@
             <schema name="Description" constraint="256" default="SKYWORTH IPTV" type="string" />
             <schema name="ProductClass" constraint="64" getter="diagnose" type="string" />
             <schema name="SerialNumber" constraint="64" getter="diagnose" type="string" />
+            <schema name="ChipID" constraint="64" getter="diagnose" type="string" />
 
             <schema name="HardwareVersion" constraint="64" getter="diagnose" inform="true" type="string" />
             <schema name="SoftwareVersion" constraint="64" getter="diagnose" inform="true" type="string" />
@@ -624,6 +625,7 @@
                 <schema name="Name" constraint="128" getter="diagnose" type="string" />
                 <schema name="ConnectionStatus" getter="diagnose" setter="diagnose" type="string" write="W" />
                 <schema name="Power" getter="diagnose" type="string" />
+                <schema name="RcuVersion" getter="diagnose" type="string" />
             </schema>
 
             <schema name="RemoteControl" type="object">
