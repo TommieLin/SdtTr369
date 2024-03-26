@@ -61,19 +61,24 @@ import java.util.Objects;
 public class AppX implements IProtocolArray<AppInfo> {
     private static final String TAG = "AppX";
     private final static String REFIX = "Device.X_Skyworth.App.";
-    private static final ArrayMap<String, AppPermissionGroup> mPermissionNameToGroup = new ArrayMap<>();
+    private static final ArrayMap<String, AppPermissionGroup>
+            mPermissionNameToGroup = new ArrayMap<>();
     private static ArrayList<AppPermissionGroup> mGroups = new ArrayList<>();
-    public long firstTime = 0;
-    public long totalFirstTime = 0;
-    public UsageStatsManager usm =
-            (UsageStatsManager) GlobalContext.getContext().getSystemService(Context.USAGE_STATS_SERVICE);
-    public List<UsageStats> list;
+    public UsageStatsManager mUsageStatsManager =
+            (UsageStatsManager) GlobalContext.getContext().getSystemService(
+                    Context.USAGE_STATS_SERVICE);
     public List<UsageStats> totalList;
     final static Map<String, ArrayList<AppPermissionGroup>> appPermissionGroup = new HashMap<>();
     private static AppsManager mAppsManager = null;
-    private static final String PROP_TMS_APP_FIREWALL_TYPE = "persist.sys.tms.app.firewall.type";
-    private static final String PROP_TMS_APP_FIREWALL_NUM = "persist.sys.tms.app.firewall.number";
-    private static final String PROP_TMS_APP_FIREWALL_PART = "persist.sys.tms.app.firewall.part";
+    public static final String PROP_TMS_APP_FIREWALL_TYPE = "persist.sys.tms.app.firewall.type";
+    public static final String PROP_TMS_APP_FIREWALL_NUM = "persist.sys.tms.app.firewall.number";
+    public static final String PROP_TMS_APP_FIREWALL_PART = "persist.sys.tms.app.firewall.part";
+    public static final String NODE_APP_BATCH_LOCKLIST_LIST = "Device.X_Skyworth.AppBatch.LockList.List";
+    public static final String NODE_APP_BATCH_LOCKLIST_ENABLE = "Device.X_Skyworth.AppBatch.LockList.Enable";
+    public static final String NODE_APP_BATCH_BLACKLIST_LIST = "Device.X_Skyworth.AppBatch.BlackList.List";
+    public static final String NODE_APP_BATCH_BLACKLIST_ENABLE = "Device.X_Skyworth.AppBatch.BlackList.Enable";
+    public static final String NODE_APP_BATCH_WHITELIST_LIST = "Device.X_Skyworth.AppBatch.WhiteList.List";
+    public static final String NODE_APP_BATCH_WHITELIST_ENABLE = "Device.X_Skyworth.AppBatch.WhiteList.Enable";
 
     public static void updateAppList() {
         if (mAppsManager != null) {
@@ -172,7 +177,7 @@ public class AppX implements IProtocolArray<AppInfo> {
         String thirdParam = paramsArr.length >= 3 ? paramsArr[2] : "";
         String forthParam = paramsArr.length >= 4 ? paramsArr[3] : "";
         if (TextUtils.isEmpty(secondParam)) {
-            //Todo report error.
+            // Todo report error.
             return null;
         }
         switch (secondParam) {
@@ -204,24 +209,21 @@ public class AppX implements IProtocolArray<AppInfo> {
             case "StorageUsage":
                 return String.valueOf(t.getStorageUsed());
             case "Uptime":
-                return getUsageStats(t.getPackageName(), GlobalContext.getContext()) != null
-                        ? String.valueOf(
-                        getUsageStats(
-                                t.getPackageName(),
-                                GlobalContext.getContext()).getTotalTimeInForeground() / 1000) : "0";
             case "TotalUptime":
-                return getTotalUsageStats(t.getPackageName()) != null
-                        ? String.valueOf(getTotalUsageStats(
-                        t.getPackageName()).getTotalTimeInForeground() / 1000) : "0";
+                UsageStats uptimeUsageStats = getUsageStats(t.getPackageName());
+                return uptimeUsageStats != null
+                        ? String.valueOf(uptimeUsageStats.getTotalTimeInForeground() / 1000)
+                        : "0";
             case "RunningTimes":
-                return getUsageStats(t.getPackageName(), GlobalContext.getContext()) != null
-                        ? String.valueOf(getUsageStats(
-                        t.getPackageName(), GlobalContext.getContext()).mLaunchCount) : "0";
+                UsageStats runningTimesUsageStats = getUsageStats(t.getPackageName());
+                return runningTimesUsageStats != null
+                        ? String.valueOf(runningTimesUsageStats.mLaunchCount)
+                        : "0";
             case "LastStartTime":
-                return getUsageStats(t.getPackageName(), GlobalContext.getContext()) != null
-                        ? String.valueOf(
-                        getUsageStats(
-                                t.getPackageName(), GlobalContext.getContext()).getLastTimeStamp()) : "0";
+                UsageStats lastStartTimeUsageStats = getUsageStats(t.getPackageName());
+                return lastStartTimeUsageStats != null
+                        ? String.valueOf(lastStartTimeUsageStats.getLastTimeStamp())
+                        : "0";
             case "CpuUsage":
                 return getCpuUsed(t.getPackageName()).trim();
             case "ClearData":
@@ -230,7 +232,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                 return String.valueOf(mGroups.size());
             case "Permissions":
                 if (TextUtils.isEmpty(thirdParam)) {
-                    //Todo report error.
+                    // Todo report error.
                     return null;
                 }
                 try {
@@ -264,7 +266,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                             break;
                     }
                 } catch (Exception e) {
-                    LogUtils.e(TAG, "Failed to obtain permission information. Error: " + e.getMessage());
+                    LogUtils.e(TAG, "Failed to obtain permission info. Error: " + e.getMessage());
                     return null;
                 }
         }
@@ -318,7 +320,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                     addPermission(appInfo, paths[3], true);
                     return success;
                 } catch (Exception e) {
-                    LogUtils.e(TAG, "Failed to set permission information. Error: " + e.getMessage());
+                    LogUtils.e(TAG, "Failed to set permission info. Error: " + e.getMessage());
                 }
             }
         }
@@ -334,18 +336,18 @@ public class AppX implements IProtocolArray<AppInfo> {
         AppInfo appInfo = null;
         String[] params = ProtocolPathUtils.parse(REFIX, path);
         if (params == null || params.length < 1) {
-            //Todo report error.
+            // Todo report error.
             return null;
         }
         int index = 0;
         try {
             index = Integer.parseInt(params[0]);
             if (index < 1) {
-                //Todo report error.
+                // Todo report error.
                 return null;
             }
         } catch (NumberFormatException e) {
-            //Todo report error.
+            // Todo report error.
             return null;
         }
 
@@ -366,46 +368,28 @@ public class AppX implements IProtocolArray<AppInfo> {
         return appInfo;
     }
 
-    public UsageStats getUsageStats(String packageName, Context context) {
+    public UsageStats getUsageStats(String packageName) {
         Calendar calendar = Calendar.getInstance();
         long endTime = calendar.getTimeInMillis();
-        String dbParam = String.valueOf(1800);  // DbManager.getDBParam("Device.X_Skyworth.AppInfoPeriodicInformInterval");
-        long startTime = TextUtils.isEmpty(dbParam) ? 0 : (endTime - Long.parseLong(dbParam) * 1000);
-        if (endTime - firstTime > 10000) {
-            list = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+        calendar.add(Calendar.DAY_OF_WEEK, -2); // 最近两周启动过所用app的List
+        long startTime = calendar.getTimeInMillis();
+        if (endTime - startTime > 0) {
+            LogUtils.d(TAG, "queryUsageStats " + startTime + " ~ " + endTime);
+            totalList = mUsageStatsManager.queryUsageStats(
+                    UsageStatsManager.INTERVAL_MONTHLY,
+                    startTime,
+                    endTime);
         }
-        firstTime = endTime;
-        //需要注意的是5.1以上，如果不打开此设置，queryUsageStats获取到的是size为0的list；
-        if (list.size() == 0) {
-            return null;
-        } else {
-            for (UsageStats usageStats : list) {
-                if (usageStats.getPackageName().equals(packageName)) {
-                    return usageStats;
-                }
-            }
-        }
-        return null;
-    }
-
-    public UsageStats getTotalUsageStats(String packageName) {
-        Calendar calendar = Calendar.getInstance();
-        long endTime = calendar.getTimeInMillis();
-        long startTime = 0;
-        if (endTime - totalFirstTime > 10000) {
-            totalList = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
-            totalFirstTime = endTime;
-        }
-        //需要注意的是5.1以上，如果不打开此设置，queryUsageStats获取到的是size为0的list；
-        if (totalList.size() == 0) {
-            return null;
-        } else {
+        if (totalList.size() != 0) {
             for (UsageStats usageStats : totalList) {
                 if (usageStats.getPackageName().equals(packageName)) {
+                    LogUtils.d(TAG, "Found usage of package name(" + packageName
+                            + ") within two weeks");
                     return usageStats;
                 }
             }
         }
+        LogUtils.e(TAG, "No usage of package name(" + packageName + ") was found within two weeks");
         return null;
     }
 
@@ -471,31 +455,30 @@ public class AppX implements IProtocolArray<AppInfo> {
         SystemProperties.set(PROP_TMS_APP_FIREWALL_PART + num, data);
     }
 
-    private boolean parseAppFirewallList(int type, String list) {
+    private ArrayList<String> parsePkgNamesFromJson(String Json) {
         ArrayList<String> packageNames;
         try {
             Gson gson = new Gson();
-            packageNames = gson.fromJson(list, new TypeToken<List<String>>(){}.getType());
-            if (packageNames == null) {
+            packageNames = gson.fromJson(Json, new TypeToken<List<String>>(){}.getType());
+            if (packageNames != null) {
+                packageNames.removeIf(TextUtils::isEmpty);
+                return packageNames;
+            } else {
                 LogUtils.e(TAG, "The JSON data is empty");
-                return false;
-            }
-            // 过滤空字符串或为null的元素
-            packageNames.removeIf(TextUtils::isEmpty);
-            LogUtils.d(TAG, "Waiting for firewall list to be set: " + packageNames);
-            if (packageNames.isEmpty()) {
-                LogUtils.d(TAG, "The content of packageNames is empty.");
-                // 黑名单功能不允许列表为空，为空代表不启用黑名单功能
-                if (type == TYPE_BLACKLIST) {
-                    LogUtils.i(TAG, "The blacklist is empty and no further action is required.");
-                    return false;
-                }
-                // 白名单功能允许列表为空
-                return true;
             }
         } catch (Exception e) {
             LogUtils.e(TAG, "JSON data parsing exception, " + e.getMessage());
-            return false;
+        }
+        return new ArrayList<>();
+    }
+
+    private boolean parseAppFirewallList(int type, String list) {
+        ArrayList<String> packageNames = parsePkgNamesFromJson(list);
+        if (packageNames.isEmpty()) {
+            LogUtils.d(TAG, "The content of packageNames is empty.");
+            // 黑名单功能不允许列表为空，为空代表不启用黑名单功能
+            // 白名单功能允许列表为空
+            return type == TYPE_WHITELIST;
         }
 
         // 由于单个系统属性Set长度不能超过91，所以需要将包名数组拆分，依次存入不同的系统属性
@@ -524,9 +507,34 @@ public class AppX implements IProtocolArray<AppInfo> {
         return true;
     }
 
+    private String getMergedLockList() {
+        ArrayList<String> mergedList = new ArrayList<>();
+
+        String blackListStatus = DbManager.getDBParam(NODE_APP_BATCH_BLACKLIST_ENABLE);
+        if ("1".equals(blackListStatus)) {
+            String blackList = DbManager.getDBParam(NODE_APP_BATCH_BLACKLIST_LIST);
+            LogUtils.d(TAG, "getMergedLockList blackList: " + blackList);
+            mergedList.addAll(parsePkgNamesFromJson(blackList));
+        }
+
+        String lockListStatus = DbManager.getDBParam(NODE_APP_BATCH_LOCKLIST_ENABLE);
+        if ("1".equals(lockListStatus)) {
+            String lockList = DbManager.getDBParam(NODE_APP_BATCH_LOCKLIST_LIST);
+            LogUtils.d(TAG, "getMergedLockList lockList: " + lockList);
+            mergedList.addAll(parsePkgNamesFromJson(lockList));
+        }
+
+        if (!mergedList.isEmpty()) {
+            LogUtils.d(TAG, "getMergedLockList mergedList: " + mergedList);
+            return new Gson().toJson(mergedList);
+        } else {
+            return "";
+        }
+    }
+
     private boolean setAppLockListStatus(boolean enable) {
         if (enable) {
-            String lockList = DbManager.getDBParam("Device.X_Skyworth.AppBatch.LockList.List");
+            String lockList = getMergedLockList();
             LogUtils.d(TAG, "setAppLockListStatus lockList: " + lockList);
             if (TextUtils.isEmpty(lockList)) {
                 return true;
@@ -537,20 +545,37 @@ public class AppX implements IProtocolArray<AppInfo> {
             service.putExtra("lockList", lockList);
             GlobalContext.getContext().startForegroundService(service);
         } else {
+            // 1. 取消限制应用启动
             GlobalContext.getContext().stopService(
                     new Intent(GlobalContext.getContext(), ActivityStartWatcher.class));
+            // 2. 若原BlackList功能打开，则继续打开LockList功能
+            String blackListStatus = DbManager.getDBParam(NODE_APP_BATCH_BLACKLIST_ENABLE);
+            if ("1".equals(blackListStatus)) {
+                setAppLockListStatus(true);
+            }
         }
         return true;
     }
 
     private boolean setAppBlackListStatus(boolean enable) {
         if (enable) {
-            String blackList = DbManager.getDBParam("Device.X_Skyworth.AppBatch.BlackList.List");
+            // 1. 限制应用启动
+            String lockList = getMergedLockList();
+            LogUtils.d(TAG, "setAppBlackListStatus lockList: " + lockList);
+            if (TextUtils.isEmpty(lockList)) {
+                return true;
+            }
+            Intent service = new Intent(GlobalContext.getContext(), ActivityStartWatcher.class);
+            service.putExtra("lockType", TYPE_BLACKLIST);
+            service.putExtra("lockList", lockList);
+            GlobalContext.getContext().startForegroundService(service);
+
+            // 2. 卸载应用
+            String blackList = DbManager.getDBParam(NODE_APP_BATCH_BLACKLIST_LIST);
             LogUtils.d(TAG, "setAppBlackListStatus blackList: " + blackList);
             if (TextUtils.isEmpty(blackList)) {
                 return true;
             }
-            // 1. 卸载应用
             final PackageManager pm = GlobalContext.getContext().getPackageManager();
             List<PackageInfo> packlist = pm.getInstalledPackages(0);
             for (int i = 0; i < packlist.size(); i++) {
@@ -562,15 +587,10 @@ public class AppX implements IProtocolArray<AppInfo> {
                         ApplicationUtils.uninstall(pkgName);
                         LogUtils.d(TAG, "Uninstallation process completed");
                     } else {
-                        LogUtils.i(TAG, "This application is a system app and cannot be uninstalled");
+                        LogUtils.i(TAG, "The application is system app and cannot be uninstalled");
                     }
                 }
             }
-            // 2. 限制应用启动
-            Intent service = new Intent(GlobalContext.getContext(), ActivityStartWatcher.class);
-            service.putExtra("lockType", TYPE_BLACKLIST);
-            service.putExtra("lockList", blackList);
-            GlobalContext.getContext().startForegroundService(service);
             // 3. 禁止应用安装
             clearAppFirewallList();
             if (parseAppFirewallList(TYPE_BLACKLIST, blackList)) {
@@ -589,13 +609,18 @@ public class AppX implements IProtocolArray<AppInfo> {
                 SystemProperties.set(PROP_TMS_APP_FIREWALL_TYPE, String.valueOf(TYPE_UNDEFINED));
                 clearAppFirewallList();
             }
+            // 3. 若原LockList功能打开，则继续打开LockList功能
+            String lockListStatus = DbManager.getDBParam(NODE_APP_BATCH_LOCKLIST_ENABLE);
+            if ("1".equals(lockListStatus)) {
+                setAppLockListStatus(true);
+            }
         }
         return true;
     }
 
     private boolean setAppWhiteListStatus(boolean enable) {
         if (enable) {
-            String whiteList = DbManager.getDBParam("Device.X_Skyworth.AppBatch.WhiteList.List");
+            String whiteList = DbManager.getDBParam(NODE_APP_BATCH_WHITELIST_LIST);
             LogUtils.d(TAG, "setAppWhiteListStatus whiteList: " + whiteList);
             // 禁止应用安装
             clearAppFirewallList();
@@ -619,30 +644,26 @@ public class AppX implements IProtocolArray<AppInfo> {
     @Tr369Set("Device.X_Skyworth.AppBatch.")
     public boolean SK_TR369_SetAppBatchParams(String path, String value) {
         DbManager.setDBParam(path, value);
-        if (path.contains("LockList.Enable")) {
+        if (NODE_APP_BATCH_LOCKLIST_ENABLE.equals(path)) {
             // value: 0->close, 1->open
             return setAppLockListStatus("1".equals(value));
-        } else if (path.contains("BlackList.Enable")) {
+        } else if (NODE_APP_BATCH_BLACKLIST_ENABLE.equals(path)) {
             // value: 0->close, 1->open
             boolean enable = "1".equals(value);
             if (enable) {
-                String whiteListStatus = DbManager.getDBParam(
-                        "Device.X_Skyworth.AppBatch.WhiteList.Enable");
+                String whiteListStatus = DbManager.getDBParam(NODE_APP_BATCH_WHITELIST_ENABLE);
                 if ("1".equals(whiteListStatus)) {
-                    setAppWhiteListStatus(false);
-                    DbManager.setDBParam("Device.X_Skyworth.AppBatch.WhiteList.Enable", "0");
+                    SK_TR369_SetAppBatchParams(NODE_APP_BATCH_WHITELIST_ENABLE, "0");
                 }
             }
             return setAppBlackListStatus(enable);
-        } else if (path.contains("WhiteList.Enable")) {
+        } else if (NODE_APP_BATCH_WHITELIST_ENABLE.equals(path)) {
             // value: 0->close, 1->open
             boolean enable = "1".equals(value);
             if (enable) {
-                String blackListStatus = DbManager.getDBParam(
-                        "Device.X_Skyworth.AppBatch.BlackList.Enable");
+                String blackListStatus = DbManager.getDBParam(NODE_APP_BATCH_BLACKLIST_ENABLE);
                 if ("1".equals(blackListStatus)) {
-                    setAppBlackListStatus(false);
-                    DbManager.setDBParam("Device.X_Skyworth.AppBatch.BlackList.Enable", "0");
+                    SK_TR369_SetAppBatchParams(NODE_APP_BATCH_BLACKLIST_ENABLE, "0");
                 }
             }
             return setAppWhiteListStatus(enable);
