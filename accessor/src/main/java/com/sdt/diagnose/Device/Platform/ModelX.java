@@ -9,7 +9,7 @@ public class ModelX {
     public static Type getPlatform() {
         String platform = DeviceInfoUtils.getHardware();
         LogUtils.d(TAG, "platform is [" + platform + "]");
-        if ("amlogic".contains(platform)) {
+        if (platform.startsWith("aml")) {
             return Type.Amlogic;
         } else if (platform.startsWith("rtd")) {
             return Type.Realtek;

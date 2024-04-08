@@ -129,7 +129,7 @@ public class AppX implements IProtocolArray<AppInfo> {
                     .getPackageManager().getPackageInfo(packageInfo.packageName,
                             PackageManager.GET_PERMISSIONS);
         } catch (PackageManager.NameNotFoundException e) {
-            LogUtils.e(TAG, "Failed to add permission information. Error: " + e.getMessage());
+            LogUtils.e(TAG, "Failed to add permission info. Error: " + e.getMessage());
         }
 
         if (packageInfo.requestedPermissions != null) {
@@ -275,7 +275,7 @@ public class AppX implements IProtocolArray<AppInfo> {
 
     @Tr369Set("Device.X_Skyworth.App.")
     public boolean SK_TR369_HandleAppInfoSetCmd(String path, String value) {
-        LogUtils.d(TAG, "Set the path for app information: " + path);
+        LogUtils.d(TAG, "Set the path for app info: " + path);
         AppInfo appInfo = getAppByPath(path);
         if (appInfo == null) return false;
 
