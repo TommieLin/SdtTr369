@@ -76,8 +76,8 @@ public class Event {
     private static final String VIDEO_TYPE = "X Skyworth Video File";
     private static final String APP_ICON_TYPE = "X Skyworth App Icon File";
     private static final String BUG_REPORT_TYPE = "X Skyworth Bug Report File";
-    private static final String Config_File = "1 Vendor Configuration File";
-    private static final String Log_File = "2 Vendor Log File";
+    private static final String CONFIG_FILE_TYPE = "1 Vendor Configuration File";
+    private static final String LOG_FILE_TYPE = "2 Vendor Log File";
     private static final String ACTION_BOOT_EXTERNAL_SYS = "com.skw.ota.update.ExternalSysUpdate";
     private static final String ACTION_BOOT_EXTERNAL_APP = "com.skw.ota.update.ExternalAppUpdate";
     private static final String OTA_NEW_PARAMS = "newParams";
@@ -423,12 +423,12 @@ public class Event {
             case VIDEO_TYPE:
                 handleVideoFile(uploadUrl, delaySeconds);
                 break;
-            case Config_File:
+            case CONFIG_FILE_TYPE:
                 String configFilePath = GlobalContext.getContext().getFilesDir().getPath() + "refresh.txt";
                 getRefreshData(configFilePath);
                 uploadLogFile(uploadUrl, configFilePath, 1);
                 break;
-            case Log_File:
+            case LOG_FILE_TYPE:
                 handleLogFile(uploadUrl);
                 break;
             case APP_ICON_TYPE:
