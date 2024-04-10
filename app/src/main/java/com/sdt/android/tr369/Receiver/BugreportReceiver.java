@@ -7,6 +7,7 @@ import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
+import com.sdt.diagnose.command.Event;
 import com.sdt.diagnose.common.log.LogUtils;
 import com.sdt.diagnose.common.net.HttpsUtils;
 import com.sdt.diagnose.database.DbManager;
@@ -48,6 +49,7 @@ public class BugreportReceiver extends BroadcastReceiver {
                     throws IOException {
                 LogUtils.d(TAG, "uploadBugReportFile onResponse: " + response.protocol()
                         + ", code: " + response.code());
+                Event.isBugReportRunning = false;
                 if (response.code() == 200) {
                     File file = new File(filePath);
                     if (file.exists()) {
@@ -66,6 +68,7 @@ public class BugreportReceiver extends BroadcastReceiver {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 File file = new File(filePath);
                 file.delete();
+                Event.isBugReportRunning = false;
                 String message = "Failed to upload bug report file, " + e.getMessage();
                 LogUtils.e(TAG, "uploadBugReportFile: " + message);
             }

@@ -90,11 +90,14 @@ public class Event {
     private static final int INDEX_PARAM_3 = 3;
     private static final int INDEX_PARAM_4 = 4;
 
+    // Upload log
     private static final String format = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     private static final SimpleDateFormat df = new SimpleDateFormat(format);
     public static final String RAW_LOG_FILE = "logcat_tr369.log";
     private static final String LOG_SOURCE_DIR_PATH = "/data/tcpdump/";
 
+    // Bug report
+    public static boolean isBugReportRunning = false;
     private static final String BUGREPORT_DIR = "bugreports";
     private static final String INTENT_BUGREPORT_REQUESTED =
             "com.android.internal.intent.action.BUGREPORT_REQUESTED";
@@ -757,6 +760,11 @@ public class Event {
                 return;
             }
         }
+        if (isBugReportRunning) {
+            String message = "BugReport function is running";
+            LogUtils.e(TAG, "handleBugReport: " + message);
+            setUploadResponseDBParams("Error", message);
+        }
         DbManager.setDBParam("Device.X_Skyworth.BugReport.Url", uploadUrl);
 
         Intent triggerShellBugreport = new Intent();
@@ -767,6 +775,7 @@ public class Event {
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         triggerShellBugreport.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
         GlobalContext.getContext().sendBroadcast(triggerShellBugreport);
+        isBugReportRunning = true;
 
         String message = "Bug Report task execution begins";
         LogUtils.d(TAG, "handleBugReport: " + message + ", file path: " + bugreportsDir.getPath());
