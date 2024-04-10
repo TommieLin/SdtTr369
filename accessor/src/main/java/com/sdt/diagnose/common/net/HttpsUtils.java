@@ -226,15 +226,8 @@ public class HttpsUtils {
             con.setDoInput(true);
             con.setDoOutput(true);
             con.setUseCaches(false);
-            SSLSocketFactory sslSocketFactory = new CreateSSL().getSSLSocketFactory();
-            con.setSSLSocketFactory(sslSocketFactory);
-            con.setHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    String val = Tr369PathInvoke.getInstance().getString("Device.X_Skyworth.ManagementServer.Hostname");
-                    return val.isEmpty() || hostname.equals(val);
-                }
-            });
+            con.setSSLSocketFactory(mCreateSSL.getSSLSocketFactory());
+            con.setHostnameVerifier((hostname, session) -> true);   // 设置默认主机名验证器接受所有主机名
             con.setConnectTimeout(50000);
             con.setReadTimeout(50000);
             // 设置传送的method=POST
