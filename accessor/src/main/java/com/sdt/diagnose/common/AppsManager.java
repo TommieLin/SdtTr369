@@ -50,6 +50,10 @@ public class AppsManager extends AbstractCachedArray<AppInfo> {
             if (disable && !ApplicationUtils.canOpen(pm, pkgName)) {
                 continue;
             }
+            // 过滤掉TR069和Diagnose应用
+            if (pkgName.contains("tr069") || pkgName.contains("diagnose")) {
+                continue;
+            }
 
             AppInfo appInfo = new AppInfo(context, pm, pkgInfo);
 

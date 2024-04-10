@@ -23,11 +23,11 @@ import okhttp3.OkHttpClient;
  */
 public class CreateSSL {
     private static final String TAG = "CreateSSL";
-    //证书文件路径
+    // 证书文件路径
     String path = "vendor/etc/security/certs/";
-    private static final String CA = "cacert.pem";
-    private static final String CERTIFICATE = "clientcert.pem";
-    private static final String CERTKEY = "clientkey.pem";
+    private static final String CA = "TR369CaCert.pem";
+    private static final String CERTIFICATE = "TR369ClientCert.pem";
+    private static final String CERTKEY = "TR369ClientKey.pem";
     private final String CLIENT_CER_PASSWORD = "sky@0123";
     private static OkHttpClient mOkHttpClient = null;
     private String ca = getUsefulCertInfo(getCertString(path + CA));
@@ -53,7 +53,7 @@ public class CreateSSL {
                     .writeTimeout(TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS)
                     .connectionPool(new ConnectionPool(5, 2, TimeUnit.MINUTES))
                     .sslSocketFactory(ssl, trustManager)
-                    .hostnameVerifier((hostname, session) -> true)
+                    .hostnameVerifier((hostname, session) -> true)  // 设置默认主机名验证器接受所有主机名
                     .retryOnConnectionFailure(true)
                     .build();
         }
@@ -71,7 +71,7 @@ public class CreateSSL {
             String temp = "";
             while ((temp = br.readLine()) != null) {
                 // 拼接换行符
-                sb.append(temp + "\n");
+                sb.append(temp).append("\n");
             }
             br.close();
         } catch (Exception e) {
@@ -87,11 +87,11 @@ public class CreateSSL {
             return SSLHelper.getSslSocketFactory(ca, certKey, certificate, CLIENT_CER_PASSWORD);
         } catch (Exception e) {
             LogUtils.e(TAG, "getSslSocketFactory call failed, " + e.getMessage());
+            return SSLHelper.getNoCheckSSLSocketFactory();
         }
-        return null;
     }
 
-    //获取证书信息
+    // 获取证书信息
     public String getUsefulCertInfo(String certificate) {
         String startingSubstring = "-----BEGIN";
         int startIndex = certificate.indexOf(startingSubstring);
