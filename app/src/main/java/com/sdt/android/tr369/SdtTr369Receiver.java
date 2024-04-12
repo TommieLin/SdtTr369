@@ -85,7 +85,7 @@ public class SdtTr369Receiver extends BroadcastReceiver {
             // 获取承有网络连接信恿
             if (isConnected(context.getApplicationContext())) {
                 LogUtils.d(TAG, "Connected to the network.");
-                mHandler.sendEmptyMessageDelayed(MSG_REQUEST_MQTT_CONFIGS, 15000);
+                mHandler.sendEmptyMessageDelayed(MSG_REQUEST_MQTT_CONFIGS, 5000);
             } else {
                 LogUtils.e(TAG, "Not connected to the network.");
                 mHandler.removeMessages(MSG_REQUEST_MQTT_CONFIGS);
