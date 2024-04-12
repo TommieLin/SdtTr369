@@ -764,6 +764,7 @@ public class Event {
             String message = "BugReport function is running";
             LogUtils.e(TAG, "handleBugReport: " + message);
             setUploadResponseDBParams("Error", message);
+            return;
         }
         DbManager.setDBParam("Device.X_Skyworth.BugReport.Url", uploadUrl);
 
