@@ -35,10 +35,13 @@ public class BugreportReceiver extends BroadcastReceiver {
             LogUtils.d(TAG, "filePath: " + filePath + ", uploadUrl: " + uploadUrl);
             if (!TextUtils.isEmpty(uploadUrl) && !TextUtils.isEmpty(filePath)) {
                 uploadBugReportFile(uploadUrl, filePath);
+            } else {
+                Event.isBugReportRunning = false;
             }
         } else if (ACTION_TMS_BUGREPORT_ERROR.equals(action)) {
             String reason = intent.getStringExtra("reason");
             LogUtils.e(TAG, "Bug report execution failed, " + reason);
+            Event.isBugReportRunning = false;
         }
     }
 
