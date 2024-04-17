@@ -4,7 +4,7 @@
 
 ##### 应用信息
 
-
+...
 
 ##### 集成说明
 
@@ -22,7 +22,7 @@
    # adb shell setenforce 0
    ```
 
-   ![image-system_app_te_patch](doc\pictures\system_app_te_patch.png)
+   ![image-system_app_te_patch](doc/pictures/system_app_te_patch.png)
 
 
 2. 配置相关
@@ -42,7 +42,7 @@
 
    在TR369中基于MQTT实现的Launcher短消息通知功能需要将包名添加至谷歌的通知白名单中。
 
-   ![image-google_launcher_configuration](doc\pictures\google_launcher_configuration.png)
+   ![image-google_launcher_configuration](doc/pictures/google_launcher_configuration.png)
 
 
 4. 应用集成
