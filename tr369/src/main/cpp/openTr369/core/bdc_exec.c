@@ -961,6 +961,8 @@ CURLcode LoadBulkDataTrustStore(CURL *curl, void *curl_sslctx, void *parm)
 
     // Exit if unable to load the trust store and client cert into curl's SSL context
     err = DEVICE_SECURITY_LoadTrustStore(curl_ssl_ctx, SSL_VERIFY_PEER, DEVICE_SECURITY_NoSaveTrustCertVerifyCallback);
+    // Outis: If you want to disable the SSL certificate verification host function, please use the code annotated below.
+    // err = DEVICE_SECURITY_LoadTrustStore(curl_ssl_ctx, SSL_VERIFY_NONE, DEVICE_SECURITY_NoSaveTrustCertVerifyCallback);
     if (err != USP_ERR_OK)
     {
         return CURLE_ABORTED_BY_CALLBACK;
